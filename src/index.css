@@ -104,7 +104,7 @@
   --color-bandeau-haut: var(--bandeau-haut);
   --color-bandeau-bas: var(--bandeau-bas);
 
-  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-display: 'Faustina', Georgia, 'Times New Roman', serif;
   --font-sans: 'Figtree', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   --radius-card: 1.5rem;
@@ -137,16 +137,16 @@
     overscroll-behavior-y: none;
   }
 
-  /* Fraunces : SOFT arrondit les angles, WONK active les variantes
-     penchées du g et du y. C'est ce qui la rend appétissante plutôt
-     que juridique. */
+  /* Faustina : serif humaniste à forte hauteur d'x, choisie pour ses
+     chiffres — un poids et un total de calories sont ce que cette
+     application affiche en plus gros. Elle remplace Fraunces, trop vue
+     pour porter une identité propre. */
   .font-display,
   h1,
   h2,
   h3 {
     font-family: var(--font-display);
-    font-variation-settings: 'SOFT' 60, 'WONK' 1;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.015em;
   }
 
   /* Chiffres alignés verticalement : indispensable dès qu'un poids ou un
