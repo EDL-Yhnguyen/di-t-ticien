@@ -32,6 +32,22 @@ export interface Repas {
   variantes?: string[]
 }
 
+/**
+ * Le professionnel qui suit l'utilisateur, s'il y en a un.
+ *
+ * Saisi par l'utilisateur et stocké dans son propre document : ce sont les
+ * coordonnées d'un tiers, elles n'ont donc rien à faire dans le code d'une
+ * application publique. Chaque champ peut rester vide.
+ */
+export interface Praticien {
+  nom: string
+  role: string
+  email: string
+  telephone: string
+  /** Espace de suivi en ligne, si le praticien en propose un. */
+  suivi: string
+}
+
 export interface Profil {
   id: string
   prenom: string
@@ -49,6 +65,8 @@ export interface Profil {
    * qu'une diététicienne a prescrit.
    */
   planPrescrit: boolean
+  /** Renseigné par l'utilisateur depuis son profil. `null` tant qu'il ne l'a pas fait. */
+  praticien: Praticien | null
   onboardingFait: boolean
   /** Vrai tant que le mot de passe provisoire n'a pas été remplacé. */
   motDePasseAChanger: boolean

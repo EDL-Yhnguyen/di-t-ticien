@@ -1,5 +1,6 @@
-import { ChefHat, LineChart, ShieldHalf, User, Utensils } from 'lucide-react'
+import { ChefHat, CloudOff, LineChart, ShieldHalf, User, Utensils } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useApp } from '../context/AppContext'
 import { Lien, useRoutage } from '../lib/router'
 import { classes } from '../lib/utils'
 
@@ -95,6 +96,36 @@ export function RailLateral() {
   )
 }
 
+/**
+ * Signale une sauvegarde qui n'est pas passée. Sans ça, l'écran affichait la
+ * saisie comme prise en compte alors qu'elle n'avait jamais quitté l'appareil.
+ */
+function BandeauEnregistrement() {
+  const { erreurEnregistrement, reessayerEnregistrement } = useApp()
+  if (!erreurEnregistrement) return null
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className="safe-top sticky top-0 z-30 flex items-center gap-3 border-b border-berry/30 bg-berry-wash px-4 py-2.5 md:px-8"
+    >
+      <CloudOff size={17} className="shrink-0 text-berry" aria-hidden="true" />
+      <p className="min-w-0 flex-1 text-sm text-ink">
+        <span className="font-semibold">Modifications non enregistrées.</span>{' '}
+        <span className="text-ink-soft">Elles restent sur cet appareil pour l’instant.</span>
+      </p>
+      <button
+        type="button"
+        onClick={reessayerEnregistrement}
+        className="shrink-0 rounded-full bg-berry px-3.5 py-1.5 text-sm font-semibold text-white transition hover:opacity-90"
+      >
+        Réessayer
+      </button>
+    </div>
+  )
+}
+
 /** Gabarit commun aux écrans connectés. */
 export function Cadre({ children }: { children: React.ReactNode }) {
   return (
@@ -104,6 +135,7 @@ export function Cadre({ children }: { children: React.ReactNode }) {
     <div className="min-h-svh bg-ground md:pl-60">
       <RailLateral />
       <BarreOnglets />
+      <BandeauEnregistrement />
       <main className="mx-auto max-w-lg px-4 pt-5 pb-28 md:max-w-2xl md:px-8 md:pt-10 md:pb-12">
         {children}
       </main>

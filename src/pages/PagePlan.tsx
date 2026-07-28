@@ -5,16 +5,9 @@ import { CONSIGNES, OPTIONS_HERBALIFE, planPour } from '../lib/plan'
 import { objectifCalorique } from '../lib/nutrition'
 import { poidsActuel } from '../lib/store'
 
-const DIETETICIENNE = {
-  nom: 'Julie Bertolotto',
-  role: 'Diététicienne-nutritionniste',
-  email: 'julie.bjdietetique@gmail.com',
-  telephone: '07 58 21 19 08',
-  suivi: 'https://diet.alivio.fr/0cc63c63-86df-4f6c-946d-f0654f6a56f3',
-}
-
 export function PagePlan() {
   const { etat } = useSession()
+  const praticien = etat.profil.praticien
 
   const objectif = objectifCalorique({
     poidsKg: poidsActuel(etat),
@@ -36,42 +29,52 @@ export function PagePlan() {
         </p>
       </header>
 
-      {etat.profil.planPrescrit && (
+      {praticien && (
         <Carte className="p-5">
           <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="font-semibold text-ink">{DIETETICIENNE.nom}</p>
-              <p className="text-sm text-ink-soft">{DIETETICIENNE.role}</p>
+            <div className="min-w-0">
+              <p className="font-semibold text-ink">{praticien.nom}</p>
+              {praticien.role && <p className="text-sm text-ink-soft">{praticien.role}</p>}
             </div>
-            <Etiquette ton="iris">Prescrit</Etiquette>
+            {etat.profil.planPrescrit && <Etiquette ton="iris">Prescrit</Etiquette>}
           </div>
-          <div className="mt-4 space-y-1.5 text-sm">
-            <p>
-              <a
-                href={`mailto:${DIETETICIENNE.email}`}
-                className="text-iris underline underline-offset-2"
-              >
-                {DIETETICIENNE.email}
-              </a>
-            </p>
-            <p>
-              <a
-                href={`tel:+33${DIETETICIENNE.telephone.replace(/\D/g, '').slice(1)}`}
-                className="text-iris underline underline-offset-2"
-              >
-                {DIETETICIENNE.telephone}
-              </a>
-            </p>
-          </div>
-          <a
-            href={DIETETICIENNE.suivi}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-4 flex items-center justify-center gap-2 rounded-full border border-line px-5 py-3 font-semibold text-ink transition hover:bg-sunken"
-          >
-            Ouvrir mon suivi Alivio
-            <ExternalLink size={16} aria-hidden="true" />
-          </a>
+
+          {(praticien.email || praticien.telephone) && (
+            <div className="mt-4 space-y-1.5 text-sm">
+              {praticien.email && (
+                <p>
+                  <a
+                    href={`mailto:${praticien.email}`}
+                    className="text-iris underline underline-offset-2"
+                  >
+                    {praticien.email}
+                  </a>
+                </p>
+              )}
+              {praticien.telephone && (
+                <p>
+                  <a
+                    href={`tel:${praticien.telephone.replace(/\s/g, '')}`}
+                    className="text-iris underline underline-offset-2"
+                  >
+                    {praticien.telephone}
+                  </a>
+                </p>
+              )}
+            </div>
+          )}
+
+          {praticien.suivi && (
+            <a
+              href={praticien.suivi}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 flex items-center justify-center gap-2 rounded-full border border-line px-5 py-3 font-semibold text-ink transition hover:bg-sunken"
+            >
+              Ouvrir mon suivi en ligne
+              <ExternalLink size={16} aria-hidden="true" />
+            </a>
+          )}
         </Carte>
       )}
 

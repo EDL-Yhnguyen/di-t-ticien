@@ -17,6 +17,15 @@ interface Application {
   utilisateur: Utilisateur | null
   etat: EtatUtilisateur | null
   chargement: boolean
+  /** Renseigné quand l'ouverture de session a échoué : évite l'écran d'attente sans fin. */
+  erreurChargement: string | null
+  reessayerChargement: () => void
+  /**
+   * Renseigné quand la dernière sauvegarde a échoué. L'état modifié est
+   * conservé en mémoire et sera réécrit par `reessayerEnregistrement`.
+   */
+  erreurEnregistrement: string | null
+  reessayerEnregistrement: () => void
   /** Badge tout juste débloqué, à célébrer puis à refermer. */
   badgeACelebrer: Badge | null
   fermerCelebration: () => void
@@ -28,29 +37,70 @@ interface Application {
 
 const ContexteApp = createContext<Application | null>(null)
 
+function message(erreur: unknown): string {
+  return erreur instanceof Error ? erreur.message : String(erreur)
+}
+
 export function FournisseurApp({ children }: { children: ReactNode }) {
   const [utilisateur, setUtilisateur] = useState<Utilisateur | null>(null)
   const [etat, setEtat] = useState<EtatUtilisateur | null>(null)
   const [chargement, setChargement] = useState(true)
+  const [erreurChargement, setErreurChargement] = useState<string | null>(null)
+  const [erreurEnregistrement, setErreurEnregistrement] = useState<string | null>(null)
   const [badgeACelebrer, setBadgeACelebrer] = useState<Badge | null>(null)
+  const [tentative, setTentative] = useState(0)
 
   const enregistrementDiffere = useRef<number | null>(null)
+  /** Dernier état dont l'écriture n'a pas encore abouti. */
+  const enAttente = useRef<EtatUtilisateur | null>(null)
 
-  useEffect(() => {
-    let annule = false
-    ;(async () => {
+  /**
+   * Le seul endroit qui écrit. Un échec ne doit jamais être silencieux : on
+   * garde l'état en attente et on remonte l'erreur à l'écran, sinon
+   * l'utilisateur voit sa saisie prise en compte alors qu'elle est perdue.
+   */
+  const ecrire = useCallback(async (cible: EtatUtilisateur) => {
+    enAttente.current = cible
+    try {
+      await enregistrer(cible.profil.id, cible)
+      // Une écriture plus récente a pu passer devant : ne pas l'effacer.
+      if (enAttente.current === cible) enAttente.current = null
+      setErreurEnregistrement(null)
+    } catch (erreur) {
+      setErreurEnregistrement(message(erreur))
+    }
+  }, [])
+
+  const ouvrirSession = useCallback(async () => {
+    setChargement(true)
+    setErreurChargement(null)
+    try {
       const u = await auth.utilisateurCourant()
-      if (annule) return
       if (u) {
         setUtilisateur(u)
         setEtat(await charger(u))
       }
+    } catch (erreur) {
+      // Sans ce filet, `setChargement(false)` n'était jamais atteint et
+      // l'écran « Ouverture » restait affiché indéfiniment.
+      setErreurChargement(message(erreur))
+      setUtilisateur(null)
+      setEtat(null)
+    } finally {
       setChargement(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    let annule = false
+    void (async () => {
+      await ouvrirSession()
+      if (annule) return
     })()
     return () => {
       annule = true
     }
-  }, [])
+  }, [ouvrirSession, tentative])
 
   /**
    * Toute modification passe par ici : on applique la recette, on détecte les
@@ -71,34 +121,45 @@ export function FournisseurApp({ children }: { children: ReactNode }) {
           setBadgeACelebrer(nouveaux[0])
         }
 
+        // Replanifier est idempotent : en mode strict React rejoue cet
+        // updater, le clearTimeout annule simplement la planification jumelle.
         if (enregistrementDiffere.current) window.clearTimeout(enregistrementDiffere.current)
         enregistrementDiffere.current = window.setTimeout(() => {
           enregistrementDiffere.current = null
-          void enregistrer(suivant.profil.id, suivant)
+          void ecrire(suivant)
         }, 400)
 
         return suivant
       })
     },
-    [],
+    [ecrire],
   )
+
+  const reessayerEnregistrement = useCallback(() => {
+    const cible = enAttente.current ?? etat
+    if (cible) void ecrire(cible)
+  }, [ecrire, etat])
+
+  const reessayerChargement = useCallback(() => setTentative((n) => n + 1), [])
 
   // Une fermeture d'onglet ne doit pas emporter les 400 dernières millisecondes.
   useEffect(() => {
     const surFermeture = () => {
       if (enregistrementDiffere.current && etat) {
         window.clearTimeout(enregistrementDiffere.current)
-        void enregistrer(etat.profil.id, etat)
+        enregistrementDiffere.current = null
+        void ecrire(etat)
       }
     }
     window.addEventListener('pagehide', surFermeture)
     return () => window.removeEventListener('pagehide', surFermeture)
-  }, [etat])
+  }, [etat, ecrire])
 
   const seConnecter = useCallback(async (identifiant: string, motDePasse: string) => {
     const u = await auth.connexion(identifiant, motDePasse)
     setUtilisateur(u)
     setEtat(await charger(u))
+    setErreurChargement(null)
   }, [])
 
   const sInscrire = useCallback(
@@ -106,14 +167,22 @@ export function FournisseurApp({ children }: { children: ReactNode }) {
       const u = await auth.inscription(identifiant, motDePasse, prenom)
       setUtilisateur(u)
       setEtat(await charger(u))
+      setErreurChargement(null)
     },
     [],
   )
 
   const seDeconnecter = useCallback(async () => {
+    // Ne pas laisser une écriture différée partir après la déconnexion.
+    if (enregistrementDiffere.current) {
+      window.clearTimeout(enregistrementDiffere.current)
+      enregistrementDiffere.current = null
+    }
+    enAttente.current = null
     await auth.deconnexion()
     setUtilisateur(null)
     setEtat(null)
+    setErreurEnregistrement(null)
   }, [])
 
   const valeur = useMemo(
@@ -121,6 +190,10 @@ export function FournisseurApp({ children }: { children: ReactNode }) {
       utilisateur,
       etat,
       chargement,
+      erreurChargement,
+      reessayerChargement,
+      erreurEnregistrement,
+      reessayerEnregistrement,
       badgeACelebrer,
       fermerCelebration: () => setBadgeACelebrer(null),
       modifier,
@@ -128,7 +201,20 @@ export function FournisseurApp({ children }: { children: ReactNode }) {
       sInscrire,
       seDeconnecter,
     }),
-    [utilisateur, etat, chargement, badgeACelebrer, modifier, seConnecter, sInscrire, seDeconnecter],
+    [
+      utilisateur,
+      etat,
+      chargement,
+      erreurChargement,
+      reessayerChargement,
+      erreurEnregistrement,
+      reessayerEnregistrement,
+      badgeACelebrer,
+      modifier,
+      seConnecter,
+      sInscrire,
+      seDeconnecter,
+    ],
   )
 
   return <ContexteApp.Provider value={valeur}>{children}</ContexteApp.Provider>

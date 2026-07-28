@@ -13,24 +13,49 @@ const EMAIL_ELODIE = 'elo@equilibre.local'
 const CLE_COMPTES = 'equilibre:comptes'
 const CLE_SESSION = 'equilibre:session'
 
+/** Minimum imposé par Supabase, et vérifié ici pour éviter un aller-retour. */
+export const MDP_MINIMUM = 6
+
 /**
- * « ELO » fait 3 caractères, Supabase en exige 6 au minimum. On complète donc
- * en interne les mots de passe trop courts avec une constante fixe. Cela ne
- * rend pas « ELO » plus difficile à deviner — c'est précisément pour ça que
- * le changement de mot de passe est imposé à la première connexion.
+ * En mode synchronisé, l'identifiant doit être une vraie adresse : c'est elle
+ * qui reçoit le lien de confirmation et celui de récupération. Les pseudos
+ * étaient convertis en `pseudo@equilibre.local`, un domaine qui ne reçoit
+ * rien — la confirmation n'arrivait jamais et le mot de passe était
+ * irrécupérable. Ils restent acceptés en mode démo, où rien n'est envoyé.
  */
-const RALLONGE = '·équilibre·'
-function motDePasseEtendu(mdp: string): string {
-  return mdp.length >= 6 ? mdp : mdp + RALLONGE
+export const exigeEmailReel = supabase !== null
+
+/** Contrôle de forme. C'est Supabase qui tranche pour de bon. */
+export function estEmail(identifiant: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(identifiant.trim())
 }
 
-/** Permet de taper « ELO » plutôt qu'une adresse e-mail complète. */
+/** Permet de taper « ELO » plutôt qu'une adresse e-mail complète, en démo. */
 export function versEmail(identifiant: string): string {
   const propre = identifiant.trim()
   if (propre.includes('@')) return propre.toLowerCase()
   return `${propre.toLowerCase()}@equilibre.local`
 }
 
+function exigerIdentifiantValide(identifiant: string): void {
+  if (exigeEmailReel && !estEmail(identifiant)) {
+    throw new ErreurAuth(
+      'Entrez une adresse e-mail. Elle sert à confirmer votre compte et à le récupérer si vous oubliez votre mot de passe.',
+    )
+  }
+}
+
+/**
+ * Le compte de démonstration ne s'auto-crée **qu'en mode démo**, c'est-à-dire
+ * dans un navigateur, sans base partagée. En mode Supabase, taper ELO/ELO
+ * revenait à ouvrir — ou à prendre — un compte réel dont l'identifiant est
+ * public : le premier arrivé effectuait le changement de mot de passe imposé.
+ */
+export function estCompteDemo(identifiant: string): boolean {
+  return supabase === null && versEmail(identifiant) === EMAIL_ELODIE
+}
+
+/** Sert à pré-remplir le profil d'exemple, indépendamment du mode. */
 export function estCompteElodie(identifiant: string): boolean {
   return versEmail(identifiant) === EMAIL_ELODIE
 }
@@ -98,19 +123,56 @@ export async function inscription(
   motDePasse: string,
   prenom: string,
 ): Promise<Utilisateur> {
+  exigerIdentifiantValide(identifiant)
   const email = versEmail(identifiant)
+
+  if (motDePasse.length < MDP_MINIMUM) {
+    throw new ErreurAuth(`Choisissez un mot de passe d’au moins ${MDP_MINIMUM} caractères.`)
+  }
 
   if (supabase) {
     const { data, error } = await supabase.auth.signUp({
       email,
-      password: motDePasseEtendu(motDePasse),
+      password: motDePasse,
       options: { data: { prenom } },
     })
     if (error) throw new ErreurAuth(traduireErreur(error.message))
     if (!data.user) throw new ErreurAuth('Le compte n’a pas pu être créé.')
+
+    // Quand la confirmation par e-mail est active, Supabase renvoie un
+    // utilisateur factice sans identité plutôt que d'admettre que l'adresse
+    // est déjà prise. Sans ce test, on annonçait « compte créé » à quelqu'un
+    // qui possède déjà un compte.
+    if (data.user.identities?.length === 0) {
+      throw new ErreurAuth('Un compte existe déjà avec cet identifiant.')
+    }
+
+    // Toujours avec la confirmation active : le compte existe mais aucune
+    // session n'est ouverte. Poursuivre menait droit à un refus de la RLS,
+    // affiché sous forme de message de base de données en anglais.
+    if (!data.session) {
+      throw new ErreurAuth(
+        'Compte créé. Ouvrez le lien de confirmation reçu par e-mail, puis connectez-vous.',
+      )
+    }
+
     return { id: data.user.id, email, prenom }
   }
 
+  return creerCompteLocal(email, motDePasse, prenom)
+}
+
+/**
+ * Création d'un compte dans le navigateur. Séparé d'`inscription` parce que le
+ * compte de démonstration s'ensemence avec un mot de passe de trois lettres :
+ * la longueur minimale est une contrainte de Supabase, elle n'a pas de sens
+ * ici, et ce compte impose de toute façon un changement à la première connexion.
+ */
+async function creerCompteLocal(
+  email: string,
+  motDePasse: string,
+  prenom: string,
+): Promise<Utilisateur> {
   const comptes = lireComptes()
   if (comptes.some((c) => c.email === email)) {
     throw new ErreurAuth('Un compte existe déjà avec cet identifiant.')
@@ -134,14 +196,9 @@ export async function connexion(identifiant: string, motDePasse: string): Promis
   if (supabase) {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
-      password: motDePasseEtendu(motDePasse),
+      password: motDePasse,
     })
     if (error) {
-      // Première connexion d'Élodie : le compte n'existe pas encore côté
-      // Supabase, on le crée à la volée avec ses identifiants convenus.
-      if (estCompteElodie(email) && motDePasse === 'ELO') {
-        return inscription(identifiant, motDePasse, 'Élodie')
-      }
       throw new ErreurAuth(traduireErreur(error.message))
     }
     return {
@@ -154,8 +211,9 @@ export async function connexion(identifiant: string, motDePasse: string): Promis
   const comptes = lireComptes()
   const compte = comptes.find((c) => c.email === email)
   if (!compte) {
-    if (estCompteElodie(email) && motDePasse === 'ELO') {
-      return inscription(identifiant, motDePasse, 'Élodie')
+    // Ensemencement du compte d'exemple, en mode démo uniquement.
+    if (estCompteDemo(email) && motDePasse === IDENTIFIANT_ELODIE) {
+      return creerCompteLocal(email, motDePasse, 'Élodie')
     }
     throw new ErreurAuth('Identifiant ou mot de passe incorrect.')
   }
@@ -177,12 +235,17 @@ export async function deconnexion(): Promise<void> {
 
 export async function utilisateurCourant(): Promise<Utilisateur | null> {
   if (supabase) {
-    const { data } = await supabase.auth.getUser()
-    if (!data.user?.email) return null
+    // `getSession` lit le jeton déjà stocké sur l'appareil, sans appel réseau.
+    // `getUser` interrogeait le serveur : hors connexion il échouait et
+    // déconnectait quelqu'un dont la session était pourtant valide — inacceptable
+    // pour une application installable censée fonctionner hors ligne.
+    const { data } = await supabase.auth.getSession()
+    const compte = data.session?.user
+    if (!compte?.email) return null
     return {
-      id: data.user.id,
-      email: data.user.email,
-      prenom: (data.user.user_metadata?.prenom as string) ?? '',
+      id: compte.id,
+      email: compte.email,
+      prenom: (compte.user_metadata?.prenom as string) ?? '',
     }
   }
 
@@ -193,8 +256,8 @@ export async function utilisateurCourant(): Promise<Utilisateur | null> {
 }
 
 export async function changerMotDePasse(nouveau: string): Promise<void> {
-  if (nouveau.length < 6) {
-    throw new ErreurAuth('Choisissez un mot de passe d’au moins 6 caractères.')
+  if (nouveau.length < MDP_MINIMUM) {
+    throw new ErreurAuth(`Choisissez un mot de passe d’au moins ${MDP_MINIMUM} caractères.`)
   }
 
   if (supabase) {
@@ -217,15 +280,38 @@ export async function changerMotDePasse(nouveau: string): Promise<void> {
   ecrireComptes(comptes)
 }
 
+/**
+ * Les messages de Supabase et de PostgREST sont en anglais et parlent de
+ * politiques RLS et de contraintes SQL. Ils ne sont jamais montrés tels quels :
+ * on traduit ce qu'on reconnaît, et on retombe sur une phrase neutre pour le
+ * reste. Le message d'origine part en console pour le diagnostic.
+ */
 function traduireErreur(message: string): string {
   const m = message.toLowerCase()
+
   if (m.includes('invalid login')) return 'Identifiant ou mot de passe incorrect.'
   if (m.includes('already registered') || m.includes('already been registered')) {
     return 'Un compte existe déjà avec cet identifiant.'
   }
-  if (m.includes('password should be')) {
-    return 'Choisissez un mot de passe d’au moins 6 caractères.'
+  if (m.includes('password should be') || m.includes('password is too short')) {
+    return `Choisissez un mot de passe d’au moins ${MDP_MINIMUM} caractères.`
   }
-  if (m.includes('email')) return 'Cet identifiant n’est pas accepté.'
-  return message
+  if (m.includes('email not confirmed')) {
+    return 'Ce compte attend encore la confirmation envoyée par e-mail.'
+  }
+  if (m.includes('email rate limit') || m.includes('over_email_send_rate_limit')) {
+    return 'Trop de tentatives d’envoi d’e-mail. Réessayez dans quelques minutes.'
+  }
+  if (m.includes('error sending confirmation') || m.includes('error sending')) {
+    return 'L’e-mail de confirmation n’a pas pu être envoyé. Vérifiez l’adresse saisie.'
+  }
+  if (m.includes('invalid email') || m.includes('email address') || m.includes('is invalid')) {
+    return 'Cet identifiant n’est pas accepté.'
+  }
+  if (m.includes('failed to fetch') || m.includes('networkerror')) {
+    return 'Connexion au serveur impossible. Vérifiez votre réseau.'
+  }
+
+  console.error('[auth] message non traduit :', message)
+  return 'Quelque chose s’est mal passé. Réessayez dans un instant.'
 }

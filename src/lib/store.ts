@@ -48,6 +48,8 @@ export function profilInitial(u: Utilisateur): Profil {
     activite: 'sedentaire',
     herbalifeActif: false,
     planPrescrit: elodie,
+    // Les coordonnées d'un praticien appartiennent à l'utilisateur, pas au code.
+    praticien: null,
     onboardingFait: false,
     motDePasseAChanger: elodie,
     creeLe: new Date().toISOString(),
@@ -75,7 +77,10 @@ export async function charger(u: Utilisateur): Promise<EtatUtilisateur> {
       .eq('user_id', u.id)
       .maybeSingle()
 
-    if (error) throw new Error(`Lecture impossible : ${error.message}`)
+    if (error) {
+      console.error('[store] lecture :', error)
+      throw new Error('Vos données n’ont pas pu être lues. Vérifiez votre connexion.')
+    }
     if (data?.contenu) return fusionner(u, data.contenu as Partial<EtatUtilisateur>)
 
     const frais = etatInitial(u)
@@ -101,7 +106,10 @@ export async function enregistrer(userId: string, etat: EtatUtilisateur): Promis
     const { error } = await supabase
       .from('donnees')
       .upsert({ user_id: userId, contenu: etat, maj_le: new Date().toISOString() })
-    if (error) throw new Error(`Enregistrement impossible : ${error.message}`)
+    if (error) {
+      console.error('[store] enregistrement :', error)
+      throw new Error('Vos données n’ont pas pu être enregistrées.')
+    }
     return
   }
   localStorage.setItem(CLE_LOCALE(userId), JSON.stringify(etat))

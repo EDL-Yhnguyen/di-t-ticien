@@ -241,6 +241,7 @@ function Recapitulatif({
       activite,
       herbalifeActif: false,
       planPrescrit: false,
+      praticien: null,
       onboardingFait: true,
       motDePasseAChanger: false,
       creeLe: '',

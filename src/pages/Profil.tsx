@@ -7,6 +7,7 @@ import {
   LogOut,
   Moon,
   NotebookText,
+  Stethoscope,
   Sun,
 } from 'lucide-react'
 import { useApp, useSession } from '../context/AppContext'
@@ -15,22 +16,29 @@ import { Lien } from '../lib/router'
 import { LIBELLE_ACTIVITE, depenseJournaliere, objectifCalorique } from '../lib/nutrition'
 import { poidsActuel } from '../lib/store'
 import { modeDemo } from '../lib/supabase'
-import type { Activite } from '../lib/types'
+import type { Activite, Praticien } from '../lib/types'
 import { entier, nombre } from '../lib/utils'
 
 const CLE_THEME = 'equilibre:theme'
-const LIEN_ALIVIO = 'https://diet.alivio.fr/0cc63c63-86df-4f6c-946d-f0654f6a56f3'
+
+const PRATICIEN_VIDE: Praticien = { nom: '', role: '', email: '', telephone: '', suivi: '' }
 
 export function Profil() {
   const { seDeconnecter } = useApp()
   const { etat, modifier } = useSession()
   const [mesuresOuvertes, setMesuresOuvertes] = useState(false)
+  const [praticienOuvert, setPraticienOuvert] = useState(false)
   const [sombre, setSombre] = useState(() => document.documentElement.classList.contains('dark'))
 
   const [taille, setTaille] = useState(String(etat.profil.tailleCm))
   const [age, setAge] = useState(String(etat.profil.age))
   const [objectifKg, setObjectifKg] = useState(String(etat.profil.poidsObjectifKg))
   const [activite, setActivite] = useState<Activite>(etat.profil.activite)
+
+  const praticien = etat.profil.praticien
+  const [brouillonPraticien, setBrouillonPraticien] = useState<Praticien>(
+    praticien ?? PRATICIEN_VIDE,
+  )
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', sombre)
@@ -53,6 +61,29 @@ export function Profil() {
       brouillon.profil.activite = activite
     })
     setMesuresOuvertes(false)
+  }
+
+  // Repartir de l'état à chaque ouverture : les champs locaux ne se
+  // resynchronisent pas tout seuls après un enregistrement.
+  function ouvrirPraticien() {
+    setBrouillonPraticien(praticien ?? PRATICIEN_VIDE)
+    setPraticienOuvert(true)
+  }
+
+  function enregistrerPraticien() {
+    const propre: Praticien = {
+      nom: brouillonPraticien.nom.trim(),
+      role: brouillonPraticien.role.trim(),
+      email: brouillonPraticien.email.trim(),
+      telephone: brouillonPraticien.telephone.trim(),
+      suivi: brouillonPraticien.suivi.trim(),
+    }
+    // Tout vide vaut « pas de praticien » — inutile de garder une coquille.
+    const vide = Object.values(propre).every((v) => v === '')
+    modifier((brouillon) => {
+      brouillon.profil.praticien = vide ? null : propre
+    })
+    setPraticienOuvert(false)
   }
 
   return (
@@ -112,17 +143,48 @@ export function Profil() {
             <span className="flex-1 font-medium text-ink">Les jeux</span>
             <ChevronRight size={17} className="shrink-0 text-ink-faint" aria-hidden="true" />
           </Lien>
-          <a
-            href={LIEN_ALIVIO}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken"
-          >
-            <ExternalLink size={19} className="shrink-0 text-basil" aria-hidden="true" />
-            <span className="flex-1 font-medium text-ink">Mon suivi chez la diététicienne</span>
-            <ChevronRight size={17} className="shrink-0 text-ink-faint" aria-hidden="true" />
-          </a>
+          {praticien?.suivi && (
+            <a
+              href={praticien.suivi}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken"
+            >
+              <ExternalLink size={19} className="shrink-0 text-basil" aria-hidden="true" />
+              <span className="flex-1 font-medium text-ink">Mon suivi en ligne</span>
+              <ChevronRight size={17} className="shrink-0 text-ink-faint" aria-hidden="true" />
+            </a>
+          )}
         </Carte>
+      </section>
+
+      <section>
+        <TitreSection>Mon praticien</TitreSection>
+        <Carte className="p-5">
+          {praticien ? (
+            <div className="flex items-start gap-3">
+              <Stethoscope size={19} className="mt-0.5 shrink-0 text-basil" aria-hidden="true" />
+              <div className="min-w-0 space-y-0.5">
+                <p className="font-semibold text-ink">{praticien.nom || 'Sans nom'}</p>
+                {praticien.role && <p className="text-sm text-ink-soft">{praticien.role}</p>}
+                {praticien.email && (
+                  <p className="truncate text-sm text-ink-soft">{praticien.email}</p>
+                )}
+                {praticien.telephone && (
+                  <p className="text-sm text-ink-soft tnum">{praticien.telephone}</p>
+                )}
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-ink-soft">
+              Si un diététicien ou un médecin vous suit, enregistrez ses coordonnées ici pour les
+              retrouver depuis votre plan. Elles restent dans votre compte, visibles de vous seul.
+            </p>
+          )}
+        </Carte>
+        <Bouton ton="doux" pleineLargeur className="mt-3" onClick={ouvrirPraticien}>
+          {praticien ? 'Modifier mon praticien' : 'Ajouter mon praticien'}
+        </Bouton>
       </section>
 
       <section>
@@ -227,6 +289,66 @@ export function Profil() {
             }))}
           />
           <Bouton pleineLargeur onClick={enregistrerMesures}>
+            Enregistrer
+          </Bouton>
+        </div>
+      </Feuille>
+
+      <Feuille
+        ouvert={praticienOuvert}
+        titre="Mon praticien"
+        onFermer={() => setPraticienOuvert(false)}
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-ink-soft">
+            Ces coordonnées sont celles d’une autre personne : elles restent dans votre compte et
+            ne sont jamais partagées. Laissez tout vide pour les retirer.
+          </p>
+          <Champ
+            id="praticien-nom"
+            label="Nom"
+            autoComplete="off"
+            value={brouillonPraticien.nom}
+            onChange={(e) => setBrouillonPraticien((p) => ({ ...p, nom: e.target.value }))}
+          />
+          <Champ
+            id="praticien-role"
+            label="Spécialité"
+            aide="Par exemple : diététicien-nutritionniste."
+            autoComplete="off"
+            value={brouillonPraticien.role}
+            onChange={(e) => setBrouillonPraticien((p) => ({ ...p, role: e.target.value }))}
+          />
+          <Champ
+            id="praticien-email"
+            label="E-mail"
+            type="email"
+            inputMode="email"
+            autoComplete="off"
+            value={brouillonPraticien.email}
+            onChange={(e) => setBrouillonPraticien((p) => ({ ...p, email: e.target.value }))}
+          />
+          <Champ
+            id="praticien-telephone"
+            label="Téléphone"
+            type="tel"
+            inputMode="tel"
+            autoComplete="off"
+            value={brouillonPraticien.telephone}
+            onChange={(e) => setBrouillonPraticien((p) => ({ ...p, telephone: e.target.value }))}
+          />
+          <Champ
+            id="praticien-suivi"
+            label="Lien de suivi en ligne"
+            aide="L’adresse de votre espace patient, si votre praticien en propose un."
+            type="url"
+            inputMode="url"
+            autoComplete="off"
+            placeholder="https://"
+            value={brouillonPraticien.suivi}
+            onChange={(e) => setBrouillonPraticien((p) => ({ ...p, suivi: e.target.value }))}
+          />
+          <Bouton pleineLargeur onClick={enregistrerPraticien}>
             Enregistrer
           </Bouton>
         </div>

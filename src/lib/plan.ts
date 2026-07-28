@@ -1,13 +1,11 @@
 import type { Categorie, Moment, Profil, Repas } from './types'
 
 /**
- * Le plan d'Élodie, repris mot pour mot de l'ordonnance établie par
- * Julie Bertolotto, diététicienne-nutritionniste.
+ * Le plan de référence, repris d'une ordonnance réelle de
+ * diététicienne-nutritionniste et servant de structure à tous les autres.
  *
  * Les kcal sont des estimations de portion moyenne. Elles servent d'indicateur,
  * jamais de consigne : ce plan raisonne en parts d'assiette, pas en grammes.
- * C'est aussi pour ça que l'assiette est l'écran principal et le compteur une
- * ligne secondaire.
  */
 export const PLAN_REFERENCE: Repas[] = [
   {
