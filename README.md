@@ -42,12 +42,29 @@ données sur son téléphone **et** sur l'ordinateur :
 1. Créez un projet sur [supabase.com](https://supabase.com) (gratuit).
 2. Ouvrez le **SQL Editor** et exécutez le contenu de
    [`supabase/schema.sql`](supabase/schema.sql).
-3. Dans **Settings → API**, copiez l'URL du projet et la clé `anon public`.
-4. Copiez `.env.example` en `.env` et collez-y les deux valeurs.
-5. Relancez `npm run dev`.
+3. **Désactivez la confirmation par e-mail** — voir l'encadré ci-dessous, sans
+   ça aucune connexion ne fonctionnera.
+4. Dans **Settings → API Keys**, copiez l'URL du projet et la clé `anon public`.
+5. Copiez `.env.example` en `.env` et collez-y les deux valeurs.
+6. Relancez `npm run dev`.
 
 L'application détecte les clés au démarrage et bascule seule. Aucune autre
 modification n'est nécessaire — les deux modes partagent le même code.
+
+> **La confirmation par e-mail doit être désactivée.**
+> Dans **Authentication → Sign In / Providers → Email**, décochez
+> _Confirm email_.
+>
+> Supabase l'active par défaut : à l'inscription, il envoie un lien de
+> validation et refuse la connexion tant qu'il n'est pas cliqué. Or les
+> identifiants d'ici sont des pseudos, pas des adresses — `ELO` devient
+> `elo@equilibre.local`, une adresse qui ne reçoit rien. Le lien n'arriverait
+> jamais et le compte resterait bloqué.
+>
+> C'est un choix assumé : cette application n'envoie aucun e-mail, donc elle ne
+> propose pas non plus de récupération de mot de passe. Un mot de passe oublié
+> se réinitialise depuis le tableau de bord Supabase, dans
+> **Authentication → Users**.
 
 > La clé `anon` est faite pour être publique. Ce qui protège les données, c'est
 > la _row level security_ activée par le script SQL : chaque compte ne peut lire
@@ -60,6 +77,10 @@ Sur [vercel.com](https://vercel.com), importez le dépôt GitHub. Vercel détect
 Vite tout seul. Ajoutez les deux variables `VITE_SUPABASE_URL` et
 `VITE_SUPABASE_ANON_KEY` dans **Settings → Environment Variables**, puis
 redéployez.
+
+> Les variables `VITE_*` sont lues à la compilation, pas à l'exécution : les
+> ajouter ne suffit pas, il faut **relancer un déploiement** pour qu'elles
+> entrent dans le fichier livré. Sans ça le site reste en mode démo.
 
 Chaque `git push` redéploie ensuite automatiquement.
 
