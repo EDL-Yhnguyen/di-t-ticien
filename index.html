@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Équilibre — votre assiette, jour après jour</title>
+    <meta
+      name="description"
+      content="Suivez votre plan alimentaire, votre poids et vos envies de grignotage. Une assiette qui se remplit, pas un compteur qui culpabilise."
+    />
+    <meta name="theme-color" content="#F6F2F9" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1B1026" media="(prefers-color-scheme: dark)" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/icone.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/icone-180.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Équilibre" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..900,0..100,0..1&family=Figtree:wght@400..900&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <!-- Appliqué avant le premier rendu : sans ça, un thème sombre choisi dans
+         les réglages provoque un flash clair au chargement. -->
+    <script>
+      ;(function () {
+        try {
+          var choix = localStorage.getItem('equilibre:theme')
+          var sombre =
+            choix === 'sombre' ||
+            (choix !== 'clair' && matchMedia('(prefers-color-scheme: dark)').matches)
+          if (sombre) document.documentElement.classList.add('dark')
+        } catch (e) {}
+      })()
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

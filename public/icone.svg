@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Équilibre">
+  <rect width="512" height="512" rx="112" fill="#2B1A3D" />
+  <circle cx="256" cy="256" r="168" fill="#F6F2F9" />
+  <circle cx="256" cy="256" r="140" fill="#EFE9F5" />
+  <!-- Les trois parts de l'assiette : un quart protéines, un quart féculents,
+       une moitié légumes. Mêmes couleurs validées que dans l'application. -->
+  <path d="M256 256 L256 130 A126 126 0 0 1 382 256 Z" fill="#6535BF" />
+  <path d="M256 256 L382 256 A126 126 0 0 1 256 382 Z" fill="#C97B14" />
+  <path d="M256 256 L256 382 A126 126 0 1 1 256 130 Z" fill="#1A6E3E" />
+  <g stroke="#EFE9F5" stroke-width="9" stroke-linecap="round">
+    <line x1="256" y1="256" x2="256" y2="130" />
+    <line x1="256" y1="256" x2="382" y2="256" />
+    <line x1="256" y1="256" x2="256" y2="382" />
+  </g>
+</svg>

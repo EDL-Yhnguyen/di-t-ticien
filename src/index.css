@@ -1,0 +1,234 @@
+@import 'tailwindcss';
+
+/* Le thème sombre est piloté par une classe sur <html>, initialisée depuis la
+   préférence système puis modifiable dans les réglages. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ─────────────────────────────────────────────────────────────
+   Palette
+   Reprise de l'ordonnance de la diététicienne : bandeau violet,
+   étiquettes abricot. L'aubergine sert d'encre, le basilic dit
+   « réussi », la groseille dit « envie de grignoter ».
+   ───────────────────────────────────────────────────────────── */
+:root {
+  --ground: #f6f2f9;
+  --surface: #ffffff;
+  --sunken: #efe9f5;
+  --ink: #2b1a3d;
+  --ink-soft: #6b5a7d;
+  --ink-faint: #9a8cab;
+  --line: #e4daee;
+
+  --iris: #6d3fc4;
+  --iris-wash: #ede4fb;
+  --apricot: #e2661a;
+  --apricot-wash: #ffe9d9;
+  --basil: #2f8f4e;
+  --basil-wash: #dff3e5;
+  --berry: #c92a63;
+  --berry-wash: #fde3ec;
+
+  --shadow-soft: 0 1px 2px rgb(43 26 61 / 0.04), 0 8px 24px -12px rgb(43 26 61 / 0.16);
+  --shadow-lift: 0 2px 4px rgb(43 26 61 / 0.05), 0 18px 40px -18px rgb(43 26 61 / 0.28);
+
+  /* Les trois parts de l'assiette forment une palette catégorielle : elles se
+     touchent, donc chaque paire doit rester distinguable en vision daltonienne.
+     Ces valeurs sont validées, pas choisies à l'œil — vert et orange voisins,
+     le réflexe naturel, tombaient à ΔE 5,1 en protanopie (seuil : 8).
+     Elles sont distinctes des jetons d'interface, dont la contrainte est le
+     contraste du texte et non la séparation entre voisins. */
+  --assiette-legume: #1a6e3e;
+  --assiette-feculent: #c97b14;
+  --assiette-proteine: #6535bf;
+
+  /* Le bandeau de tête porte toujours du texte blanc : il lui faut donc rester
+     sombre dans les deux thèmes. Le jeton --iris, lui, s'éclaircit en mode
+     sombre pour rester lisible en texte — les deux usages divergent. */
+  --bandeau-haut: #6d3fc4;
+  --bandeau-bas: #4b2a8a;
+}
+
+.dark {
+  --ground: #1b1026;
+  --surface: #251633;
+  --sunken: #2f1d40;
+  --ink: #f3edf9;
+  --ink-soft: #bcabce;
+  --ink-faint: #8b789e;
+  --line: #3a2650;
+
+  --iris: #b995f5;
+  --iris-wash: #33204a;
+  --apricot: #ffa05c;
+  --apricot-wash: #40291a;
+  --basil: #6ed08d;
+  --basil-wash: #16301f;
+  --berry: #f57fa8;
+  --berry-wash: #3b1725;
+
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -12px rgb(0 0 0 / 0.6);
+  --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.35), 0 18px 40px -18px rgb(0 0 0 / 0.7);
+
+  /* Réétagées pour le fond sombre, revalidées séparément : un thème sombre
+     n'est pas l'inversion du thème clair. */
+  --assiette-legume: #22a97f;
+  --assiette-feculent: #c28520;
+  --assiette-proteine: #9d72e4;
+
+  --bandeau-haut: #452a75;
+  --bandeau-bas: #2b1a4a;
+}
+
+@theme inline {
+  --color-ground: var(--ground);
+  --color-surface: var(--surface);
+  --color-sunken: var(--sunken);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-faint: var(--ink-faint);
+  --color-line: var(--line);
+
+  --color-iris: var(--iris);
+  --color-iris-wash: var(--iris-wash);
+  --color-apricot: var(--apricot);
+  --color-apricot-wash: var(--apricot-wash);
+  --color-basil: var(--basil);
+  --color-basil-wash: var(--basil-wash);
+  --color-berry: var(--berry);
+  --color-berry-wash: var(--berry-wash);
+
+  --color-assiette-legume: var(--assiette-legume);
+  --color-assiette-feculent: var(--assiette-feculent);
+  --color-assiette-proteine: var(--assiette-proteine);
+
+  --color-bandeau-haut: var(--bandeau-haut);
+  --color-bandeau-bas: var(--bandeau-bas);
+
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Figtree', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --radius-card: 1.5rem;
+  --radius-tile: 1rem;
+
+  --shadow-soft: var(--shadow-soft);
+  --shadow-lift: var(--shadow-lift);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Base
+   ───────────────────────────────────────────────────────────── */
+@layer base {
+  * {
+    border-color: var(--line);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scrollbar-gutter: stable;
+  }
+
+  body {
+    background-color: var(--ground);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior-y: none;
+  }
+
+  /* Fraunces : SOFT arrondit les angles, WONK active les variantes
+     penchées du g et du y. C'est ce qui la rend appétissante plutôt
+     que juridique. */
+  .font-display,
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-variation-settings: 'SOFT' 60, 'WONK' 1;
+    letter-spacing: -0.02em;
+  }
+
+  /* Chiffres alignés verticalement : indispensable dès qu'un poids ou un
+     nombre de calories change sous les yeux. */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--iris);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  button,
+  [role='button'] {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  input,
+  textarea,
+  select {
+    font: inherit;
+    color: inherit;
+  }
+
+  /* iOS zoome sur les champs sous 16px. */
+  input,
+  textarea {
+    font-size: max(16px, 1rem);
+  }
+}
+
+@layer utilities {
+  .safe-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 0.5rem);
+  }
+  .safe-top {
+    padding-top: max(env(safe-area-inset-top), 0px);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Mouvement
+   Une seule idée : ce qui se remplit ressort, le reste reste calme.
+   ───────────────────────────────────────────────────────────── */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes flame {
+  0%,
+  100% {
+    transform: scale(1) rotate(-2deg);
+  }
+  50% {
+    transform: scale(1.12) rotate(2deg);
+  }
+}
+
+.animate-rise {
+  animation: rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.animate-flame {
+  animation: flame 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
