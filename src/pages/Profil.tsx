@@ -1,5 +1,14 @@
 import { useEffect, useState } from 'react'
-import { Award, ChevronRight, ExternalLink, LogOut, Moon, NotebookText, Sun } from 'lucide-react'
+import {
+  Award,
+  ChevronRight,
+  ExternalLink,
+  Gamepad2,
+  LogOut,
+  Moon,
+  NotebookText,
+  Sun,
+} from 'lucide-react'
 import { useApp, useSession } from '../context/AppContext'
 import { Bouton, Bascule, Carte, Champ, ChoixListe, Feuille, TitreSection } from '../components/ui'
 import { Lien } from '../lib/router'
@@ -93,6 +102,14 @@ export function Profil() {
             <Award size={19} className="shrink-0 text-apricot" aria-hidden="true" />
             <span className="flex-1 font-medium text-ink">Mes badges</span>
             <span className="text-sm text-ink-faint tnum">{etat.badges.length}</span>
+            <ChevronRight size={17} className="shrink-0 text-ink-faint" aria-hidden="true" />
+          </Lien>
+          <Lien
+            vers="/app/jeux"
+            className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken"
+          >
+            <Gamepad2 size={19} className="shrink-0 text-berry" aria-hidden="true" />
+            <span className="flex-1 font-medium text-ink">Les jeux</span>
             <ChevronRight size={17} className="shrink-0 text-ink-faint" aria-hidden="true" />
           </Lien>
           <a
