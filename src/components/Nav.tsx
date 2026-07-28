@@ -98,10 +98,13 @@ export function RailLateral() {
 /** Gabarit commun aux écrans connectés. */
 export function Cadre({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-svh bg-ground">
+    // Le décalage porte sur l'enveloppe et non sur <main> : la colonne se
+    // centre ainsi dans l'espace restant à droite du rail, au lieu d'y être
+    // collée sur les écrans larges.
+    <div className="min-h-svh bg-ground md:pl-60">
       <RailLateral />
       <BarreOnglets />
-      <main className="mx-auto max-w-lg px-4 pt-5 pb-28 md:ml-60 md:max-w-2xl md:px-8 md:pt-10 md:pb-12">
+      <main className="mx-auto max-w-lg px-4 pt-5 pb-28 md:max-w-2xl md:px-8 md:pt-10 md:pb-12">
         {children}
       </main>
     </div>
