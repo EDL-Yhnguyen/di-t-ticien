@@ -53,6 +53,13 @@ begin
 end;
 $$;
 
+-- Postgres accorde l'exécution à `public` sur toute fonction nouvellement
+-- créée. Une fonction trigger n'a rien à faire dans l'API : PostgREST l'expose
+-- en `/rest/v1/rpc/marquer_maj`, où l'appel échoue certes, mais l'advisor
+-- sécurité la signale à juste titre. On rend la surface exposée conforme à
+-- l'intention.
+revoke execute on function public.marquer_maj() from public, anon, authenticated;
+
 drop trigger if exists donnees_maj on public.donnees;
 create trigger donnees_maj
   before update on public.donnees
