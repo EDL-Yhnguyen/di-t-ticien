@@ -336,12 +336,26 @@ partent, l'identifiant survit. Ce cas remonte un `avisSuppression` affiché sur
 
 ### `legal.ts` est à remplir, pas à deviner
 
-`EDITEUR` (nom, statut, adresse, contact) est vide par défaut et **doit** être
-renseigné avant toute mise à disposition du public : l'identification de
-l'éditeur est une obligation (LCEN, art. 6-III). Tant qu'il est vide,
-`/confidentialite` affiche un encart d'avertissement plutôt qu'une fausse
-mention. `REGION_BASE` doit correspondre à la région réelle du projet
-Supabase — c'est elle qui dit si les données de santé sortent de l'UE.
+**Le site est en régime « éditeur non professionnel »** (`EDITEUR_NON_
+PROFESSIONNEL = true`). La LCEN (art. 6-III-2) permet à un particulier qui
+publie sans en tirer de revenu de ne pas rendre publics son nom et son
+adresse, à condition de les avoir communiqués à son hébergeur. **Ce n'est pas
+une dispense** : le compte Vercel doit être à la véritable identité, et un
+faux nom dans les mentions serait une infraction là où l'absence de nom n'en
+est pas une.
+
+**Ce régime tombe dès le premier euro encaissé.** L'abonnement Stripe du
+sprint 8 fera de ce site une édition professionnelle : passer le drapeau à
+`false` et remplir `nom`, `statut` et `adresse` fera alors partie du sprint,
+pas d'un rattrapage après coup.
+
+`EDITEUR.contact` reste obligatoire dans tous les cas — le RGPD ne dispense
+personne d'un point de contact (art. 13). Tant qu'il pointe sur
+`@example.com`, `contactProvisoire` vaut `true` et `/confidentialite` affiche
+un encart d'avertissement plutôt que de laisser croire à une boîte relevée.
+
+`REGION_BASE` doit correspondre à la région réelle du projet Supabase — c'est
+elle qui dit si les données de santé sortent de l'UE.
 
 Corollaire : **tout nouveau destinataire de données se déclare dans
 `DESTINATAIRES`** au moment où on l'ajoute au code, pas après.
@@ -525,7 +539,9 @@ Le reliquat du sprint 1, qui bloquait toute mise à disposition du public.
   fonction `security definer` évite d'avoir à exposer `service_role`.
 - **`/confidentialite`** : politique et mentions légales en un seul écran,
   atteignable connecté ou non, y compris depuis l'écran de consentement.
-  L'identité de l'éditeur reste **à remplir** dans `legal.ts`.
+  Régime « éditeur non professionnel » retenu (Yann, 29/07/2026) : diffusion
+  d'abord restreinte à des proches, pas de société. Aucun nom n'est publié —
+  la loi le permet, un faux nom ne l'aurait pas permis.
 - **Fin de l'éclatement des recettes.** `recettes.ts` était toujours le
   module chargé ; `recettes/` existait à côté sans jamais être importé (la
   résolution Node prend le fichier avant le dossier), donc quinze petits
@@ -541,10 +557,10 @@ retirés, reconnexion refusée). Un défaut corrigé à ce moment-là : l'avis d
 suppression partielle était placé sur l'accueil alors que le parcours atterrit
 sur `/connexion`.
 
-**Reste à faire :** `EDITEUR` à renseigner dans `src/lib/legal.ts` et
-`REGION_BASE` à confirmer ; `supabase/schema.sql` à rejouer pour créer
-`supprimer_mon_compte()` ; `ANTHROPIC_API_KEY` à ajouter dans Vercel pour
-activer le scan photo.
+**Reste à faire :** `EDITEUR.contact` à remplacer par une vraie boîte relevée
+et `REGION_BASE` à confirmer, dans `src/lib/legal.ts` ; `supabase/schema.sql`
+à rejouer pour créer `supprimer_mon_compte()` ; `ANTHROPIC_API_KEY` à ajouter
+dans Vercel pour activer le scan photo.
 
 ### 28 juillet 2026 — Mémoire projet et audit
 

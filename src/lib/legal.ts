@@ -16,24 +16,48 @@
 export const VERSION_CONFIDENTIALITE = '2026-07-29'
 
 export interface Editeur {
-  /** Nom et prénom, ou raison sociale. */
+  /** Nom et prénom, ou raison sociale. Facultatif pour un éditeur non professionnel. */
   nom: string
   /** « particulier », « auto-entrepreneur », « SAS au capital de… ». */
   statut: string
-  /** Adresse du siège ou du domicile de l'éditeur. */
+  /** Adresse du siège ou du domicile. Facultative pour un éditeur non professionnel. */
   adresse: string
   /** L'adresse à laquelle on exerce ses droits. Elle doit être relevée. */
   contact: string
 }
 
+/**
+ * Éditeur **non professionnel** : un particulier qui publie sans en tirer de
+ * revenu. La LCEN (art. 6-III-2) l'autorise alors à ne pas rendre publics son
+ * nom et son adresse, à condition de les avoir communiqués à son hébergeur,
+ * qui les tient à disposition de l'autorité judiciaire.
+ *
+ * Ce n'est pas une dispense : le compte Vercel doit être à la véritable
+ * identité. Et ça tombe **dès le premier euro encaissé** — l'abonnement Stripe
+ * du sprint 8 fera basculer le site en édition professionnelle, ce qui rendra
+ * `nom`, `statut` et `adresse` obligatoires et publics.
+ */
+export const EDITEUR_NON_PROFESSIONNEL = true
+
 export const EDITEUR: Editeur = {
   nom: '',
-  statut: '',
+  statut: 'particulier, éditeur à titre non professionnel',
   adresse: '',
-  contact: '',
+  contact: 'equilibre-contact@example.com',
 }
 
-export const editeurRenseigne: boolean = Object.values(EDITEUR).every((v) => v.trim() !== '')
+/**
+ * Vrai quand l'adresse de contact est encore le repère laissé par défaut. Le
+ * RGPD ne dispense personne d'un point de contact (art. 13) : celle-ci doit
+ * devenir une vraie boîte, relevée, avant d'ouvrir le site à qui que ce soit.
+ */
+export const contactProvisoire: boolean = EDITEUR.contact.endsWith('@example.com')
+
+/** L'identité publiable est-elle complète pour le régime déclaré ? */
+export const editeurRenseigne: boolean =
+  EDITEUR.contact.trim() !== '' &&
+  (EDITEUR_NON_PROFESSIONNEL ||
+    [EDITEUR.nom, EDITEUR.statut, EDITEUR.adresse].every((v) => v.trim() !== ''))
 
 export const HEBERGEUR_SITE = {
   nom: 'Vercel Inc.',

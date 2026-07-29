@@ -4,10 +4,12 @@ import { useRoutage } from '../lib/router'
 import {
   DESTINATAIRES,
   EDITEUR,
+  EDITEUR_NON_PROFESSIONNEL,
   HEBERGEUR_BASE,
   HEBERGEUR_SITE,
   REGION_BASE,
   VERSION_CONFIDENTIALITE,
+  contactProvisoire,
   editeurRenseigne,
 } from '../lib/legal'
 import { modeDemo } from '../lib/supabase'
@@ -59,6 +61,18 @@ export function Confidentialite() {
           </Carte>
         )}
 
+        {editeurRenseigne && contactProvisoire && (
+          <Carte className="border-apricot bg-apricot-wash p-4">
+            <p className="text-sm text-apricot">
+              <strong className="font-semibold">Adresse de contact provisoire.</strong> Personne ne
+              peut exercer ses droits sur une adresse qui n’existe pas. Remplacez{' '}
+              <code className="font-mono">EDITEUR.contact</code> dans{' '}
+              <code className="font-mono">src/lib/legal.ts</code> par une boîte réellement relevée
+              avant d’ouvrir le site à d’autres personnes.
+            </p>
+          </Carte>
+        )}
+
         <Carte className="flex items-start gap-3 p-5">
           <ShieldCheck size={20} className="mt-0.5 shrink-0 text-basil" aria-hidden="true" />
           <p className="text-sm leading-relaxed text-ink-soft">
@@ -69,12 +83,23 @@ export function Confidentialite() {
         </Carte>
 
         <Section titre="Qui traite vos données">
-          {editeurRenseigne ? (
+          {!editeurRenseigne ? (
+            <p>À compléter avant la mise en ligne publique.</p>
+          ) : (
             <>
-              <p>
-                Le responsable du traitement est <strong>{EDITEUR.nom}</strong> ({EDITEUR.statut}),{' '}
-                {EDITEUR.adresse}.
-              </p>
+              {EDITEUR_NON_PROFESSIONNEL ? (
+                <p>
+                  Ce site est édité par un <strong>particulier, à titre non professionnel</strong>.
+                  La loi lui permet de ne pas publier son nom et son adresse (LCEN, art. 6-III-2) :
+                  il les a communiqués à son hébergeur, {HEBERGEUR_SITE.nom}, qui les tient à la
+                  disposition de l’autorité judiciaire.
+                </p>
+              ) : (
+                <p>
+                  Le responsable du traitement est <strong>{EDITEUR.nom}</strong> ({EDITEUR.statut}
+                  ), {EDITEUR.adresse}.
+                </p>
+              )}
               <p>
                 Pour toute question ou pour exercer vos droits :{' '}
                 <a
@@ -86,8 +111,6 @@ export function Confidentialite() {
                 .
               </p>
             </>
-          ) : (
-            <p>À compléter avant la mise en ligne publique.</p>
           )}
         </Section>
 
