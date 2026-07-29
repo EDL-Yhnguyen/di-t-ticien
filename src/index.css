@@ -6,30 +6,36 @@
 
 /* ─────────────────────────────────────────────────────────────
    Palette
-   Reprise de l'ordonnance de la diététicienne : bandeau violet,
-   étiquettes abricot. L'aubergine sert d'encre, le basilic dit
-   « réussi », la groseille dit « envie de grignoter ».
+   Tirée du logo Mamakilo : la marmite corail, le fond crème,
+   l'encre marine du lettrage, le vert des feuilles. L'abricot dit
+   les calories, la groseille dit « envie de grignoter ».
+
+   Le corail du logo (#f67a5e) n'apparaît nulle part tel quel : il ne
+   tient que 2,4:1 sur blanc, donc ni texte ni bouton. Il vit dans
+   l'illustration ; --corail est sa version portante, assombrie
+   jusqu'à 4,5:1 partout où elle sert. Les deux se ressemblent assez
+   pour que la marque reste une seule couleur à l'œil.
    ───────────────────────────────────────────────────────────── */
 :root {
-  --ground: #f6f2f9;
+  --ground: #fdf6ee;
   --surface: #ffffff;
-  --sunken: #efe9f5;
-  --ink: #2b1a3d;
-  --ink-soft: #6b5a7d;
-  --ink-faint: #9a8cab;
-  --line: #e4daee;
+  --sunken: #f8f0e6;
+  --ink: #232d3a;
+  --ink-soft: #5b6675;
+  --ink-faint: #7e8794;
+  --line: #e8dccd;
 
-  --iris: #6d3fc4;
-  --iris-wash: #ede4fb;
-  --apricot: #e2661a;
-  --apricot-wash: #ffe9d9;
-  --basil: #2f8f4e;
-  --basil-wash: #dff3e5;
-  --berry: #c92a63;
+  --corail: #c33f22;
+  --corail-wash: #fff1ec;
+  --apricot: #a85908;
+  --apricot-wash: #fdefe3;
+  --basil: #3e7a3f;
+  --basil-wash: #eaf6e6;
+  --berry: #bd2b62;
   --berry-wash: #fde3ec;
 
-  --shadow-soft: 0 1px 2px rgb(43 26 61 / 0.04), 0 8px 24px -12px rgb(43 26 61 / 0.16);
-  --shadow-lift: 0 2px 4px rgb(43 26 61 / 0.05), 0 18px 40px -18px rgb(43 26 61 / 0.28);
+  --shadow-soft: 0 1px 2px rgb(35 45 58 / 0.04), 0 8px 24px -12px rgb(35 45 58 / 0.16);
+  --shadow-lift: 0 2px 4px rgb(35 45 58 / 0.05), 0 18px 40px -18px rgb(35 45 58 / 0.28);
 
   /* Les trois parts de l'assiette forment une palette catégorielle : elles se
      touchent, donc chaque paire doit rester distinguable en vision daltonienne.
@@ -42,10 +48,10 @@
   --assiette-proteine: #6535bf;
 
   /* Le bandeau de tête porte toujours du texte blanc : il lui faut donc rester
-     sombre dans les deux thèmes. Le jeton --iris, lui, s'éclaircit en mode
+     sombre dans les deux thèmes. Le jeton --corail, lui, s'éclaircit en mode
      sombre pour rester lisible en texte — les deux usages divergent. */
-  --bandeau-haut: #6d3fc4;
-  --bandeau-bas: #4b2a8a;
+  --bandeau-haut: #c33f22;
+  --bandeau-bas: #a33018;
 
   /* ── Nutri-Score ──────────────────────────────────────────────
      Ce ne sont pas des couleurs d'interface : c'est l'échelle officielle
@@ -85,20 +91,20 @@
 }
 
 .dark {
-  --ground: #1b1026;
-  --surface: #251633;
-  --sunken: #2f1d40;
-  --ink: #f3edf9;
-  --ink-soft: #bcabce;
-  --ink-faint: #8b789e;
-  --line: #3a2650;
+  --ground: #171d26;
+  --surface: #1f2733;
+  --sunken: #28323f;
+  --ink: #f2f0ec;
+  --ink-soft: #b3bcc7;
+  --ink-faint: #818c99;
+  --line: #33404f;
 
-  --iris: #b995f5;
-  --iris-wash: #33204a;
-  --apricot: #ffa05c;
-  --apricot-wash: #40291a;
-  --basil: #6ed08d;
-  --basil-wash: #16301f;
+  --corail: #ff8f74;
+  --corail-wash: #3a2019;
+  --apricot: #f5a03f;
+  --apricot-wash: #3d2a13;
+  --basil: #6fc46f;
+  --basil-wash: #1b2f1c;
   --berry: #f57fa8;
   --berry-wash: #3b1725;
 
@@ -111,8 +117,8 @@
   --assiette-feculent: #c28520;
   --assiette-proteine: #9d72e4;
 
-  --bandeau-haut: #452a75;
-  --bandeau-bas: #2b1a4a;
+  --bandeau-haut: #8f3a22;
+  --bandeau-bas: #5e2312;
 
   /* Les cinq teintes sont remontées juste assez pour tenir sur un fond
      sombre sans cesser d'être reconnaissables. L'encre passe au sombre
@@ -146,8 +152,8 @@
   --color-ink-faint: var(--ink-faint);
   --color-line: var(--line);
 
-  --color-iris: var(--iris);
-  --color-iris-wash: var(--iris-wash);
+  --color-corail: var(--corail);
+  --color-corail-wash: var(--corail-wash);
   --color-apricot: var(--apricot);
   --color-apricot-wash: var(--apricot-wash);
   --color-basil: var(--basil);
@@ -233,7 +239,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--iris);
+    outline: 2px solid var(--corail);
     outline-offset: 2px;
     border-radius: 4px;
   }

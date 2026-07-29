@@ -104,7 +104,7 @@ export function Confidentialite() {
                 Pour toute question ou pour exercer vos droits :{' '}
                 <a
                   href={`mailto:${EDITEUR.contact}`}
-                  className="font-semibold text-iris underline underline-offset-2"
+                  className="font-semibold text-corail underline underline-offset-2"
                 >
                   {EDITEUR.contact}
                 </a>
@@ -215,7 +215,7 @@ export function Confidentialite() {
               href="https://www.cnil.fr/fr/plaintes"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-semibold text-iris underline underline-offset-2"
+              className="font-semibold text-corail underline underline-offset-2"
             >
               CNIL
             </a>
@@ -225,7 +225,7 @@ export function Confidentialite() {
 
         <Section titre="Cookies et traceurs">
           <p>
-            Équilibre ne dépose <strong>aucun cookie publicitaire ni traceur de mesure
+            Mamakilo ne dépose <strong>aucun cookie publicitaire ni traceur de mesure
             d’audience</strong>. Le stockage local du navigateur sert uniquement à garder votre
             session ouverte et à retenir votre choix de thème clair ou sombre : ces usages sont
             strictement nécessaires au fonctionnement du service et ne demandent pas de bandeau de
@@ -235,7 +235,7 @@ export function Confidentialite() {
 
         <Section titre="Ce que l’application n’est pas">
           <p>
-            Équilibre n’est pas un dispositif médical. Les plans qu’elle affiche sont des repères
+            Mamakilo n’est pas un dispositif médical. Les plans qu’elle affiche sont des repères
             calculés (formule de Mifflin-St Jeor, déficit de 20 %, plancher de 1 200 kcal), pas une
             prescription. Pour un suivi personnalisé, consultez un diététicien-nutritionniste.
           </p>
@@ -248,7 +248,7 @@ export function Confidentialite() {
               href={HEBERGEUR_SITE.site}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-iris underline underline-offset-2"
+              className="text-corail underline underline-offset-2"
             >
               {HEBERGEUR_SITE.site}
             </a>
@@ -259,7 +259,7 @@ export function Confidentialite() {
               href={HEBERGEUR_BASE.site}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-iris underline underline-offset-2"
+              className="text-corail underline underline-offset-2"
             >
               {HEBERGEUR_BASE.site}
             </a>

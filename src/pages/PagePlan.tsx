@@ -36,7 +36,7 @@ export function PagePlan() {
               <p className="font-semibold text-ink">{praticien.nom}</p>
               {praticien.role && <p className="text-sm text-ink-soft">{praticien.role}</p>}
             </div>
-            {etat.profil.planPrescrit && <Etiquette ton="iris">Prescrit</Etiquette>}
+            {etat.profil.planPrescrit && <Etiquette ton="corail">Prescrit</Etiquette>}
           </div>
 
           {(praticien.email || praticien.telephone) && (
@@ -45,7 +45,7 @@ export function PagePlan() {
                 <p>
                   <a
                     href={`mailto:${praticien.email}`}
-                    className="text-iris underline underline-offset-2"
+                    className="text-corail underline underline-offset-2"
                   >
                     {praticien.email}
                   </a>
@@ -55,7 +55,7 @@ export function PagePlan() {
                 <p>
                   <a
                     href={`tel:${praticien.telephone.replace(/\s/g, '')}`}
-                    className="text-iris underline underline-offset-2"
+                    className="text-corail underline underline-offset-2"
                   >
                     {praticien.telephone}
                   </a>
@@ -137,7 +137,7 @@ export function PagePlan() {
         <Carte className="divide-y divide-line">
           {CONSIGNES.map((consigne) => (
             <p key={consigne} className="flex items-start gap-3 px-5 py-3.5 text-sm text-ink">
-              <Info size={16} className="mt-0.5 shrink-0 text-iris" aria-hidden="true" />
+              <Info size={16} className="mt-0.5 shrink-0 text-corail" aria-hidden="true" />
               {consigne}
             </p>
           ))}

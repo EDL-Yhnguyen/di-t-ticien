@@ -7,7 +7,10 @@
  * navigateur, jamais dans le cache HTTP.
  */
 
-const VERSION = 'equilibre-v2'
+// Changer ce nom purge les caches précédents à l'activation : c'est ce qui
+// débarrasse les installations existantes de l'ancienne icône et de l'ancienne
+// coquille au moment du passage à Mamakilo.
+const VERSION = 'mamakilo-v1'
 const COQUILLE = `${VERSION}-coquille`
 const RESSOURCES = `${VERSION}-ressources`
 const POLICES = `${VERSION}-polices`

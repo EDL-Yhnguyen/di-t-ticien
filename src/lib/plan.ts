@@ -142,12 +142,12 @@ export const OPTIONS_HERBALIFE: { id: string; libelle: string; kcal: number }[] 
   { id: 'hbl-barre', libelle: 'Barre repas Formula 1', kcal: 250 },
 ]
 
-/** Chaque repas porte sa teinte : au réveil l'abricot, à midi le basilic, le soir l'iris. */
+/** Chaque repas porte sa teinte : au réveil l'abricot, à midi le basilic, le soir l'corail. */
 export const TEINTE_MOMENT: Record<Moment, { fond: string; texte: string; barre: string }> = {
   'petit-dejeuner': { fond: 'bg-apricot-wash', texte: 'text-apricot', barre: 'bg-apricot' },
   dejeuner: { fond: 'bg-basil-wash', texte: 'text-basil', barre: 'bg-basil' },
   collation: { fond: 'bg-berry-wash', texte: 'text-berry', barre: 'bg-berry' },
-  diner: { fond: 'bg-iris-wash', texte: 'text-iris', barre: 'bg-iris' },
+  diner: { fond: 'bg-corail-wash', texte: 'text-corail', barre: 'bg-corail' },
 }
 
 export const LIBELLE_CATEGORIE: Record<Categorie, string> = {

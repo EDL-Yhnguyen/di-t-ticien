@@ -40,7 +40,7 @@ const COULEUR: Partial<Record<Categorie, string>> = {
   legume: 'var(--assiette-legume)',
   feculent: 'var(--assiette-feculent)',
   proteine: 'var(--assiette-proteine)',
-  laitier: 'var(--iris)',
+  laitier: 'var(--corail)',
   fruit: 'var(--berry)',
   'matiere-grasse': 'var(--apricot)',
   boisson: 'var(--basil)',

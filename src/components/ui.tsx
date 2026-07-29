@@ -3,12 +3,56 @@ import { X } from 'lucide-react'
 import { useEffect, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode } from 'react'
 import { classes } from '../lib/utils'
 
+/* ──────────────────────────────── Marque ────────────────────────────────── */
+
+/**
+ * La marmite du logo. Elle reprend exactement les tracés de `public/icone.svg` :
+ * le sigle affiché dans l'application et l'icône installée sur l'écran d'accueil
+ * doivent être la même image, sinon l'application ouverte n'a plus l'air d'être
+ * celle qu'on a installée.
+ *
+ * Les couleurs sont écrites en dur plutôt que prises aux jetons : c'est un
+ * logo, il ne change pas avec le thème.
+ */
+export function Marque({ taille = 36 }: { taille?: number }) {
+  return (
+    <svg
+      width={taille}
+      height={taille}
+      viewBox="0 0 512 512"
+      aria-hidden="true"
+      className="shrink-0 rounded-xl"
+    >
+      <rect width="512" height="512" rx="112" fill="#FDF6EE" />
+      <path
+        d="M186 232 C150 232 132 206 142 180 C120 168 124 140 148 134 C150 110 180 100 196 118 C216 104 240 118 238 140 C256 152 254 182 232 188 C232 218 210 232 186 232 Z"
+        fill="#4C8A4C"
+      />
+      <circle cx="262" cy="186" r="46" fill="#E85C46" />
+      <path d="M356 132 C376 148 380 186 366 236 L322 226 C328 176 338 144 356 132 Z" fill="#F58A32" />
+      <g stroke="#F67A5E" strokeWidth="26" fill="none" strokeLinecap="round">
+        <path d="M126 288 C92 288 92 340 126 340" />
+        <path d="M386 288 C420 288 420 340 386 340" />
+      </g>
+      <path
+        d="M118 246 h276 v104 c0 42 -34 76 -76 76 h-124 c-42 0 -76 -34 -76 -76 Z"
+        fill="#F67A5E"
+      />
+      <g fill="none" stroke="#24303C" strokeWidth="18" strokeLinecap="round">
+        <path d="M196 306 q18 -20 36 0" />
+        <path d="M212 342 q44 44 88 0" />
+      </g>
+      <circle cx="298" cy="310" r="13" fill="#24303C" />
+    </svg>
+  )
+}
+
 /* ─────────────────────────────── Boutons ────────────────────────────────── */
 
 type Ton = 'primaire' | 'accent' | 'doux' | 'fantome' | 'alerte'
 
 const TON: Record<Ton, string> = {
-  primaire: 'bg-iris text-white hover:brightness-110 active:brightness-95',
+  primaire: 'bg-corail text-white hover:brightness-110 active:brightness-95',
   accent: 'bg-apricot text-white hover:brightness-110 active:brightness-95',
   doux: 'bg-surface text-ink border border-line hover:bg-sunken',
   fantome: 'text-ink-soft hover:bg-sunken hover:text-ink',
@@ -83,14 +127,14 @@ export function TitreSection({
 }
 
 export function Etiquette({
-  ton = 'iris',
+  ton = 'corail',
   children,
 }: {
-  ton?: 'iris' | 'apricot' | 'basil' | 'berry' | 'neutre'
+  ton?: 'corail' | 'apricot' | 'basil' | 'berry' | 'neutre'
   children: ReactNode
 }) {
   const styles = {
-    iris: 'bg-iris-wash text-iris',
+    corail: 'bg-corail-wash text-corail',
     apricot: 'bg-apricot-wash text-apricot',
     basil: 'bg-basil-wash text-basil',
     berry: 'bg-berry-wash text-berry',
@@ -134,7 +178,7 @@ export function Champ({
           className={classes(
             'w-full rounded-2xl border border-line bg-surface px-4 py-3',
             'text-ink placeholder:text-ink-faint',
-            'focus:border-iris focus:outline-none',
+            'focus:border-corail focus:outline-none',
             suffixe && 'pr-14',
             className,
           )}
@@ -174,7 +218,7 @@ export function ChoixListe<T extends string>({
               className={classes(
                 'flex cursor-pointer items-center gap-3 rounded-2xl border px-4 py-3 transition',
                 actif
-                  ? 'border-iris bg-iris-wash text-ink'
+                  ? 'border-corail bg-corail-wash text-ink'
                   : 'border-line bg-surface text-ink-soft hover:bg-sunken',
               )}
             >
@@ -188,10 +232,10 @@ export function ChoixListe<T extends string>({
               <span
                 className={classes(
                   'grid size-5 shrink-0 place-items-center rounded-full border-2',
-                  actif ? 'border-iris' : 'border-line',
+                  actif ? 'border-corail' : 'border-line',
                 )}
               >
-                {actif && <span className="size-2.5 rounded-full bg-iris" />}
+                {actif && <span className="size-2.5 rounded-full bg-corail" />}
               </span>
               <span className="text-sm font-medium">{option.libelle}</span>
             </label>
@@ -227,7 +271,7 @@ export function Bascule({
         onClick={() => onChange(!actif)}
         className={classes(
           'relative mt-0.5 h-7 w-12 shrink-0 rounded-full transition',
-          actif ? 'bg-iris' : 'bg-line',
+          actif ? 'bg-corail' : 'bg-line',
         )}
       >
         <motion.span
@@ -345,7 +389,7 @@ export function Chargement({ libelle = 'Chargement' }: { libelle?: string }) {
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1.1, repeat: Infinity, ease: 'linear' }}
-          className="mx-auto mb-4 size-9 rounded-full border-[3px] border-line border-t-iris"
+          className="mx-auto mb-4 size-9 rounded-full border-[3px] border-line border-t-corail"
         />
         <p className="text-sm text-ink-soft">{libelle}…</p>
       </div>

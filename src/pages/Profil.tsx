@@ -117,7 +117,7 @@ export function Profil() {
   return (
     <div className="space-y-6">
       <header className="flex items-center gap-4">
-        <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-iris-wash font-display text-2xl font-semibold text-iris">
+        <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-corail-wash font-display text-2xl font-semibold text-corail">
           {etat.profil.prenom.slice(0, 1).toUpperCase() || '?'}
         </span>
         <div className="min-w-0">
@@ -150,7 +150,7 @@ export function Profil() {
             vers="/app/plan"
             className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken"
           >
-            <NotebookText size={19} className="shrink-0 text-iris" aria-hidden="true" />
+            <NotebookText size={19} className="shrink-0 text-corail" aria-hidden="true" />
             <span className="flex-1 font-medium text-ink">Mon plan alimentaire</span>
             <ChevronRight size={17} className="shrink-0 text-ink-faint" aria-hidden="true" />
           </Lien>
@@ -298,7 +298,7 @@ export function Profil() {
             onClick={() => telechargerExport(etat)}
             className="flex w-full items-center gap-3 px-5 py-4 text-left transition hover:bg-sunken"
           >
-            <Download size={19} className="shrink-0 text-iris" aria-hidden="true" />
+            <Download size={19} className="shrink-0 text-corail" aria-hidden="true" />
             <span className="min-w-0 flex-1">
               <span className="block font-medium text-ink">Exporter mes données</span>
               <span className="block text-xs text-ink-soft">
@@ -399,7 +399,7 @@ export function Profil() {
             <button
               type="button"
               onClick={() => telechargerExport(etat)}
-              className="font-semibold text-iris underline underline-offset-2"
+              className="font-semibold text-corail underline underline-offset-2"
             >
               exporter vos données
             </button>

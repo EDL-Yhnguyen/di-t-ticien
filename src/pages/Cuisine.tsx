@@ -126,7 +126,7 @@ export function Cuisine() {
                     className={classes(
                       'rounded-full px-3.5 py-2 text-xs font-semibold transition',
                       actif
-                        ? 'bg-iris text-white'
+                        ? 'bg-corail text-white'
                         : 'bg-surface text-ink-soft hover:bg-sunken hover:text-ink',
                     )}
                   >
@@ -219,7 +219,7 @@ export function Cuisine() {
                               'my-4 mr-4 grid size-10 shrink-0 place-items-center rounded-full border-2 transition',
                               panier.includes(recette.id)
                                 ? 'border-basil bg-basil text-white'
-                                : 'border-line text-ink-faint hover:border-iris hover:text-iris',
+                                : 'border-line text-ink-faint hover:border-corail hover:text-corail',
                             )}
                           >
                             {panier.includes(recette.id) ? (
@@ -248,7 +248,7 @@ export function Cuisine() {
                     setFiltre(null)
                     setTags([])
                   }}
-                  className="text-sm font-semibold text-iris underline underline-offset-4"
+                  className="text-sm font-semibold text-corail underline underline-offset-4"
                 >
                   Voir toutes les recettes
                 </button>
@@ -289,7 +289,7 @@ function DetailRecette({ recette, bande }: { recette: Recette; bande: Bande }) {
           </Etiquette>
         ))}
         {recette.tags.map((t) => (
-          <Etiquette key={t} ton="iris">
+          <Etiquette key={t} ton="corail">
             {LIBELLE_TAG[t]}
           </Etiquette>
         ))}
@@ -323,7 +323,7 @@ function DetailRecette({ recette, bande }: { recette: Recette; bande: Bande }) {
         <ol className="space-y-3">
           {recette.etapes.map((etape, i) => (
             <li key={etape} className="flex gap-3 text-sm text-ink">
-              <span className="grid size-6 shrink-0 place-items-center rounded-full bg-iris-wash text-xs font-bold text-iris tnum">
+              <span className="grid size-6 shrink-0 place-items-center rounded-full bg-corail-wash text-xs font-bold text-corail tnum">
                 {i + 1}
               </span>
               <span className="pt-0.5">{etape}</span>

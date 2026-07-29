@@ -104,7 +104,7 @@ export function Poids() {
             <button
               type="button"
               onClick={() => setTableauOuvert(true)}
-              className="flex items-center gap-1.5 text-sm font-semibold text-iris"
+              className="flex items-center gap-1.5 text-sm font-semibold text-corail"
             >
               <Table2 size={16} aria-hidden="true" />
               Tableau

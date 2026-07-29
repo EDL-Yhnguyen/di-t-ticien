@@ -129,7 +129,7 @@ export function Ajouter() {
                   className={classes(
                     'flex w-full flex-col items-center gap-1.5 rounded-tile px-1 py-3 text-xs font-semibold transition',
                     actif
-                      ? 'bg-iris text-white'
+                      ? 'bg-corail text-white'
                       : 'bg-surface text-ink-soft hover:bg-sunken hover:text-ink',
                   )}
                 >
@@ -197,7 +197,7 @@ function ChoixMoment({ valeur, onChange }: { valeur: Moment; onChange: (m: Momen
               className={classes(
                 'cursor-pointer rounded-tile border px-2 py-2.5 text-center text-xs font-semibold transition',
                 actif
-                  ? 'border-iris bg-iris-wash text-iris'
+                  ? 'border-corail bg-corail-wash text-corail'
                   : 'border-line bg-surface text-ink-soft hover:bg-sunken',
               )}
             >
@@ -399,7 +399,7 @@ function OngletScan({
   if (etat === 'recherche') {
     return (
       <Carte className="grid place-items-center px-5 py-14 text-center">
-        <Loader2 size={26} className="animate-spin text-iris" aria-hidden="true" />
+        <Loader2 size={26} className="animate-spin text-corail" aria-hidden="true" />
         <p className="mt-4 text-sm text-ink-soft" role="status">
           Recherche du produit {dernierCode}…
         </p>
@@ -501,7 +501,7 @@ function OngletPhoto({
       />
 
       <Carte className="px-5 py-8 text-center">
-        <span className="mx-auto mb-3 grid size-12 place-items-center rounded-full bg-iris-wash text-iris">
+        <span className="mx-auto mb-3 grid size-12 place-items-center rounded-full bg-corail-wash text-corail">
           <Sparkles size={22} aria-hidden="true" />
         </span>
         <h3 className="text-base font-semibold text-ink">Photographiez votre assiette</h3>
@@ -578,7 +578,7 @@ function OngletPhoto({
                             null,
                         )
                       }}
-                      className="w-20 rounded-xl border border-line bg-surface px-2.5 py-1.5 text-right text-sm text-ink tnum focus:border-iris focus:outline-none"
+                      className="w-20 rounded-xl border border-line bg-surface px-2.5 py-1.5 text-right text-sm text-ink tnum focus:border-corail focus:outline-none"
                     />
                     <span className="text-sm text-ink-soft">g</span>
                   </label>
@@ -705,7 +705,7 @@ function OngletManuel({ onCreer }: { onCreer: (a: Aliment) => void }) {
       </fieldset>
 
       <p className="text-xs text-ink-soft">
-        Le Nutri-Score sera calculé par Équilibre à partir de ces valeurs, et signalé comme estimé —
+        Le Nutri-Score sera calculé par Mamakilo à partir de ces valeurs, et signalé comme estimé —
         il ne vient pas du fabricant.
       </p>
 
@@ -767,7 +767,7 @@ function FeuilleDosage({
 
       {aliment.nutriScoreEstime && (
         <p className="mt-3 rounded-tile bg-sunken px-3 py-2 text-xs text-ink-soft">
-          Nutri-Score estimé par Équilibre d’après les valeurs nutritionnelles. Le fabricant n’a
+          Nutri-Score estimé par Mamakilo d’après les valeurs nutritionnelles. Le fabricant n’a
           pas déclaré de note officielle pour ce produit.
         </p>
       )}
@@ -793,7 +793,7 @@ function FeuilleDosage({
               className={classes(
                 'rounded-full px-3 py-1.5 text-xs font-semibold transition',
                 quantite === grammes
-                  ? 'bg-iris text-white'
+                  ? 'bg-corail text-white'
                   : 'bg-sunken text-ink-soft hover:text-ink',
               )}
             >

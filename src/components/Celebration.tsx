@@ -2,7 +2,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useApp } from '../context/AppContext'
 import { Bouton } from './ui'
 
-const COULEURS = ['var(--iris)', 'var(--apricot)', 'var(--basil)', 'var(--berry)']
+const COULEURS = ['var(--corail)', 'var(--apricot)', 'var(--basil)', 'var(--berry)']
 
 /** Trajectoires figées à la définition : un tirage aléatoire par rendu ferait sauter les confettis. */
 const CONFETTIS = Array.from({ length: 26 }, (_, i) => ({

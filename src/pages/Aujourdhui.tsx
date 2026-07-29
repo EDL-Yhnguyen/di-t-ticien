@@ -132,7 +132,7 @@ export function Aujourdhui() {
             action={
               <Lien
                 vers="/app/ajouter"
-                className="flex items-center gap-1 text-sm font-semibold text-iris"
+                className="flex items-center gap-1 text-sm font-semibold text-corail"
               >
                 <Plus size={16} aria-hidden="true" />
                 Ajouter
@@ -228,8 +228,8 @@ export function Aujourdhui() {
 
       {/* ── Recommandation ── */}
       <Carte className="animate-rise overflow-hidden" style={{ animationDelay: '300ms' }}>
-        <div className="bg-iris-wash px-5 py-4">
-          <p className="text-xs font-bold tracking-[0.14em] text-iris uppercase">
+        <div className="bg-corail-wash px-5 py-4">
+          <p className="text-xs font-bold tracking-[0.14em] text-corail uppercase">
             Pour le {LIBELLE_MOMENT[conseil.moment].toLowerCase()}
           </p>
           <h2 className="mt-1 font-display text-xl font-semibold text-ink">{conseil.titre}</h2>
@@ -275,7 +275,7 @@ export function Aujourdhui() {
       <Carte className="animate-rise p-5" style={{ animationDelay: '360ms' }}>
         <div className="mb-3 flex items-center justify-between gap-4">
           <h2 className="flex items-center gap-2 text-base font-semibold text-ink">
-            <Droplets size={18} className="text-iris" aria-hidden="true" />
+            <Droplets size={18} className="text-corail" aria-hidden="true" />
             Hydratation
           </h2>
           <span className="text-sm font-semibold text-ink-soft tnum">
@@ -294,7 +294,7 @@ export function Aujourdhui() {
                 onClick={() => reglerEau(rempli && i === eau.verres - 1 ? i : i + 1)}
                 className={classes(
                   'h-11 flex-1 rounded-xl border-2 transition',
-                  rempli ? 'border-iris bg-iris' : 'border-line bg-sunken hover:border-iris/40',
+                  rempli ? 'border-corail bg-corail' : 'border-line bg-sunken hover:border-corail/40',
                 )}
               />
             )

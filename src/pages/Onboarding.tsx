@@ -70,7 +70,7 @@ export function Onboarding() {
                   initial={false}
                   animate={{ scaleX: i <= etape ? 1 : 0 }}
                   transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                  className="h-full origin-left rounded-full bg-iris"
+                  className="h-full origin-left rounded-full bg-corail"
                 />
               </div>
             ))}
@@ -260,8 +260,8 @@ function Recapitulatif({
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-tile bg-iris-wash p-4">
-          <p className="font-display text-2xl font-semibold text-iris tnum">{entier(cible)}</p>
+        <div className="rounded-tile bg-corail-wash p-4">
+          <p className="font-display text-2xl font-semibold text-corail tnum">{entier(cible)}</p>
           <p className="mt-0.5 text-xs font-semibold text-ink-soft">kcal par jour</p>
         </div>
         <div className="rounded-tile bg-basil-wash p-4">

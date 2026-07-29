@@ -1,15 +1,50 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Équilibre">
-  <rect width="512" height="512" rx="112" fill="#2B1A3D" />
-  <circle cx="256" cy="256" r="168" fill="#F6F2F9" />
-  <circle cx="256" cy="256" r="140" fill="#EFE9F5" />
-  <!-- Les trois parts de l'assiette : un quart protéines, un quart féculents,
-       une moitié légumes. Mêmes couleurs validées que dans l'application. -->
-  <path d="M256 256 L256 130 A126 126 0 0 1 382 256 Z" fill="#6535BF" />
-  <path d="M256 256 L382 256 A126 126 0 0 1 256 382 Z" fill="#C97B14" />
-  <path d="M256 256 L256 382 A126 126 0 1 1 256 130 Z" fill="#1A6E3E" />
-  <g stroke="#EFE9F5" stroke-width="9" stroke-linecap="round">
-    <line x1="256" y1="256" x2="256" y2="130" />
-    <line x1="256" y1="256" x2="382" y2="256" />
-    <line x1="256" y1="256" x2="256" y2="382" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Mamakilo">
+  <!-- La marmite du logo, redessinée en formes pleines : à 32 px dans un onglet,
+       le détail du lettrage et les petits pois disparaissent de toute façon.
+       Tout tient dans le cercle central de 410 px, la zone sûre d'une icône
+       « maskable » que les lanceurs Android rognent en cercle. -->
+  <rect width="512" height="512" rx="112" fill="#FDF6EE" />
+
+  <!-- Légumes qui dépassent, posés avant la marmite pour passer derrière le bord -->
+  <g>
+    <!-- Feuille de salade -->
+    <path
+      d="M186 232 C150 232 132 206 142 180 C120 168 124 140 148 134 C150 110 180 100 196 118 C216 104 240 118 238 140 C256 152 254 182 232 188 C232 218 210 232 186 232 Z"
+      fill="#4C8A4C"
+    />
+    <!-- Tomate -->
+    <circle cx="262" cy="186" r="46" fill="#E85C46" />
+    <path
+      d="M262 146 l-24 -14 l10 22 l-26 -4 l18 18 Z"
+      fill="#4C8A4C"
+    />
+    <!-- Carotte -->
+    <path
+      d="M356 132 C376 148 380 186 366 236 L322 226 C328 176 338 144 356 132 Z"
+      fill="#F58A32"
+    />
+    <g stroke="#4C8A4C" stroke-width="15" stroke-linecap="round" fill="none">
+      <path d="M356 132 L344 96" />
+      <path d="M356 132 L378 104" />
+    </g>
   </g>
+
+  <!-- Anses -->
+  <g stroke="#F67A5E" stroke-width="26" fill="none" stroke-linecap="round">
+    <path d="M126 288 C92 288 92 340 126 340" />
+    <path d="M386 288 C420 288 420 340 386 340" />
+  </g>
+
+  <!-- Corps de la marmite -->
+  <path
+    d="M118 246 h276 v104 c0 42 -34 76 -76 76 h-124 c-42 0 -76 -34 -76 -76 Z"
+    fill="#F67A5E"
+  />
+
+  <!-- Visage : un œil ouvert, un œil qui cligne, comme sur le logo -->
+  <g fill="none" stroke="#24303C" stroke-width="18" stroke-linecap="round">
+    <path d="M196 306 q18 -20 36 0" />
+    <path d="M212 342 q44 44 88 0" />
+  </g>
+  <circle cx="298" cy="310" r="13" fill="#24303C" />
 </svg>

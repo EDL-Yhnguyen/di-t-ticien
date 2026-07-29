@@ -80,8 +80,8 @@ export function CourbePoids({
       >
         <defs>
           <linearGradient id="sousCourbe" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--iris)" stopOpacity="0.22" />
-            <stop offset="100%" stopColor="var(--iris)" stopOpacity="0" />
+            <stop offset="0%" stopColor="var(--corail)" stopOpacity="0.22" />
+            <stop offset="100%" stopColor="var(--corail)" stopOpacity="0" />
           </linearGradient>
         </defs>
 
@@ -132,7 +132,7 @@ export function CourbePoids({
         <path
           d={trace.join(' ')}
           fill="none"
-          stroke="var(--iris)"
+          stroke="var(--corail)"
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -144,8 +144,8 @@ export function CourbePoids({
             cx={vue.x(i)}
             cy={vue.y(p.poidsKg)}
             r={i === actif ? 5.5 : 4}
-            fill={i === actif ? 'var(--iris)' : 'var(--surface)'}
-            stroke="var(--iris)"
+            fill={i === actif ? 'var(--corail)' : 'var(--surface)'}
+            stroke="var(--corail)"
             strokeWidth="2.5"
           />
         ))}

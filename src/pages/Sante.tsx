@@ -50,7 +50,7 @@ export function Sante() {
       if (nouvelles.length === 0) {
         setPhase('erreur')
         setMessage(
-          `${entier(lus)} enregistrements lus, mais aucun poids, pas ni dépense énergétique. Ces trois mesures sont les seules qu’Équilibre utilise.`,
+          `${entier(lus)} enregistrements lus, mais aucun poids, pas ni dépense énergétique. Ces trois mesures sont les seules qu’Mamakilo utilise.`,
         )
         return
       }
@@ -85,7 +85,7 @@ export function Sante() {
         <h2 className="text-sm font-bold text-ink">Ce n’est pas une synchronisation</h2>
         <p className="mt-1.5 text-sm text-ink-soft">
           Aucun navigateur ne peut lire l’app Santé directement — c’est une limite d’iOS, pas
-          d’Équilibre. Vous exportez vos données, vous les déposez ici, et vous recommencez quand
+          d’Mamakilo. Vous exportez vos données, vous les déposez ici, et vous recommencez quand
           vous voulez les rafraîchir. Rien ne remonte tout seul.
         </p>
       </Carte>
@@ -100,7 +100,7 @@ export function Sante() {
               'Revenez ici et choisissez le fichier export.xml qu’il contient.',
             ].map((etape, i) => (
               <li key={etape} className="flex gap-3">
-                <span className="grid size-6 shrink-0 place-items-center rounded-full bg-iris text-xs font-bold text-white tnum">
+                <span className="grid size-6 shrink-0 place-items-center rounded-full bg-corail text-xs font-bold text-white tnum">
                   {i + 1}
                 </span>
                 <span className="text-sm text-ink-soft">{etape}</span>
@@ -149,7 +149,7 @@ export function Sante() {
               className="mt-3 h-1.5 overflow-hidden rounded-full bg-sunken"
             >
               <span
-                className="block h-full rounded-full bg-iris transition-[width]"
+                className="block h-full rounded-full bg-corail transition-[width]"
                 style={{ width: `${progression * 100}%` }}
               />
             </div>
@@ -195,7 +195,7 @@ export function Sante() {
                 },
               ].map(({ Icone, valeur, libelle }) => (
                 <Carte key={libelle} className="px-3 py-4 text-center">
-                  <Icone size={18} className="mx-auto text-iris" aria-hidden="true" />
+                  <Icone size={18} className="mx-auto text-corail" aria-hidden="true" />
                   <p className="mt-2 font-display text-xl font-semibold text-ink tnum">{valeur}</p>
                   <p className="mt-0.5 text-xs text-ink-soft">{libelle}</p>
                 </Carte>

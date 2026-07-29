@@ -134,7 +134,7 @@ export function valeurNutri(note: NutriScore | undefined): number {
 }
 
 /**
- * Indice Équilibre — notre équivalent des points d'un programme minceur.
+ * Indice Mamakilo — notre équivalent des points d'un programme minceur.
  *
  * Weight Watchers ne publie ni ses recettes ni sa formule, et les deux sont
  * protégées. Celle-ci est la nôtre : elle pénalise l'énergie, les sucres et

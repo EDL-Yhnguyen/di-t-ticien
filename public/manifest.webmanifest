@@ -1,15 +1,15 @@
 {
-  "name": "Équilibre — suivi diététique",
-  "short_name": "Équilibre",
-  "description": "Votre plan alimentaire, votre poids et vos envies, jour après jour.",
+  "name": "Mamakilo — suivi diététique",
+  "short_name": "Mamakilo",
+  "description": "Bien manger, vivre mieux. Votre journal alimentaire, votre poids et vos envies, jour après jour.",
   "lang": "fr-FR",
   "dir": "ltr",
   "start_url": "/app",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#F6F2F9",
-  "theme_color": "#F6F2F9",
+  "background_color": "#FDF6EE",
+  "theme_color": "#FDF6EE",
   "categories": ["health", "lifestyle", "food"],
   "icons": [
     {

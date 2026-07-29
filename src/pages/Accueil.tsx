@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Gamepad2, LineChart, NotebookText, ShieldHalf } from 'lucide-react'
 import { Assiette, type PartAssiette } from '../components/Assiette'
-import { Bouton } from '../components/ui'
+import { Bouton, Marque } from '../components/ui'
 import { Lien } from '../lib/router'
 
 /**
@@ -69,12 +69,10 @@ export function Accueil() {
     <div className="min-h-svh bg-ground">
       <header className="mx-auto flex max-w-5xl items-center justify-between px-5 py-5">
         <span className="flex items-center gap-2.5">
-          <span className="grid size-9 place-items-center rounded-xl bg-iris text-lg text-white">
-            🍽
-          </span>
-          <span className="font-display text-xl font-semibold text-ink">Équilibre</span>
+          <Marque taille={36} />
+          <span className="font-display text-xl font-semibold text-ink">Mamakilo</span>
         </span>
-        <Lien vers="/connexion" className="font-semibold text-iris">
+        <Lien vers="/connexion" className="font-semibold text-corail">
           Se connecter
         </Lien>
       </header>
@@ -83,7 +81,7 @@ export function Accueil() {
         <section className="mx-auto grid max-w-5xl items-center gap-10 px-5 pt-8 pb-20 md:grid-cols-2 md:gap-14 md:pt-16">
           <div className="order-2 md:order-1">
             <p className="mb-4 text-sm font-bold tracking-[0.16em] text-apricot uppercase">
-              Suivi diététique
+              Bien manger, vivre mieux
             </p>
             <h1 className="font-display text-[2.6rem] leading-[1.05] font-semibold text-ink sm:text-6xl">
               Votre assiette,
@@ -143,7 +141,7 @@ export function Accueil() {
           <ul className="grid gap-8 sm:grid-cols-2">
             {ATOUTS.map(({ Icone, titre, texte }) => (
               <li key={titre}>
-                <span className="mb-4 grid size-11 place-items-center rounded-2xl bg-iris-wash text-iris">
+                <span className="mb-4 grid size-11 place-items-center rounded-2xl bg-corail-wash text-corail">
                   <Icone size={21} aria-hidden="true" />
                 </span>
                 <h3 className="mb-2 text-lg font-semibold text-ink">{titre}</h3>
@@ -171,7 +169,7 @@ export function Accueil() {
 
       <footer className="mx-auto max-w-5xl px-5 py-10 text-center">
         <p className="text-sm text-ink-faint">
-          Équilibre n’est pas un dispositif médical et ne remplace pas une consultation. Pour un
+          Mamakilo n’est pas un dispositif médical et ne remplace pas une consultation. Pour un
           suivi personnalisé, consultez un diététicien-nutritionniste.
         </p>
         <Lien

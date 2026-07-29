@@ -56,7 +56,7 @@ export function PastilleNutri({
 
   return (
     <span
-      aria-label={`Nutri-Score ${note} — ${LIBELLE_NUTRI[note]}${estime ? ', estimé par Équilibre' : ''}`}
+      aria-label={`Nutri-Score ${note} — ${LIBELLE_NUTRI[note]}${estime ? ', estimé par Mamakilo' : ''}`}
       className={classes(
         'relative grid shrink-0 place-items-center rounded-lg font-display font-bold',
         TEINTE[note],
@@ -147,7 +147,7 @@ export function JaugeEnergie({
               style={{ width: `${part}%` }}
               className={classes(
                 'block h-full rounded-full transition-[width] duration-500',
-                enTrop ? 'bg-berry' : surBandeau ? 'bg-white' : 'bg-iris',
+                enTrop ? 'bg-berry' : surBandeau ? 'bg-white' : 'bg-corail',
               )}
             />
           )

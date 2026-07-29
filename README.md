@@ -1,8 +1,15 @@
-# Équilibre
+# Mamakilo
+
+> *Bien manger, vivre mieux.*
 
 Site web et application mobile de suivi diététique. Une seule base de code : le
 site **est** l'application — installable sur iPhone et Android depuis le
 navigateur, sans passer par l'App Store.
+
+L'application s'est d'abord appelée **Équilibre**. Le nom a changé le
+29 juillet 2026 ; les clés de stockage du navigateur et le domaine des pseudos
+(`@equilibre.local`) portent encore l'ancien, volontairement — les renommer
+déconnecterait les comptes existants.
 
 L'écran principal est une assiette, pas un compteur de calories. C'est le langage
 de l'ordonnance dont part le projet : une diététicienne ne prescrit pas des
@@ -117,6 +124,11 @@ Une icône apparaît sur l'écran d'accueil et l'application s'ouvre en plein
   dépendances transitives pour une mise en cache qui tient en 80 lignes.
 - **`npm audit` doit rester à zéro vulnérabilité.** C'était le critère de choix
   des dépendances.
+- **La palette vient du logo, mais aucune de ses couleurs n'est reprise telle
+  quelle.** Le corail de la marmite (`#f67a5e`) ne tient que 2,4:1 sur blanc : il
+  reste réservé à l'illustration, et `--corail` en est la version portante,
+  assombrie jusqu'à 4,5:1 dans tous ses usages réels. Les 23 paires de jetons ont
+  été vérifiées au calcul avant d'être retenues.
 - **Les couleurs de l'assiette sont validées, pas choisies à l'œil.** Les trois
   parts se touchent, donc chaque paire doit rester distinguable en vision
   daltonienne. Le réflexe naturel — vert et orange voisins — tombait à ΔE 5,1 en
@@ -125,7 +137,7 @@ Une icône apparaît sur l'écran d'accueil et l'application s'ouvre en plein
 
 ## Avertissement
 
-Équilibre n'est pas un dispositif médical. Les plans générés pour les nouveaux
+Mamakilo n'est pas un dispositif médical. Les plans générés pour les nouveaux
 comptes sont des repères calculés (Mifflin-St Jeor, déficit de 20 %, plancher à
 1 200 kcal), pas une prescription. Le plan d'Élodie, lui, est reproduit tel quel
 depuis l'ordonnance de sa diététicienne et n'est jamais recalculé par

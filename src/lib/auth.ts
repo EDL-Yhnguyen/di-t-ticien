@@ -8,6 +8,14 @@ export interface Utilisateur {
 
 /** Le compte pré-chargé d'Élodie. Voir `profilInitial` dans store.ts. */
 export const IDENTIFIANT_ELODIE = 'ELO'
+/**
+ * `equilibre` reste dans ces trois valeurs après le passage à Mamakilo, et ce
+ * n'est pas un oubli : le domaine est celui sous lequel les comptes existants
+ * sont enregistrés dans Supabase, et les deux clés désignent des entrées déjà
+ * écrites dans le navigateur des utilisateurs. Les renommer déconnecterait tout
+ * le monde et rendrait les pseudos historiques impossibles à identifier. Rien
+ * de tout cela n'est visible.
+ */
 const EMAIL_ELODIE = 'elo@equilibre.local'
 
 const CLE_COMPTES = 'equilibre:comptes'

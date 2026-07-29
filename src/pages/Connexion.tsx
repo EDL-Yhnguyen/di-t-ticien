@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { AlertCircle, X } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { Bouton, Champ } from '../components/ui'
+import { Bouton, Champ, Marque } from '../components/ui'
 import { Lien } from '../lib/router'
 import { modeDemo } from '../lib/supabase'
 
@@ -52,10 +52,8 @@ export function Connexion({ mode }: { mode: 'connexion' | 'inscription' }) {
         )}
 
         <Lien vers="/" className="mb-8 flex items-center justify-center gap-2.5">
-          <span className="grid size-10 place-items-center rounded-xl bg-iris text-lg text-white">
-            🍽
-          </span>
-          <span className="font-display text-2xl font-semibold text-ink">Équilibre</span>
+          <Marque taille={40} />
+          <span className="font-display text-2xl font-semibold text-ink">Mamakilo</span>
         </Lien>
 
         <div className="rounded-card border border-line bg-surface p-6 shadow-soft sm:p-7">
@@ -122,7 +120,7 @@ export function Connexion({ mode }: { mode: 'connexion' | 'inscription' }) {
             {inscription ? 'Vous avez déjà un compte ?' : 'Pas encore de compte ?'}{' '}
             <Lien
               vers={inscription ? '/connexion' : '/inscription'}
-              className="font-semibold text-iris underline underline-offset-2"
+              className="font-semibold text-corail underline underline-offset-2"
             >
               {inscription ? 'Se connecter' : 'En créer un'}
             </Lien>

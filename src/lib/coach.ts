@@ -19,9 +19,9 @@ import { jourISO } from './utils'
 
 export type Verdict = 'leger' | 'juste' | 'copieux' | 'vide'
 
-export const TON_VERDICT: Record<Verdict, { libelle: string; ton: 'basil' | 'iris' | 'apricot' | 'neutre' }> = {
+export const TON_VERDICT: Record<Verdict, { libelle: string; ton: 'basil' | 'corail' | 'apricot' | 'neutre' }> = {
   leger: { libelle: 'Léger', ton: 'basil' },
-  juste: { libelle: 'Dans la cible', ton: 'iris' },
+  juste: { libelle: 'Dans la cible', ton: 'corail' },
   copieux: { libelle: 'Copieux', ton: 'apricot' },
   vide: { libelle: 'Rien de noté', ton: 'neutre' },
 }

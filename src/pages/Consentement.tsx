@@ -68,13 +68,13 @@ export function Consentement() {
           <p className="mt-2 text-sm leading-relaxed text-ink-soft">
             {renouvellement
               ? 'La politique de confidentialité a évolué. Relisez-la et confirmez votre accord pour continuer.'
-              : 'Équilibre enregistre ce que vous mangez et ce que vous pesez. Ce sont des données de santé, et elles ne se traitent pas sans votre accord.'}
+              : 'Mamakilo enregistre ce que vous mangez et ce que vous pesez. Ce sont des données de santé, et elles ne se traitent pas sans votre accord.'}
           </p>
 
           <ul className="mt-6 space-y-4">
             {POINTS.map(({ Icone, texte }) => (
               <li key={texte} className="flex items-start gap-3">
-                <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-xl bg-iris-wash text-iris">
+                <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-xl bg-corail-wash text-corail">
                   <Icone size={16} aria-hidden="true" />
                 </span>
                 <p className="text-sm leading-relaxed text-ink-soft">{texte}</p>
@@ -88,7 +88,7 @@ export function Consentement() {
               : 'Vos données sont enregistrées sur votre compte, dans une base où vous seul pouvez les lire.'}{' '}
             <Lien
               vers="/confidentialite"
-              className="font-semibold text-iris underline underline-offset-2"
+              className="font-semibold text-corail underline underline-offset-2"
             >
               Lire la politique complète
             </Lien>

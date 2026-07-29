@@ -1,4 +1,4 @@
-# CLAUDE.md — Mémoire projet « Équilibre »
+# CLAUDE.md — Mémoire projet « Mamakilo »
 
 Ce fichier est la mémoire permanente du projet. Le lire **avant** toute
 modification. Le mettre à jour **après** chaque évolution importante
@@ -8,9 +8,19 @@ modification. Le mettre à jour **après** chaque évolution importante
 
 ## Ce qu'est le projet
 
-**Équilibre** — application web installable (PWA) de suivi diététique et coach
-nutrition. Une seule base de code : le site *est* l'application, installable
-sur iPhone et Android depuis le navigateur, sans App Store.
+**Mamakilo** — *bien manger, vivre mieux* — application web installable (PWA)
+de suivi diététique et coach nutrition. Une seule base de code : le site *est*
+l'application, installable sur iPhone et Android depuis le navigateur, sans
+App Store.
+
+Le produit s'appelait **Équilibre** jusqu'au 29 juillet 2026. Le nom
+`equilibre` survit dans trois endroits, et **ce n'est pas un oubli** : les clés
+`localStorage` (`equilibre:theme`, `equilibre:donnees:<id>`,
+`equilibre:comptes`, `equilibre:session`), le domaine des pseudos
+`@equilibre.local` sous lequel les comptes existants sont enregistrés dans
+Supabase, et le préfixe `equilibre-export-v1` des fichiers d'export déjà
+téléchargés. Les renommer déconnecterait tout le monde. Rien de tout cela n'est
+visible par l'utilisateur.
 
 Le produit tient sur un **journal alimentaire réel** : l'utilisateur note ce
 qu'il mange (recherche, code-barres, photo, saisie), et tout le reste —
@@ -27,7 +37,7 @@ Julie Bertolotto) a servi de cas d'école pour construire le socle ; il reste
 comme jeu de données d'exemple et comme mode « plan prescrit », mais il ne
 définit pas le produit.
 
-> **Avertissement produit, à ne jamais retirer :** Équilibre n'est pas un
+> **Avertissement produit, à ne jamais retirer :** Mamakilo n'est pas un
 > dispositif médical. Les plans générés sont des repères calculés
 > (Mifflin-St Jeor, déficit 20 %, plancher 1 200 kcal), pas une prescription.
 
@@ -209,10 +219,11 @@ Aucune migration SQL n'est nécessaire : tout est dans une colonne `jsonb`.
 Réutiliser ces composants plutôt que de restyler du JSX brut :
 
 ```ts
+Marque({ taille? })                              // le logo, mêmes tracés que public/icone.svg
 Bouton({ ton?: 'primaire'|'accent'|'doux'|'fantome'|'alerte', pleineLargeur? })
 Carte(props: HTMLAttributes<HTMLDivElement>)
 TitreSection({ eyebrow?, children, action? })
-Etiquette({ ton?: 'iris'|'apricot'|'basil'|'berry'|'neutre' })
+Etiquette({ ton?: 'corail'|'apricot'|'basil'|'berry'|'neutre' })
 Champ({ label, aide?, suffixe?, ...inputProps })
 ChoixListe<T extends string>({ label, valeur, options, onChange })
 Bascule({ label, aide?, actif, onChange })
@@ -229,9 +240,21 @@ Mode sombre = classe `.dark` sur `<html>`. Chaque jeton est redéfini dans
 `:root`, `.dark` **et** `@theme inline` — les trois, sinon la couleur casse
 dans un des deux thèmes.
 
+La palette est tirée du logo Mamakilo (`Modèles/logo Mamakilo.jpg`) : marmite
+corail, fond crème, encre marine du lettrage, vert des feuilles. **Aucune
+couleur du logo n'est reprise telle quelle** — le corail `#f67a5e` ne tient que
+2,4:1 sur blanc, donc ni texte ni bouton. Il reste à l'illustration ; `--corail`
+en est la version portante, assombrie jusqu'à 4,5:1 dans chacun de ses usages.
+Les deux se ressemblent assez pour que la marque reste une seule couleur à
+l'œil.
+
 - Neutres : `ground`, `surface`, `sunken`, `ink`, `ink-soft`, `ink-faint`, `line`
-- Teintes + lavis : `iris`/`iris-wash` (primaire), `apricot`/`apricot-wash`
+- Teintes + lavis : `corail`/`corail-wash` (primaire), `apricot`/`apricot-wash`
   (accent, calories), `basil`/`basil-wash` (réussite), `berry`/`berry-wash` (alerte)
+- **Toute teinte modifiée se revérifie au calcul de contraste**, sur les quatre
+  fonds où elle peut atterrir : `surface`, `ground`, `sunken` et son propre lavis.
+  Le fond crème est moins clair que le blanc — une valeur qui passe sur `surface`
+  peut échouer sur `ground`, ce qui est arrivé au premier jet.
 - **Réservés, ne pas emprunter** : `assiette-legume`, `assiette-feculent`,
   `assiette-proteine`. Palette catégorielle validée en vision daltonienne
   (ΔE ≥ 8 en protanopie) — les trois parts se touchent, donc chaque paire doit
@@ -495,6 +518,44 @@ Vérification manuelle attendue :
 ---
 
 ## Historique du projet
+
+### 29 juillet 2026 — Équilibre devient Mamakilo
+
+Changement de nom décidé par Yann, à partir d'un logo qu'il avait fait faire :
+une marmite souriante d'où dépassent des légumes, sur fond crème, baseline
+« bien manger, vivre mieux ».
+
+- **Nom** partout où il est visible : titre, manifeste PWA, en-têtes, textes
+  d'interface, mentions légales, README, `package.json`. Les clés internes ne
+  bougent pas — voir « Ce qu'est le projet ».
+- **Marque** : `Marque` dans `ui.tsx` reprend exactement les tracés de
+  `public/icone.svg`, et remplace l'emoji 🍽 qui servait de sigle sur les trois
+  en-têtes. Le sigle affiché et l'icône installée doivent être la même image.
+- **Icônes** régénérées (192, 512, 180) au Chromium sans tête, à fond perdu :
+  iOS et Android appliquent leur propre masque, des coins déjà arrondis y
+  feraient un liseré.
+- **`VERSION` du service worker** passée à `mamakilo-v1`. C'est ce qui purge
+  l'ancienne coquille et l'ancienne icône chez les installations existantes —
+  sans ça le rebranding ne serait pas visible sur un téléphone déjà équipé.
+- **Palette** basculée du violet/lilas au corail/crème/marine du logo.
+  `--iris` renommé `--corail` dans les 85 lignes qui l'utilisaient : garder le
+  nom d'une fleur violette pour une couleur corail aurait menti au lecteur
+  suivant. `apricot`, `basil` et `berry` gardent leur nom, qui décrit toujours
+  leur teinte.
+
+**Non touché, délibérément :** les jetons `--assiette-*`, `--macro-*`,
+`--nutri-*` et `--bande-*`. Ce sont des couleurs de données, dont la contrainte
+est la séparation entre voisines ou la reconnaissance d'une échelle officielle,
+pas l'accord avec une marque. Le quart violet de l'assiette sur la page
+d'accueil détonne un peu depuis le changement — c'est le prix de la validation
+daltonienne, et le regagner demanderait de repasser au script.
+
+**Vérifié à l'écran** avant livraison, au pilote Playwright : parcours
+inscription → consentement → onboarding → aujourd'hui → ajouter → cuisine →
+poids → profil → confidentialité, en 390 px et 1280 px, thèmes clair et sombre,
+aucune erreur console. 23 paires de contraste vérifiées au calcul, toutes au-
+dessus du seuil ; quatre valeurs ont dû être assombries après un premier jet
+qui échouait sur le fond crème.
 
 ### 28 juillet 2026 — Socle
 

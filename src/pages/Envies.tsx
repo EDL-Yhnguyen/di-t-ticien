@@ -190,7 +190,7 @@ export function Envies() {
                 className={classes(
                   'w-full rounded-2xl border px-3 py-3 text-sm font-medium transition',
                   declencheur === item
-                    ? 'border-iris bg-iris-wash text-iris'
+                    ? 'border-corail bg-corail-wash text-corail'
                     : 'border-line bg-surface text-ink-soft hover:bg-sunken',
                 )}
               >
@@ -327,7 +327,7 @@ function LigneEnvie({ envie }: { envie: EnvieEntree }) {
   const etiquette = {
     resistee: { ton: 'basil' as const, texte: 'Passée' },
     cedee: { ton: 'neutre' as const, texte: 'Grignoté' },
-    'collation-prevue': { ton: 'iris' as const, texte: 'Collation' },
+    'collation-prevue': { ton: 'corail' as const, texte: 'Collation' },
   }[envie.issue]
 
   const heure = new Date(envie.horodatage).toLocaleTimeString('fr-FR', {

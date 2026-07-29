@@ -152,7 +152,7 @@ export function Scanner({
 
       {repli && (
         <p className="mt-3 text-xs text-ink-soft">
-          Votre navigateur n’a pas de lecteur intégré : Équilibre en charge un au premier scan
+          Votre navigateur n’a pas de lecteur intégré : Mamakilo en charge un au premier scan
           (environ 500 Ko), puis le garde hors connexion.
         </p>
       )}

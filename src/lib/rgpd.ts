@@ -28,7 +28,7 @@ export function consentementDuJour(): Consentement {
 /* ─────────────────────────── Portabilité (art. 20) ──────────────────────── */
 
 const LISEZ_MOI =
-  'Export de vos données Équilibre. Tout ce que l’application conserve à votre ' +
+  'Export de vos données Mamakilo. Tout ce que l’application conserve à votre ' +
   'sujet est dans ce fichier, dans la forme exacte où elle le stocke. Il se lit ' +
   'dans n’importe quel éditeur de texte et se recharge dans n’importe quel outil ' +
   'acceptant du JSON.'

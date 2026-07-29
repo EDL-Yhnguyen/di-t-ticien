@@ -40,7 +40,7 @@ export function NouveauMotDePasse() {
   return (
     <div className="grid min-h-svh place-items-center bg-ground px-5 py-10">
       <div className="w-full max-w-sm rounded-card border border-line bg-surface p-6 shadow-soft sm:p-7">
-        <span className="mb-5 grid size-12 place-items-center rounded-2xl bg-iris-wash text-iris">
+        <span className="mb-5 grid size-12 place-items-center rounded-2xl bg-corail-wash text-corail">
           <KeyRound size={22} aria-hidden="true" />
         </span>
 

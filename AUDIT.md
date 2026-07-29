@@ -1,5 +1,9 @@
 # Audit technique — Équilibre / di-t-ticien
 
+> Ce document garde le nom du produit au jour de l'audit. L'application
+> s'appelle **Mamakilo** depuis le 29 juillet 2026 ; réécrire un constat daté
+> lui ferait dire autre chose que ce qui a été observé.
+
 **Date :** 28 juillet 2026
 **Périmètre :** `EDL-Yhnguyen/di-t-ticien`, commit `8776238`
 **Méthode :** lecture du code source, du schéma SQL, de la configuration de

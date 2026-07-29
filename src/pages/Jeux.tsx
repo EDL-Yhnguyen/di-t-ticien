@@ -185,7 +185,7 @@ function Memo() {
               carte.trouvee
                 ? 'bg-basil-wash'
                 : carte.retournee
-                  ? 'bg-iris-wash'
+                  ? 'bg-corail-wash'
                   : 'bg-sunken hover:bg-line',
             )}
           >
@@ -376,7 +376,7 @@ function Quiz() {
             className={classes(
               'flex-1 rounded-2xl border-2 py-4 font-semibold transition',
               reponse === null
-                ? 'border-line bg-surface text-ink hover:border-iris'
+                ? 'border-line bg-surface text-ink hover:border-corail'
                 : valeur === question.reponse
                   ? 'border-basil bg-basil-wash text-basil'
                   : reponse === valeur
@@ -448,7 +448,7 @@ function Souffle() {
         <motion.div
           animate={{ scale: enCours ? PHASES[phase].echelle : 0.8 }}
           transition={{ duration: enCours ? PHASES[phase].duree : 0.6, ease: 'easeInOut' }}
-          className="absolute size-52 rounded-full bg-iris-wash"
+          className="absolute size-52 rounded-full bg-corail-wash"
         />
         <div className="relative">
           <p className="font-display text-2xl font-semibold text-ink">

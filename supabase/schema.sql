@@ -1,4 +1,4 @@
--- Schéma d'Équilibre.
+-- Schéma d'Mamakilo.
 --
 -- À exécuter une fois, dans le SQL Editor de votre projet Supabase.
 --

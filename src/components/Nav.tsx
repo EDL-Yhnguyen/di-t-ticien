@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { useApp } from '../context/AppContext'
 import { Lien, useRoutage } from '../lib/router'
 import { classes } from '../lib/utils'
+import { Marque } from './ui'
 
 /**
  * Noter un aliment est devenu le geste principal de l'application : il occupe
@@ -46,7 +47,7 @@ export function BarreOnglets() {
                   <span
                     className={classes(
                       'grid size-11 place-items-center rounded-2xl text-white shadow-soft transition',
-                      actif ? 'bg-iris brightness-110' : 'bg-iris hover:brightness-110',
+                      actif ? 'bg-corail brightness-110' : 'bg-corail hover:brightness-110',
                     )}
                   >
                     <Icone size={23} strokeWidth={2.6} aria-hidden="true" />
@@ -54,7 +55,7 @@ export function BarreOnglets() {
                   <span
                     className={classes(
                       'text-[0.6875rem] font-semibold',
-                      actif ? 'text-iris' : 'text-ink-faint',
+                      actif ? 'text-corail' : 'text-ink-faint',
                     )}
                   >
                     {libelle}
@@ -70,14 +71,14 @@ export function BarreOnglets() {
                 vers={vers}
                 className={classes(
                   'relative flex flex-col items-center gap-1 px-1 pt-2.5 pb-1.5 transition',
-                  actif ? 'text-iris' : 'text-ink-faint',
+                  actif ? 'text-corail' : 'text-ink-faint',
                 )}
               >
                 {actif && (
                   <motion.span
                     layoutId="onglet-actif"
                     transition={{ type: 'spring', stiffness: 420, damping: 34 }}
-                    className="absolute inset-x-3 top-0 h-0.5 rounded-full bg-iris"
+                    className="absolute inset-x-3 top-0 h-0.5 rounded-full bg-corail"
                   />
                 )}
                 <Icone size={21} strokeWidth={actif ? 2.4 : 1.9} aria-hidden="true" />
@@ -101,10 +102,8 @@ export function RailLateral() {
       className="fixed top-0 left-0 z-40 hidden h-svh w-60 flex-col border-r border-line bg-surface px-4 py-7 md:flex"
     >
       <Lien vers="/app" className="mb-8 flex items-center gap-2.5 px-2">
-        <span className="grid size-9 place-items-center rounded-xl bg-iris text-lg text-white">
-          🍽
-        </span>
-        <span className="font-display text-xl font-semibold text-ink">Équilibre</span>
+        <Marque taille={36} />
+        <span className="font-display text-xl font-semibold text-ink">Mamakilo</span>
       </Lien>
 
       <ul className="space-y-1">
@@ -120,9 +119,9 @@ export function RailLateral() {
                   className={classes(
                     'flex items-center gap-3 rounded-2xl px-3 py-2.5 font-semibold transition',
                     ajout
-                      ? 'bg-iris text-white hover:brightness-110'
+                      ? 'bg-corail text-white hover:brightness-110'
                       : actif
-                        ? 'bg-iris-wash text-iris'
+                        ? 'bg-corail-wash text-corail'
                         : 'text-ink-soft hover:bg-sunken hover:text-ink',
                   )}
                 >
