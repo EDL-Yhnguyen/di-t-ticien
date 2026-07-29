@@ -1,7 +1,8 @@
-import { useEffect } from 'react'
+import { Suspense, lazy, useEffect } from 'react'
 import { useApp } from './context/AppContext'
 import { useRoutage } from './lib/router'
 import { Cadre } from './components/Nav'
+import { BarriereErreur } from './components/BarriereErreur'
 import { Bouton, Carte, Chargement } from './components/ui'
 import { Celebration } from './components/Celebration'
 import { Accueil } from './pages/Accueil'
@@ -11,20 +12,58 @@ import { Consentement } from './pages/Consentement'
 import { Onboarding } from './pages/Onboarding'
 import { NouveauMotDePasse } from './pages/NouveauMotDePasse'
 import { Aujourdhui } from './pages/Aujourdhui'
-import { Ajouter } from './pages/Ajouter'
-import { Sante } from './pages/Sante'
-import { PagePlan } from './pages/PagePlan'
-import { Poids } from './pages/Poids'
-import { Envies } from './pages/Envies'
-import { Cuisine } from './pages/Cuisine'
-import { Coach } from './pages/Coach'
-import { Menus } from './pages/Menus'
-import { Stats } from './pages/Stats'
-import { Sport } from './pages/Sport'
-import { Jeux } from './pages/Jeux'
-import { Badges } from './pages/Badges'
-import { Profil } from './pages/Profil'
 import { consentementAJour } from './lib/rgpd'
+
+/**
+ * Les écrans secondaires sont chargés à la demande.
+ *
+ * Tout partait auparavant dans un seul fichier de 831 Ko : le catalogue de
+ * recettes, le lecteur de l'export Apple Santé, les jeux et les statistiques
+ * étaient téléchargés par quelqu'un qui voulait seulement noter son petit
+ * déjeuner. Sur un forfait mobile, c'est de l'attente pure.
+ *
+ * Restent chargés d'emblée les écrans du premier contact — accueil, connexion,
+ * consentement, onboarding — et `Aujourdhui`, qui est la destination par
+ * défaut : la découper ferait clignoter l'écran le plus visité de tous.
+ */
+const Ajouter = lazy(() => import('./pages/Ajouter').then((m) => ({ default: m.Ajouter })))
+const Sante = lazy(() => import('./pages/Sante').then((m) => ({ default: m.Sante })))
+const PagePlan = lazy(() => import('./pages/PagePlan').then((m) => ({ default: m.PagePlan })))
+const Poids = lazy(() => import('./pages/Poids').then((m) => ({ default: m.Poids })))
+const Envies = lazy(() => import('./pages/Envies').then((m) => ({ default: m.Envies })))
+const Cuisine = lazy(() => import('./pages/Cuisine').then((m) => ({ default: m.Cuisine })))
+const Coach = lazy(() => import('./pages/Coach').then((m) => ({ default: m.Coach })))
+const Menus = lazy(() => import('./pages/Menus').then((m) => ({ default: m.Menus })))
+const Stats = lazy(() => import('./pages/Stats').then((m) => ({ default: m.Stats })))
+const Sport = lazy(() => import('./pages/Sport').then((m) => ({ default: m.Sport })))
+const Jeux = lazy(() => import('./pages/Jeux').then((m) => ({ default: m.Jeux })))
+const Badges = lazy(() => import('./pages/Badges').then((m) => ({ default: m.Badges })))
+const Profil = lazy(() => import('./pages/Profil').then((m) => ({ default: m.Profil })))
+
+/**
+ * Les écrans à précharger dès que le navigateur n'a plus rien à faire.
+ *
+ * Découper le code a un revers : un écran jamais ouvert n'est pas dans le
+ * cache du service worker, donc il devient inaccessible hors connexion. Les
+ * charger pendant un temps mort rend l'application de nouveau utilisable en
+ * entier hors ligne, et instantanée à la navigation — sans rien coûter au
+ * premier affichage, qui est le moment où l'attente se voit.
+ */
+const ECRANS_A_PRECHARGER = [
+  () => import('./pages/Ajouter'),
+  () => import('./pages/Cuisine'),
+  () => import('./pages/Profil'),
+  () => import('./pages/Menus'),
+  () => import('./pages/Stats'),
+  () => import('./pages/Poids'),
+  () => import('./pages/Sport'),
+  () => import('./pages/Envies'),
+  () => import('./pages/Coach'),
+  () => import('./pages/Jeux'),
+  () => import('./pages/Badges'),
+  () => import('./pages/PagePlan'),
+  () => import('./pages/Sante'),
+]
 
 export function App() {
   const { utilisateur, etat, chargement, erreurChargement, reessayerChargement } = useApp()
@@ -39,6 +78,31 @@ export function App() {
     if (!connecte && chemin.startsWith('/app')) aller('/connexion', { remplacer: true })
     if (connecte && publique) aller('/app', { remplacer: true })
   }, [chargement, connecte, chemin, publique, aller])
+
+  // Le préchargement attend que l'application soit ouverte et utilisable :
+  // rien ne doit disputer la bande passante au premier écran.
+  useEffect(() => {
+    if (!connecte) return
+    let annule = false
+
+    const precharger = () => {
+      if (annule) return
+      for (const ecran of ECRANS_A_PRECHARGER) void ecran().catch(() => {})
+    }
+
+    // Safari n'a `requestIdleCallback` que depuis peu : un délai fait l'affaire
+    // là où il manque, l'idée étant seulement de ne pas gêner l'ouverture.
+    const inactif = typeof window.requestIdleCallback === 'function'
+    const jeton = inactif
+      ? window.requestIdleCallback(precharger, { timeout: 5000 })
+      : window.setTimeout(precharger, 2500)
+
+    return () => {
+      annule = true
+      if (inactif) window.cancelIdleCallback(jeton)
+      else window.clearTimeout(jeton)
+    }
+  }, [connecte])
 
   if (chargement) return <Chargement libelle="Ouverture" />
 
@@ -67,9 +131,32 @@ export function App() {
 
   return (
     <>
-      <Cadre>{ecranPour(chemin)}</Cadre>
+      <Cadre>
+        {/* La barrière est remontée à chaque changement de route : sans cette
+            clé, un écran cassé le resterait même après avoir navigué ailleurs
+            et être revenu. La navigation, elle, est hors barrière — c'est ce
+            qui permet de quitter un écran en panne. */}
+        <BarriereErreur key={chemin}>
+          <Suspense fallback={<AttenteEcran />}>{ecranPour(chemin)}</Suspense>
+        </BarriereErreur>
+      </Cadre>
       <Celebration />
     </>
+  )
+}
+
+/**
+ * L'attente d'un écran chargé à la demande.
+ *
+ * Volontairement discrète et sans texte : sur une connexion correcte elle dure
+ * quelques dizaines de millisecondes, et annoncer « chargement » pour ça
+ * donnerait l'impression d'une application plus lente qu'elle ne l'est.
+ */
+function AttenteEcran() {
+  return (
+    <div className="grid min-h-[50svh] place-items-center" role="status" aria-label="Chargement de l’écran">
+      <span className="size-8 animate-spin rounded-full border-[3px] border-line border-t-corail" />
+    </div>
   )
 }
 

@@ -85,6 +85,18 @@ sous `/api`, jamais dans `src/`.
 - **Repli automatique en mode démo** quand les clés `.env` sont absentes :
   comptes et données restent dans le navigateur. Les deux modes partagent
   exactement le même code applicatif.
+- **Écrans chargés à la demande, puis préchargés en temps mort.** `App.tsx`
+  déclare chaque écran secondaire en `lazy()` ; `Aujourdhui` et tout le premier
+  contact (accueil, connexion, consentement, onboarding) restent chargés
+  d'emblée. Le découpage seul rendrait un écran jamais ouvert inaccessible hors
+  connexion — d'où le préchargement en `requestIdleCallback` juste après
+  l'ouverture, qui restaure l'usage hors ligne complet sans peser sur le premier
+  affichage. **Ajouter un écran, c'est l'ajouter aux deux endroits**, sinon il
+  se charge à la demande mais jamais d'avance.
+- **Une barrière d'erreur autour de l'écran affiché** (`BarriereErreur`), remontée
+  à chaque changement de route, plus une seconde autour de toute la coquille
+  dans `main.tsx`. Sans elles, une exception laissait une page blanche sans
+  issue — indistinguable d'une panne définitive sur une PWA installée.
 
 ### Structure des fichiers
 
@@ -190,11 +202,13 @@ l'écran de consentement doit pouvoir ouvrir alors qu'il bloque tout le reste.
   la classe `.tnum`.
 - **Accessibilité** : `aria-label` sur les boutons-icônes, `aria-pressed` sur
   les bascules, `role="tab"` + `aria-selected` sur les onglets.
-- **Attention au `prefers-reduced-motion`** : le bloc d'`index.css:225-234`
-  neutralise les animations **CSS**, pas celles de framer-motion. `useReducedMotion`
-  n'est appelé que dans `Assiette.tsx` et `Celebration.tsx` ; `ui.tsx`, `Nav.tsx`,
-  `Accueil.tsx`, `Onboarding.tsx` et `Envies.tsx` animent sans le respecter.
-  Le correctif global est un `<MotionConfig reducedMotion="user">` dans `main.tsx`.
+- **`prefers-reduced-motion` est respecté partout depuis le 29/07/2026.** Le
+  bloc d'`index.css` ne neutralise que les animations **CSS** ; le
+  `<MotionConfig reducedMotion="user">` de `main.tsx` couvre celles de
+  framer-motion, sans avoir à y penser dans chaque composant. Ne pas le retirer,
+  et ne pas contourner `MotionConfig` avec des animations impératives : ce n'est
+  pas une préférence esthétique mais un réglage médical, pour les personnes
+  sujettes au mal des transports ou aux migraines vestibulaires.
 
 ### Écrire dans l'état — un seul chemin
 
@@ -642,6 +656,45 @@ Vérification manuelle attendue :
 ---
 
 ## Historique du projet
+
+### 29 juillet 2026 — Poids du chargement, robustesse, mouvement réduit
+
+Trois faiblesses invisibles à l'usage courant, mais réelles.
+
+- **831 Ko de JavaScript en un seul fichier.** Le catalogue de recettes, le
+  lecteur de l'export Apple Santé, les jeux et les statistiques étaient
+  téléchargés par quelqu'un qui voulait seulement noter son petit déjeuner.
+  Les écrans secondaires passent en `lazy()` : le premier affichage tombe de
+  228 à 193 Ko compressés, le reste arrive à la demande.
+- **Le découpage crée une régression hors ligne** — un écran jamais ouvert n'est
+  pas dans le cache du service worker. D'où le préchargement en
+  `requestIdleCallback` une fois l'application ouverte : l'usage hors connexion
+  redevient complet, et la navigation instantanée. Vérifié : 24 fichiers
+  d'écran rapatriés sans aucune navigation.
+- **Aucune barrière d'erreur.** Une exception dans un écran laissait une page
+  blanche sans issue — sur une PWA installée, sans console, c'est
+  indistinguable d'une panne définitive. `BarriereErreur` protège désormais
+  l'écran affiché (remontée à chaque route, la navigation restant hors barrière
+  pour pouvoir quitter un écran cassé) et toute la coquille dans `main.tsx`.
+  Elle reconnaît le cas particulier du fichier d'écran injoignable et le dit
+  autrement : ce n'est pas un bogue, c'est un manque de réseau.
+- **`prefers-reduced-motion` enfin respecté** par framer-motion, via un
+  `<MotionConfig reducedMotion="user">`. Le manque était documenté dans ce
+  fichier depuis l'audit sans avoir jamais été corrigé.
+
+**Vérifié au pilote Playwright sur le build de production** (et non sur le
+serveur de développement, seul moyen de tester le vrai découpage) : les
+quatorze écrans s'affichent sans erreur console, le préchargement rapatrie les
+écrans sans navigation, un fichier d'écran coupé avant sa première ouverture
+tombe sur le bon message avec la navigation toujours utilisable, et
+l'application reste intacte en mouvement réduit.
+
+**À savoir pour tester** : `npm run build` lit le `.env` du projet, donc le
+build sert les vraies clés Supabase et l'inscription exige une adresse réelle.
+Pour un parcours automatisé, compiler à part —
+`VITE_SUPABASE_URL="" VITE_SUPABASE_ANON_KEY="" npx vite build --outDir dist-demo`
+— puis `vite preview --outDir dist-demo`. Penser à supprimer `dist-demo` :
+`.gitignore` ne couvre que `dist`.
 
 ### 29 juillet 2026 — Statistiques, boucle menus → journal, catalogue étoffé
 
