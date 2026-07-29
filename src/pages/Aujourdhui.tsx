@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import {
   ChevronRight,
   Droplets,
+  Dumbbell,
   Flame,
   Plus,
   ShieldHalf,
@@ -31,6 +32,7 @@ import type { BilanRepas } from '../lib/journal'
 import { objectifCalorique } from '../lib/nutrition'
 import { VERRES_PAR_JOUR } from '../lib/plan'
 import { Lien } from '../lib/router'
+import { bonusSportDuJour, seancesDuJour } from '../lib/sport'
 import { eauDuJour, poidsLePlusRecent } from '../lib/store'
 import type { EntreeJournal } from '../lib/types'
 import { LIBELLE_MOMENT } from '../lib/types'
@@ -41,13 +43,20 @@ export function Aujourdhui() {
   const date = jourISO()
   const [choisie, setChoisie] = useState<EntreeJournal | null>(null)
 
-  const objectif = objectifCalorique({
+  const objectifBase = objectifCalorique({
     poidsKg: poidsLePlusRecent(etat),
     tailleCm: etat.profil.tailleCm,
     age: etat.profil.age,
     sexe: etat.profil.sexe,
     activite: etat.profil.activite,
   })
+
+  // Le sport du jour agrandit le budget mangeable, et pas seulement l'affichage :
+  // tout ce qui raisonne sur l'objectif (jauge, analyse par repas, macros,
+  // recommandation) doit voir le même chiffre, sinon les conseils du jour
+  // contrediraient le nombre affiché en haut de l'écran.
+  const bonusSport = bonusSportDuJour(etat.seances, date)
+  const objectif = objectifBase + bonusSport
 
   const bilans = useMemo(() => bilanParRepas(etat.journal, date), [etat.journal, date])
   const resume = useMemo(
@@ -61,6 +70,7 @@ export function Aujourdhui() {
   )
 
   const entrees = bilans.flatMap((b) => b.entrees)
+  const seances = useMemo(() => seancesDuJour(etat.seances, date), [etat.seances, date])
   const jours = serieDeJours(etat.journal)
   const eau = eauDuJour(etat, date)
   const reste = objectif - resume.kcal
@@ -117,6 +127,14 @@ export function Aujourdhui() {
             </span>
           </p>
           <p className="mt-1.5 text-sm text-white/75">{resume.phrase}</p>
+          {bonusSport > 0 && (
+            <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-white/85">
+              <Dumbbell size={15} aria-hidden="true" />
+              <span className="tnum">
+                {entier(objectifBase)} kcal + {entier(bonusSport)} gagnées en bougeant
+              </span>
+            </p>
+          )}
 
           <div className="mt-4">
             <JaugeEnergie bilans={bilans} objectifKcal={objectif} surBandeau />
@@ -303,7 +321,46 @@ export function Aujourdhui() {
         <p className="mt-2.5 text-sm text-ink-soft">Thé, tisane et café comptent.</p>
       </Carte>
 
-      <Lien vers="/app/envies" className="animate-rise block" style={{ animationDelay: '420ms' }}>
+      {/* ── Activité ── */}
+      <Carte className="animate-rise p-5" style={{ animationDelay: '420ms' }}>
+        <div className="mb-3 flex items-center justify-between gap-4">
+          <h2 className="flex items-center gap-2 text-base font-semibold text-ink">
+            <Dumbbell size={18} className="text-corail" aria-hidden="true" />
+            Activité
+          </h2>
+          {seances.length > 0 && (
+            <span className="text-sm font-semibold text-basil tnum">
+              +{entier(bonusSport)} kcal
+            </span>
+          )}
+        </div>
+
+        {seances.length === 0 ? (
+          <p className="text-sm text-ink-soft">
+            Rien de noté aujourd’hui. Une séance agrandit le budget du jour de ce qu’elle dépense.
+          </p>
+        ) : (
+          <ul className="mb-3 space-y-1.5">
+            {seances.map((seance) => (
+              <li key={seance.id} className="flex items-baseline justify-between gap-3 text-sm">
+                <span className="min-w-0 truncate text-ink">{seance.libelle}</span>
+                <span className="shrink-0 text-ink-soft tnum">
+                  {seance.minutes} min · {entier(seance.kcal)} kcal
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <Lien vers="/app/sport" className="mt-3 block">
+          <Bouton ton="doux" pleineLargeur>
+            <Plus size={17} aria-hidden="true" />
+            Enregistrer une séance
+          </Bouton>
+        </Lien>
+      </Carte>
+
+      <Lien vers="/app/envies" className="animate-rise block" style={{ animationDelay: '480ms' }}>
         <Bouton ton="alerte" pleineLargeur className="py-4 text-base">
           <ShieldHalf size={19} aria-hidden="true" />
           J’ai une envie de grignoter

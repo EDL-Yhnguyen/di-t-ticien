@@ -11,8 +11,10 @@ import type {
   JournalRepas,
   MesureSante,
   PeseeEntree,
+  PlanSemaine,
   Profil,
   ScoreJeu,
+  SeanceSport,
 } from './types'
 
 /**
@@ -36,6 +38,10 @@ export interface EtatUtilisateur {
   alimentsPerso: Aliment[]
   /** Mesures importées depuis l'app Santé d'Apple. */
   mesuresSante: MesureSante[]
+  /** Séances de sport saisies à la main. */
+  seances: SeanceSport[]
+  /** La semaine de menus en cours. `null` tant qu'aucune n'a été générée. */
+  menus: PlanSemaine | null
   eau: JournalEau[]
   envies: EnvieEntree[]
   scores: ScoreJeu[]
@@ -79,6 +85,8 @@ export function etatInitial(u: Utilisateur): EtatUtilisateur {
     journal: [],
     alimentsPerso: [],
     mesuresSante: [],
+    seances: [],
+    menus: null,
     eau: [],
     envies: [],
     scores: [],
@@ -162,6 +170,8 @@ function fusionner(u: Utilisateur, partiel: Partial<EtatUtilisateur>): EtatUtili
     journal: partiel.journal ?? [],
     alimentsPerso: partiel.alimentsPerso ?? [],
     mesuresSante: partiel.mesuresSante ?? [],
+    seances: partiel.seances ?? [],
+    menus: partiel.menus ?? null,
     eau: partiel.eau ?? [],
     envies: partiel.envies ?? [],
     scores: partiel.scores ?? [],
@@ -217,6 +227,8 @@ export type {
   JournalRepas,
   MesureSante,
   PeseeEntree,
+  PlanSemaine,
   Profil,
   ScoreJeu,
+  SeanceSport,
 }

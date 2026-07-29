@@ -203,3 +203,81 @@ export interface MesureSante {
   depenseKcal?: number
   poidsKg?: number
 }
+
+/* ───────────────────────── Activité physique ───────────────────────── */
+
+export type FamilleActivite = 'cardio' | 'renforcement' | 'plein-air' | 'collectif' | 'douceur'
+
+export const LIBELLE_FAMILLE_ACTIVITE: Record<FamilleActivite, string> = {
+  cardio: 'Cardio',
+  renforcement: 'Renforcement',
+  'plein-air': 'Plein air',
+  collectif: 'Sports collectifs et raquette',
+  douceur: 'En douceur',
+}
+
+/**
+ * Une activité du catalogue et son coût en MET.
+ *
+ * Le MET (*metabolic equivalent of task*) est le rapport entre la dépense de
+ * l'activité et la dépense au repos. Les valeurs viennent du Compendium of
+ * Physical Activities, la référence publique du domaine — ce sont des moyennes
+ * de population, pas une mesure de la personne.
+ */
+export interface TypeActivite {
+  id: string
+  libelle: string
+  met: number
+  famille: FamilleActivite
+}
+
+/**
+ * L'intensité ressentie, faute de cardiofréquencemètre.
+ *
+ * C'est la seule correction que l'utilisateur peut apporter à la moyenne du
+ * catalogue : « j'ai couru en trottinant » et « j'ai fini à bout de souffle »
+ * ne coûtent pas la même chose pour une même durée.
+ */
+export type Intensite = 'douce' | 'moderee' | 'intense'
+
+export const INTENSITES: Intensite[] = ['douce', 'moderee', 'intense']
+
+export const LIBELLE_INTENSITE: Record<Intensite, string> = {
+  douce: 'Tranquille — je pouvais tenir une conversation',
+  moderee: 'Modérée — un peu essoufflé·e',
+  intense: 'Intense — difficile de parler',
+}
+
+export interface SeanceSport {
+  id: string
+  date: string
+  activiteId: string
+  /**
+   * Le libellé est recopié à l'enregistrement plutôt que relu dans le
+   * catalogue : une séance déjà notée ne doit pas changer de nom si le
+   * catalogue évolue.
+   */
+  libelle: string
+  minutes: number
+  intensite: Intensite
+  /**
+   * Estimation figée à la saisie. Elle dépend du poids du jour, qui bougera :
+   * la recalculer plus tard réécrirait l'histoire.
+   */
+  kcal: number
+}
+
+/* ───────────────────────── Planificateur de menus ───────────────────────── */
+
+/** Un jour de la semaine planifiée. `null` = rien de prévu à ce repas. */
+export interface JourMenu {
+  date: string
+  repas: Record<Moment, string | null>
+}
+
+export interface PlanSemaine {
+  /** Le lundi de la semaine couverte, en ISO. */
+  debut: string
+  jours: JourMenu[]
+  genereLe: string
+}

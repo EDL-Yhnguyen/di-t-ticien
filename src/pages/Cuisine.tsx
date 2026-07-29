@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Check, Clock, Refrigerator, ShoppingBasket } from 'lucide-react'
+import { CalendarDays, Check, ChevronRight, Clock, Refrigerator, ShoppingBasket } from 'lucide-react'
 import { useSession } from '../context/AppContext'
 import { EtiquetteBande } from '../components/nutrition'
 import { Carte, EtatVide, Etiquette, Feuille, TitreSection } from '../components/ui'
@@ -19,6 +19,7 @@ import { LIBELLE_BANDE, bandePour } from '../lib/nutriscore'
 import type { Bande } from '../lib/nutriscore'
 import { objectifCalorique } from '../lib/nutrition'
 import { LIBELLE_CATEGORIE, TEINTE_MOMENT } from '../lib/plan'
+import { Lien } from '../lib/router'
 import { poidsLePlusRecent } from '../lib/store'
 import { LIBELLE_MOMENT, MOMENTS } from '../lib/types'
 import { classes } from '../lib/utils'
@@ -84,6 +85,22 @@ export function Cuisine() {
           Des recettes construites sur votre plan, et la liste qui va avec.
         </p>
       </header>
+
+      {/* Choisir plat par plat est le geste de celui qui sait déjà quoi manger.
+          Pour les autres, la semaine composée d'avance est la vraie réponse —
+          d'où ce raccourci en tête, avant les filtres. */}
+      <Lien vers="/app/menus">
+        <Carte className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken">
+          <CalendarDays size={20} className="shrink-0 text-corail" aria-hidden="true" />
+          <span className="min-w-0 flex-1">
+            <span className="block font-semibold text-ink">Composer ma semaine</span>
+            <span className="block text-sm text-ink-soft">
+              Sept jours de menus et la liste de courses qui suit
+            </span>
+          </span>
+          <ChevronRight size={18} className="shrink-0 text-ink-faint" aria-hidden="true" />
+        </Carte>
+      </Lien>
 
       <div className="flex gap-1 rounded-full bg-sunken p-1" role="tablist">
         {(

@@ -123,6 +123,8 @@ src/
     photo.ts            préparation de l'image + appel de /api
     coach.ts            analyses, recommandations, alternatives (règles)
     appleSante.ts       lecture par tranches de l'export.xml d'Apple Santé
+    sport.ts            catalogue MET, dépense d'une séance, bilan de semaine
+    menu.ts             génération d'une semaine de menus, liste de courses
   components/
     Mosaique.tsx        treemap « squarified » : aire = kcal, couleur = Nutri
     nutrition.tsx       PastilleNutri, JaugeEnergie, BarreMacro, bandes
@@ -151,6 +153,8 @@ api/
 | `/app/poids` | `Poids.tsx` | pesées, tendance, date d'arrivée estimée |
 | `/app/envies` | `Envies.tsx` | anti-grignotage, minuteur, journal |
 | `/app/cuisine` | `Cuisine.tsx` | recettes + liste de courses |
+| `/app/menus` | `Menus.tsx` | semaine de menus, remplacement, courses |
+| `/app/sport` | `Sport.tsx` | séances, dépense estimée, repère de l'OMS |
 | `/app/plan` | `PagePlan.tsx` | le plan alimentaire détaillé |
 | `/app/badges` | `Badges.tsx` | badges débloqués |
 | `/app/jeux` | `Jeux.tsx` | mémo, quiz, respiration |
@@ -313,6 +317,13 @@ chose.
   quantité avant l'ajout au journal. Sans `ANTHROPIC_API_KEY`, la fonction
   répond 503 avec `configurable: true` et l'onglet renvoie vers la saisie
   manuelle — l'application reste entièrement utilisable.
+- **La dépense d'une séance est une estimation, jamais une mesure.** Elle part
+  d'un MET moyen de population et du poids connu ; l'écran le dit. Elle est
+  comptée **nette** (MET − 1), le métabolisme de repos étant déjà dans
+  l'objectif calorique — l'ajouter en brut le compterait deux fois. Même raison
+  pour l'énergie active importée d'Apple Santé, affichée sur `/app/sport` mais
+  **jamais ajoutée au budget** : elle couvre la journée entière, séances
+  comprises.
 - **Weight Watchers est propriétaire.** L'« indice Équilibre » est notre
   formule, sur données publiques. Ne pas aspirer leur catalogue.
 - **`BarcodeDetector` n'existe pas sur Safari.** D'où le repli zxing-wasm.
@@ -540,6 +551,49 @@ Vérification manuelle attendue :
 ---
 
 ## Historique du projet
+
+### 29 juillet 2026 — Menus de la semaine et activité physique
+
+Le sprint 4, et la fin du dernier trou fonctionnel du socle : l'application ne
+savait rien du sport, ni type, ni écran, ni stockage.
+
+- **`/app/sport`** : catalogue de 26 activités rangées par famille, durée,
+  intensité ressentie, dépense estimée. Barres de la semaine, série de jours
+  consécutifs, part du repère de l'OMS (150 min). Le détail des conventions de
+  calcul est dans « Les limites, à ne pas maquiller dans l'interface ».
+- **Le sport agrandit le budget du jour**, intégralement, comme le fait
+  MyFitnessPal. `Aujourdhui.tsx` ajoute le bonus à l'objectif **avant** de
+  calculer quoi que ce soit : la jauge, les analyses par repas et la
+  recommandation doivent voir le même chiffre que celui affiché en haut, sinon
+  les conseils contrediraient le nombre.
+- **`/app/menus`** : sept jours composés depuis le catalogue, en visant la
+  cible calorique de chaque repas, avec report borné à 200 kcal d'un repas sur
+  le suivant. Hors-saison pénalisé plutôt qu'exclu — à trente recettes,
+  exclure laisserait des créneaux vides, et une grille trouée est pire qu'une
+  soupe de courge en avril. Chaque repas se remplace à la main ; la liste de
+  courses suit.
+- **La liste de courses additionne enfin.** La juxtaposition d'origine
+  (« on note les deux quantités plutôt que d'inventer une addition entre
+  1 CàS et ½ ») restait juste, mais sur 28 repas elle donnait
+  « 1 + ¼ + 1 + ½ + ½ + ½ », illisible au rayon. `listeDeCourses` cumule
+  désormais les termes d'unité comparable, où qu'ils soient dans la ligne, et
+  juxtapose le reste. Les noms sont rapprochés au pluriel près, mot à mot :
+  « Carotte » et « Carottes » faisaient deux lignes à cocher. Ce qui n'est pas
+  comparable le reste : « 50 g cru » et « 60 g crues » ne s'additionnent pas,
+  l'écart de forme cache un écart d'état.
+
+**Les deux écrans sont hors onglets**, atteignables depuis « Raccourcis » du
+profil, depuis Aujourd'hui pour le sport et depuis Cuisine pour les menus. La
+barre est déjà pleine à cinq entrées ; une sixième sortait de l'écran en
+390 px, défaut déjà corrigé une fois.
+
+**Vérifié à l'écran** avant livraison, au pilote Playwright : inscription →
+consentement → onboarding → séance de sport → report du bonus sur Aujourd'hui →
+génération d'une semaine → remplacement d'un repas → liste de courses →
+cuisine → profil, en 390 px et 1280 px, thèmes clair et sombre, aucune erreur
+console. Un défaut corrigé à ce moment-là : changer de famille d'activité ne
+déplaçait pas la sélection, si bien qu'aucun bouton n'apparaissait actif et que
+l'activité enregistrée restait celle de la famille précédente.
 
 ### 29 juillet 2026 — Déblocage du déploiement Vercel
 
