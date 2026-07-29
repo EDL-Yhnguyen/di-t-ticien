@@ -421,9 +421,12 @@ C'est le minimum qui justifie une table. Tout le reste reste dans le document.
 | **5** | `/api/coach` — assistant conversationnel en streaming, avec profil et historique en contexte | Premier module nécessitant le backend |
 | **6** | Scanner photo et code-barres | |
 | **7** | Statistiques, notifications, finitions design | |
-| **8** | Stripe, niveaux FREE / PREMIUM / COACH, limitations | Monétisation |
+| ~~**8**~~ | ~~Stripe, niveaux FREE / PREMIUM / COACH, limitations~~ | **Abandonné** (Yann, 29/07/2026) |
+
+**Le sprint 8 est abandonné.** L'application reste en diffusion familiale et
+aucune monétisation n'est prévue. C'est ce qui rend durable le régime
+« éditeur non professionnel » des mentions légales — voir `CLAUDE.md`.
 
 **Ordre imposé par les dépendances :** le sprint 1 débloque tout le reste
 (sans comptes fiables, rien n'est testable en conditions réelles). Le sprint 5
-ne peut pas précéder la mise en place de `/api`. Le sprint 8 suppose le
-sprint 5 livré, sinon il n'y a rien à vendre.
+ne peut pas précéder la mise en place de `/api`.

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { CalendarDays, Check, ChevronRight, Clock, Refrigerator, ShoppingBasket } from 'lucide-react'
 import { useSession } from '../context/AppContext'
+import { AuJournal } from '../components/AuJournal'
 import { EtiquetteBande } from '../components/nutrition'
 import { Carte, EtatVide, Etiquette, Feuille, TitreSection } from '../components/ui'
 import {
@@ -15,6 +16,7 @@ import {
   type Tag,
 } from '../lib/recettes'
 import { cibleDuRepas } from '../lib/journal'
+import { entreeDeLaRecette } from '../lib/journalRecette'
 import { LIBELLE_BANDE, bandePour } from '../lib/nutriscore'
 import type { Bande } from '../lib/nutriscore'
 import { objectifCalorique } from '../lib/nutrition'
@@ -22,7 +24,7 @@ import { LIBELLE_CATEGORIE, TEINTE_MOMENT } from '../lib/plan'
 import { Lien } from '../lib/router'
 import { poidsLePlusRecent } from '../lib/store'
 import { LIBELLE_MOMENT, MOMENTS } from '../lib/types'
-import { classes } from '../lib/utils'
+import { classes, jourISO } from '../lib/utils'
 
 const BANDES: Bande[] = ['vert', 'bleu', 'orange']
 
@@ -34,7 +36,7 @@ const BANDES: Bande[] = ['vert', 'bleu', 'orange']
 const TAGS_FILTRABLES: Tag[] = ['rapide', 'vegetarien', 'batch', 'nomade']
 
 export function Cuisine() {
-  const { etat } = useSession()
+  const { etat, modifier } = useSession()
   const [onglet, setOnglet] = useState<'recettes' | 'courses'>('recettes')
   const [ouverte, setOuverte] = useState<Recette | null>(null)
   const [panier, setPanier] = useState<string[]>([])
@@ -282,20 +284,38 @@ export function Cuisine() {
 
       <Feuille ouvert={ouverte !== null} titre={ouverte?.titre ?? ''} onFermer={() => setOuverte(null)}>
         {ouverte && (
-          <DetailRecette recette={ouverte} bande={bandes.get(ouverte.id) ?? 'bleu'} />
+          <DetailRecette
+            recette={ouverte}
+            bande={bandes.get(ouverte.id) ?? 'bleu'}
+            onAuJournal={(quantiteG) => {
+              modifier((brouillon) => {
+                brouillon.journal.push(entreeDeLaRecette(ouverte, { date: jourISO(), quantiteG }))
+              })
+            }}
+          />
         )}
       </Feuille>
     </div>
   )
 }
 
-function DetailRecette({ recette, bande }: { recette: Recette; bande: Bande }) {
+function DetailRecette({
+  recette,
+  bande,
+  onAuJournal,
+}: {
+  recette: Recette
+  bande: Bande
+  onAuJournal: (quantiteG: number) => void
+}) {
   return (
     <div className="space-y-6">
       <p className="flex items-center gap-2 rounded-tile bg-sunken px-3 py-2.5">
         <EtiquetteBande bande={bande} />
         <span className="text-xs text-ink-soft">pour votre objectif du jour</span>
       </p>
+
+      <AuJournal recette={recette} onAjouter={onAuJournal} />
 
       <div className="flex flex-wrap gap-2">
         <Etiquette ton="neutre">{recette.minutes} min</Etiquette>

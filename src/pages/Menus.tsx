@@ -14,7 +14,9 @@ import {
 } from '../lib/menu'
 import { objectifCalorique } from '../lib/nutrition'
 import { LIBELLE_TAG, RAYONS, recetteParId } from '../lib/recettes'
-import type { Tag } from '../lib/recettes'
+import type { Recette, Tag } from '../lib/recettes'
+import { entreeDeLaRecette } from '../lib/journalRecette'
+import { AuJournal } from '../components/AuJournal'
 import { Lien } from '../lib/router'
 import { poidsLePlusRecent } from '../lib/store'
 import type { Moment, PlanSemaine } from '../lib/types'
@@ -30,6 +32,7 @@ export function Menus() {
   const [reglages, setReglages] = useState(false)
   const [courses, setCourses] = useState(false)
   const [tags, setTags] = useState<Tag[]>([])
+  const [ouvert, setOuvert] = useState<{ date: string; moment: Moment } | null>(null)
   const [aRemplacer, setARemplacer] = useState<{ date: string; moment: Moment } | null>(null)
 
   const objectif = objectifCalorique({
@@ -61,6 +64,17 @@ export function Menus() {
       if (cible) cible.repas[moment] = recetteId
     })
     setARemplacer(null)
+  }
+
+  /**
+   * Un menu planifié n'est qu'une intention : c'est ce geste qui le fait entrer
+   * dans le suivi réel. Il est daté du jour et non de la case du planning —
+   * quelqu'un qui décale son dîner de la veille le note quand il le mange.
+   */
+  function auJournal(recette: Recette, quantiteG: number, moment: Moment) {
+    modifier((brouillon) => {
+      brouillon.journal.push(entreeDeLaRecette(recette, { date, moment, quantiteG }))
+    })
   }
 
   return (
@@ -106,7 +120,7 @@ export function Menus() {
                 jour={jour}
                 objectif={objectif}
                 aujourdhui={jour.date === date}
-                onRemplacer={(moment) => setARemplacer({ date: jour.date, moment })}
+                onOuvrir={(moment) => setOuvert({ date: jour.date, moment })}
               />
             ))}
           </section>
@@ -128,6 +142,21 @@ export function Menus() {
 
       {plan && (
         <FeuilleCourses ouvert={courses} plan={plan} onFermer={() => setCourses(false)} />
+      )}
+
+      {ouvert && (
+        <FeuilleRepas
+          cible={ouvert}
+          recetteId={
+            plan?.jours.find((j) => j.date === ouvert.date)?.repas[ouvert.moment] ?? null
+          }
+          onFermer={() => setOuvert(null)}
+          onAuJournal={(recette, quantiteG) => auJournal(recette, quantiteG, ouvert.moment)}
+          onChanger={() => {
+            setARemplacer(ouvert)
+            setOuvert(null)
+          }}
+        />
       )}
 
       {aRemplacer && (
@@ -200,12 +229,12 @@ function CarteJour({
   jour,
   objectif,
   aujourdhui,
-  onRemplacer,
+  onOuvrir,
 }: {
   jour: { date: string; repas: Record<Moment, string | null> }
   objectif: number
   aujourdhui: boolean
-  onRemplacer: (moment: Moment) => void
+  onOuvrir: (moment: Moment) => void
 }) {
   const total = totalDuJour(jour)
   const ecart = total - objectif
@@ -234,8 +263,8 @@ function CarteJour({
             <li key={moment}>
               <button
                 type="button"
-                onClick={() => onRemplacer(moment)}
-                aria-label={`Changer le ${LIBELLE_MOMENT[moment].toLowerCase()} du ${dateLongue(jour.date)}`}
+                onClick={() => onOuvrir(moment)}
+                aria-label={`Ouvrir le ${LIBELLE_MOMENT[moment].toLowerCase()} du ${dateLongue(jour.date)}`}
                 className="flex w-full items-center gap-3 px-5 py-3 text-left transition hover:bg-sunken"
               >
                 <span className="w-24 shrink-0 text-xs font-bold tracking-[0.08em] text-ink-faint uppercase">
@@ -261,6 +290,60 @@ function CarteJour({
         })}
       </ul>
     </Carte>
+  )
+}
+
+/**
+ * La fiche d'un repas du planning : ce qui est prévu, et les deux seules
+ * choses qu'on veut en faire — le manger pour de vrai, ou le changer.
+ */
+function FeuilleRepas({
+  cible,
+  recetteId,
+  onFermer,
+  onAuJournal,
+  onChanger,
+}: {
+  cible: { date: string; moment: Moment }
+  recetteId: string | null
+  onFermer: () => void
+  onAuJournal: (recette: Recette, quantiteG: number) => void
+  onChanger: () => void
+}) {
+  const recette = recetteId ? recetteParId(recetteId) : undefined
+
+  return (
+    <Feuille
+      ouvert
+      titre={`${LIBELLE_MOMENT[cible.moment]} du ${dateLongue(cible.date).replace(/^\w+\s/, '')}`}
+      onFermer={onFermer}
+    >
+      {recette ? (
+        <div className="space-y-5">
+          <div>
+            <p className="font-display text-lg font-semibold text-ink">{recette.titre}</p>
+            <p className="mt-1 text-sm text-ink-soft tnum">
+              {recette.kcal} kcal · {recette.minutes} min
+            </p>
+          </div>
+
+          <AuJournal recette={recette} onAjouter={(q) => onAuJournal(recette, q)} />
+
+          <Bouton ton="doux" pleineLargeur onClick={onChanger}>
+            <RefreshCw size={17} aria-hidden="true" />
+            Changer ce repas
+          </Bouton>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <p className="text-sm text-ink-soft">Rien n’est prévu pour ce repas.</p>
+          <Bouton pleineLargeur onClick={onChanger}>
+            <Sparkles size={17} aria-hidden="true" />
+            Choisir un repas
+          </Bouton>
+        </div>
+      )}
+    </Feuille>
   )
 }
 

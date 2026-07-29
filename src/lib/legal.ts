@@ -33,9 +33,13 @@ export interface Editeur {
  * qui les tient à disposition de l'autorité judiciaire.
  *
  * Ce n'est pas une dispense : le compte Vercel doit être à la véritable
- * identité. Et ça tombe **dès le premier euro encaissé** — l'abonnement Stripe
- * du sprint 8 fera basculer le site en édition professionnelle, ce qui rendra
- * `nom`, `statut` et `adresse` obligatoires et publics.
+ * identité.
+ *
+ * **C'est l'état durable du site** (décidé le 29/07/2026) : la diffusion reste
+ * familiale et aucune monétisation n'est prévue. Le drapeau ne tomberait que
+ * si l'application devenait payante ou publicitaire — il faudrait alors passer
+ * `EDITEUR_NON_PROFESSIONNEL` à `false` et remplir `nom`, `statut` et
+ * `adresse`, qui deviendraient publics.
  */
 export const EDITEUR_NON_PROFESSIONNEL = true
 

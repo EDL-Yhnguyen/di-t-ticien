@@ -10,6 +10,7 @@ import {
   Gamepad2,
   HeartPulse,
   MessageCircle,
+  TrendingUp,
   LogOut,
   Moon,
   NotebookText,
@@ -149,6 +150,14 @@ export function Profil() {
       <section>
         <TitreSection>Raccourcis</TitreSection>
         <Carte className="divide-y divide-line">
+          <Lien
+            vers="/app/stats"
+            className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken"
+          >
+            <TrendingUp size={19} className="shrink-0 text-corail" aria-hidden="true" />
+            <span className="flex-1 font-medium text-ink">Mes statistiques</span>
+            <ChevronRight size={17} className="shrink-0 text-ink-faint" aria-hidden="true" />
+          </Lien>
           <Lien
             vers="/app/coach"
             className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken"

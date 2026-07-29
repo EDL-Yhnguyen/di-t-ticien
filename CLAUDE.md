@@ -66,7 +66,7 @@ que pour `api/analyser-assiette.ts`. Un contrôle rapide après build :
 
 **Pas de framework serveur.** L'application est entièrement cliente ; Supabase
 fournit l'authentification et la base. Tout code ayant besoin d'un secret
-(clé d'API IA, Stripe) doit vivre dans une **fonction serverless Vercel**
+(clé d'API IA) doit vivre dans une **fonction serverless Vercel**
 sous `/api`, jamais dans `src/`.
 
 ### Décisions structurantes (ne pas remettre en cause sans discussion)
@@ -126,6 +126,8 @@ src/
     sport.ts            catalogue MET, dépense d'une séance, bilan de semaine
     menu.ts             génération d'une semaine de menus, liste de courses
     coachIA.ts          contexte envoyé à /api/coach et lecture de la réponse
+    stats.ts            tendances sur une période : calories, macros, qualité, sport, poids
+    journalRecette.ts   conversion d'une recette en entrée de journal
   components/
     Mosaique.tsx        treemap « squarified » : aire = kcal, couleur = Nutri
     nutrition.tsx       PastilleNutri, JaugeEnergie, BarreMacro, bandes
@@ -156,6 +158,7 @@ api/
 | `/app/envies` | `Envies.tsx` | anti-grignotage, minuteur, journal |
 | `/app/cuisine` | `Cuisine.tsx` | recettes + liste de courses |
 | `/app/coach` | `Coach.tsx` | coach conversationnel (accord préalable) |
+| `/app/stats` | `Stats.tsx` | tendances sur 7 / 30 / 90 jours |
 | `/app/menus` | `Menus.tsx` | semaine de menus, remplacement, courses |
 | `/app/sport` | `Sport.tsx` | séances, dépense estimée, repère de l'OMS |
 | `/app/plan` | `PagePlan.tsx` | le plan alimentaire détaillé |
@@ -436,10 +439,12 @@ une dispense** : le compte Vercel doit être à la véritable identité, et un
 faux nom dans les mentions serait une infraction là où l'absence de nom n'en
 est pas une.
 
-**Ce régime tombe dès le premier euro encaissé.** L'abonnement Stripe du
-sprint 8 fera de ce site une édition professionnelle : passer le drapeau à
-`false` et remplir `nom`, `statut` et `adresse` fera alors partie du sprint,
-pas d'un rattrapage après coup.
+**C'est l'état durable du site, et non une étape transitoire** (Yann,
+29/07/2026) : la diffusion reste familiale, l'abonnement Stripe est abandonné,
+aucune monétisation n'est prévue. Le régime ne tomberait que si l'application
+devenait payante ou publicitaire — il faudrait alors passer le drapeau à
+`false` et remplir `nom`, `statut` et `adresse`, qui deviendraient publics.
+Ne pas réintroduire de brique de paiement sans reposer la question.
 
 `EDITEUR.contact` reste obligatoire dans tous les cas — le RGPD ne dispense
 personne d'un point de contact (art. 13). Tant qu'il pointe sur
@@ -454,6 +459,27 @@ Corollaire : **tout nouveau destinataire de données se déclare dans
 
 ---
 
+## Verser une recette au journal
+
+`src/lib/journalRecette.ts` transforme une recette en `EntreeJournal`. Le
+catalogue ne connaît que les calories : **les macros sont déduites d'une
+répartition type**, à partir de ce que la recette déclare couvrir dans
+l'assiette (une viande apporte protéines et gras, un féculent des glucides).
+
+C'est une estimation, et l'écran le dit. Elle vaut mieux que l'alternative —
+enregistrer un plat à 500 kcal avec zéro gramme de protéines fausserait
+silencieusement les barres de macros et les analyses du jour. **Aucun
+Nutri-Score n'est calculé** pour ces entrées : une note de qualité assise sur
+des macros elles-mêmes estimées se donnerait une autorité qu'elle n'a pas.
+
+Le poids de la portion vient d'une densité type par moment, uniquement pour
+que le journal affiche des grammes vraisemblables — écrire « 100 g » devant une
+assiette complète serait faux.
+
+Le geste est offert à deux endroits : la fiche d'une recette dans Cuisine, et
+la fiche d'un repas du planning dans Menus. Les deux passent par le composant
+`AuJournal`, qui laisse corriger la part avant d'enregistrer.
+
 ## Le catalogue de recettes
 
 `src/lib/recettes/` — un fichier par moment de repas, réunis par `index.ts`
@@ -465,6 +491,13 @@ Une recette porte davantage qu'un titre et des étapes : `couvre` (des
 `tags` (les questions qu'on se pose devant le frigo : rapide, batch,
 végétarien, nomade…), `conservation` et `saisons`. `Cuisine.tsx` filtre sur
 les bandes **et** sur les étiquettes, en cumulant les critères.
+
+**53 recettes au 29/07/2026** : 15 petits déjeuners, 14 déjeuners, 10
+collations, 14 dîners. Le déséquilibre d'origine (6 déjeuners, 5 dîners) faisait
+revenir les mêmes plats deux ou trois fois dans une semaine générée — le
+planificateur ne peut pas faire mieux que son catalogue, sa pénalité de
+répétition ne compense pas un manque de candidats. Garder au moins une douzaine
+de recettes par moment.
 
 Ajouter une recette : la mettre dans le fichier de son moment, rien d'autre.
 `index.ts` la récupère. L'ordre des `...` dans `RECETTES` suit la journée, ce
@@ -609,6 +642,37 @@ Vérification manuelle attendue :
 ---
 
 ## Historique du projet
+
+### 29 juillet 2026 — Statistiques, boucle menus → journal, catalogue étoffé
+
+Trois chantiers demandés ensemble, et l'abandon du sprint 8.
+
+- **`/app/stats`** : tendances sur 7 / 30 / 90 jours — moyenne calorique contre
+  repère, graphique jour par jour, macros moyennes, d'où viennent les calories
+  par Nutri-Score, régularité sportive, tendance de poids. Tout se recalcule
+  depuis le journal ; `stats.ts` ne stocke rien.
+  **Les jours sans rien de noté ne sont pas des jours à zéro** et ne comptent
+  pas dans les moyennes : les compter ferait passer un week-end oublié pour une
+  semaine exemplaire. C'est la règle structurante de cet écran.
+- **Verser une recette au journal**, depuis Cuisine et depuis un menu de la
+  semaine. Voir la section dédiée pour la répartition des macros.
+- **Catalogue porté à 53 recettes** — le manque de déjeuners et de dîners était
+  la vraie cause de la répétition dans les semaines générées.
+- **Sprint 8 (Stripe) abandonné** (Yann) : la diffusion reste familiale. Le
+  régime « éditeur non professionnel » devient l'état durable du site.
+
+**Un défaut corrigé en vérifiant à l'écran** : les barres du graphique ne se
+dessinaient pas. Une hauteur en pourcentage sur un enfant dont le parent n'a pas
+de hauteur explicite ne se résout pas — le cadre restait vide avec sa seule
+ligne de repère. La zone du graphique porte maintenant sa hauteur, et chaque
+barre l'occupe entièrement.
+
+**Vérifié au pilote Playwright** en 390 px et 1280 px, clair et sombre, sur un
+journal de vingt jours injecté dans le stockage local (deux jours volontairement
+vides) : les trois périodes, le compte de jours notés, la tendance de poids, la
+hauteur réelle des barres, la fiche d'un repas du planning et son versement au
+journal — contrôlé côté données, pas seulement à l'écran : source `recette` et
+macros non nulles.
 
 ### 29 juillet 2026 — Le coach conversationnel
 

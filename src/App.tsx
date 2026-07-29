@@ -19,6 +19,7 @@ import { Envies } from './pages/Envies'
 import { Cuisine } from './pages/Cuisine'
 import { Coach } from './pages/Coach'
 import { Menus } from './pages/Menus'
+import { Stats } from './pages/Stats'
 import { Sport } from './pages/Sport'
 import { Jeux } from './pages/Jeux'
 import { Badges } from './pages/Badges'
@@ -118,6 +119,8 @@ function ecranPour(chemin: string) {
       return <Cuisine />
     case '/app/coach':
       return <Coach />
+    case '/app/stats':
+      return <Stats />
     case '/app/menus':
       return <Menus />
     case '/app/sport':
