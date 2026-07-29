@@ -4,6 +4,7 @@ import {
   Droplets,
   Dumbbell,
   Flame,
+  MessageCircle,
   Plus,
   ShieldHalf,
   ThumbsDown,
@@ -288,6 +289,20 @@ export function Aujourdhui() {
           </Lien>
         </div>
       </Carte>
+
+      {/* ── Le coach ── */}
+      <Lien vers="/app/coach" className="animate-rise block" style={{ animationDelay: '330ms' }}>
+        <Carte className="flex items-center gap-3 bg-corail-wash px-5 py-4 transition hover:brightness-[0.98]">
+          <MessageCircle size={20} className="shrink-0 text-corail" aria-hidden="true" />
+          <span className="min-w-0 flex-1">
+            <span className="block font-semibold text-ink">Demander à mon coach</span>
+            <span className="block text-sm text-ink-soft">
+              Il voit votre journée et répond à vos questions
+            </span>
+          </span>
+          <ChevronRight size={18} className="shrink-0 text-ink-faint" aria-hidden="true" />
+        </Carte>
+      </Lien>
 
       {/* ── Hydratation ── */}
       <Carte className="animate-rise p-5" style={{ animationDelay: '360ms' }}>

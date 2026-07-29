@@ -9,6 +9,7 @@ import {
   ExternalLink,
   Gamepad2,
   HeartPulse,
+  MessageCircle,
   LogOut,
   Moon,
   NotebookText,
@@ -149,6 +150,14 @@ export function Profil() {
         <TitreSection>Raccourcis</TitreSection>
         <Carte className="divide-y divide-line">
           <Lien
+            vers="/app/coach"
+            className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken"
+          >
+            <MessageCircle size={19} className="shrink-0 text-corail" aria-hidden="true" />
+            <span className="flex-1 font-medium text-ink">Mon coach</span>
+            <ChevronRight size={17} className="shrink-0 text-ink-faint" aria-hidden="true" />
+          </Lien>
+          <Lien
             vers="/app/menus"
             className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken"
           >
@@ -282,6 +291,21 @@ export function Profil() {
               })
             }
           />
+          <div className="border-t border-line pt-5">
+            {/* Un consentement doit se retirer aussi facilement qu'il se donne
+                (RGPD, art. 7.3). Le retirer coupe l'envoi ; la conversation
+                déjà tenue reste lisible tant qu'on ne l'efface pas. */}
+            <Bascule
+              label="Envoyer mes données au coach"
+              aide="Sans cet accord, le coach ne peut pas répondre : rien ne part de votre navigateur."
+              actif={etat.consentementCoach !== null}
+              onChange={(v) =>
+                modifier((brouillon) => {
+                  brouillon.consentementCoach = v ? new Date().toISOString() : null
+                })
+              }
+            />
+          </div>
           <div className="border-t border-line pt-5">
             <Bascule
               label={sombre ? 'Thème sombre' : 'Thème clair'}

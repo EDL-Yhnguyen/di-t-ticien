@@ -125,6 +125,7 @@ src/
     appleSante.ts       lecture par tranches de l'export.xml d'Apple Santé
     sport.ts            catalogue MET, dépense d'une séance, bilan de semaine
     menu.ts             génération d'une semaine de menus, liste de courses
+    coachIA.ts          contexte envoyé à /api/coach et lecture de la réponse
   components/
     Mosaique.tsx        treemap « squarified » : aire = kcal, couleur = Nutri
     nutrition.tsx       PastilleNutri, JaugeEnergie, BarreMacro, bandes
@@ -137,7 +138,8 @@ public/
 supabase/
   schema.sql            à exécuter une fois dans le SQL Editor
 api/
-  analyser-assiette.ts  fonction Vercel Edge : photo → aliments estimés
+  analyser-assiette.ts  fonction Vercel Node : photo → aliments estimés
+  coach.ts              fonction Vercel Node : question + contexte → réponse
 ```
 
 ### Écrans actuels
@@ -153,6 +155,7 @@ api/
 | `/app/poids` | `Poids.tsx` | pesées, tendance, date d'arrivée estimée |
 | `/app/envies` | `Envies.tsx` | anti-grignotage, minuteur, journal |
 | `/app/cuisine` | `Cuisine.tsx` | recettes + liste de courses |
+| `/app/coach` | `Coach.tsx` | coach conversationnel (accord préalable) |
 | `/app/menus` | `Menus.tsx` | semaine de menus, remplacement, courses |
 | `/app/sport` | `Sport.tsx` | séances, dépense estimée, repère de l'OMS |
 | `/app/plan` | `PagePlan.tsx` | le plan alimentaire détaillé |
@@ -332,6 +335,41 @@ chose.
 
 ---
 
+## Le coach conversationnel
+
+**Deux coachs cohabitent, et ce n'est pas un doublon.**
+
+| | Où | Ce qu'il fait |
+|---|---|---|
+| Règles | `src/lib/coach.ts` | Verdict d'un repas, recommandation du suivant, alternatives. Chiffré, déterministe, explicable ligne à ligne. |
+| Conversation | `api/coach.ts` + `src/lib/coachIA.ts` | Répond aux questions qu'aucune règle ne couvre, à partir des mêmes chiffres. |
+
+**Le modèle ne reprend jamais le travail des règles.** Un verdict affiché sur
+un écran doit pouvoir s'expliquer sans invoquer un modèle ; c'est la raison
+d'être de `coach.ts` et elle n'a pas changé. Ne pas déplacer une analyse
+chiffrée vers `/api/coach` parce que « le modèle le ferait mieux ».
+
+**Ce qui part du navigateur est construit à la main** dans
+`construireContexte()` : profil, objectif du jour (bonus sport compris, le même
+chiffre que celui affiché), repas notés, séances. Pas le document entier, et
+**jamais les coordonnées du praticien** — ce sont celles d'un tiers qui n'a rien
+demandé. Ajouter un champ au contexte, c'est ajouter une donnée transmise à un
+tiers : ça se décide, et ça se répercute dans l'écran d'accord et dans
+`DESTINATAIRES`.
+
+Côté serveur, le contexte est **réécrit ligne à ligne** plutôt que sérialisé
+tel quel : un champ inattendu envoyé par un client bricolé n'atterrit pas dans
+la consigne.
+
+Réglages du modèle : `claude-opus-5`, `effort: 'low'`. La conversation n'est pas
+une tâche de raisonnement profond, et la personne attend devant son écran — au-
+dessus, on paie de la réflexion sans gagner en justesse. `max_tokens` couvre la
+réflexion **et** la réponse : ne pas le descendre sous ~3 000.
+
+**Sans `ANTHROPIC_API_KEY`, la fonction répond 503 avec `configurable: true`**
+et l'écran affiche quoi faire, comme le scan photo. Le reste de l'application
+est intact.
+
 ## Données personnelles — ce qui est obligatoire
 
 Un journal alimentaire et des pesées sont des **données de santé** (RGPD,
@@ -351,6 +389,26 @@ un destinataire en plus. Une correction de formulation ne la change pas.
 Le refus n'est pas un « plus tard » : sans accord, rien ne peut être conservé,
 donc refuser supprime le compte. C'est dit avant, dans la feuille de
 confirmation.
+
+### Le coach a son propre consentement
+
+`consentementCoach` est distinct de `consentement`, et ce n'est pas une
+duplication : le premier couvre ce que l'application **conserve**, le second
+couvre **l'envoi du journal du jour à un tiers** pour obtenir une réponse. Le
+RGPD demande un consentement par finalité (art. 6.1.a). Concrètement :
+
+- Tant qu'il vaut `null`, `/app/coach` n'affiche que l'écran d'accord et **rien
+  ne part**. Ne pas contourner cette porte.
+- Le refuser ne coûte rien d'autre : tout le reste de l'application marche.
+  C'est ce qui rend le consentement libre, donc valable.
+- Il se retire depuis « Réglages » du profil, aussi facilement qu'il se donne
+  (art. 7.3). Le retirer referme le coach ; la conversation déjà tenue reste
+  lisible tant qu'on ne l'efface pas.
+
+**`VERSION_CONFIDENTIALITE` n'a pas été incrémentée en l'ajoutant** — le texte
+a changé le même jour que sa date en vigueur, et surtout la nouvelle
+transmission est gardée par son propre accord explicite. Une prochaine
+extension du contexte envoyé, elle, devra la faire bouger.
 
 ### L'export et la suppression sont des fonctionnalités, pas des promesses
 
@@ -551,6 +609,33 @@ Vérification manuelle attendue :
 ---
 
 ## Historique du projet
+
+### 29 juillet 2026 — Le coach conversationnel
+
+Le sprint 5, dernière brique fonctionnelle du produit annoncé.
+
+- **`/api/coach`** : fonction Node, `claude-opus-5` à effort bas, consigne qui
+  borne le rôle (ni médecin ni diététicien, renvoi vers un professionnel dès
+  qu'il est question de maladie, de traitement, de grossesse ou d'un enfant,
+  jamais de conseil sous 1 200 kcal, jamais de reproche).
+- **`/app/coach`** : conversation persistée dans le document, amorces adaptées
+  à la journée, avertissement permanent sur ce que le coach n'est pas.
+- **Un consentement propre au coach**, détaillé plus haut. C'est la décision
+  structurante du sprint : envoyer un journal alimentaire à un tiers est une
+  finalité distincte de le conserver, et elle se refuse sans rien perdre.
+- **Les règles de `coach.ts` n'ont pas bougé.** Le modèle répond aux questions,
+  il ne reprend pas les analyses chiffrées.
+
+**Vérifié à l'écran** avant livraison, au pilote Playwright, en 390 px et
+1280 px, thèmes clair et sombre : accord refusé puis donné, amorce, réponse
+(l'API étant simulée — la fonction serverless n'existe pas sous Vite), question
+tapée, erreur 503, retrait de l'accord depuis le profil qui referme bien le
+coach, déclaration du coach sur `/confidentialite`. Contrôlé aussi que le
+contexte envoyé porte le profil et l'objectif **sans** les coordonnées du
+praticien, et que `@anthropic-ai/sdk` ne fuite pas dans le bundle.
+
+**Reste à faire :** `ANTHROPIC_API_KEY` n'est toujours pas dans Vercel — tant
+qu'elle manque, le coach et le scan photo répondent 503 et le disent.
 
 ### 29 juillet 2026 — Menus de la semaine et activité physique
 

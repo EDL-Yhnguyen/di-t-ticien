@@ -10,6 +10,7 @@ import type {
   JournalEau,
   JournalRepas,
   MesureSante,
+  MessageCoach,
   PeseeEntree,
   PlanSemaine,
   Profil,
@@ -42,6 +43,18 @@ export interface EtatUtilisateur {
   seances: SeanceSport[]
   /** La semaine de menus en cours. `null` tant qu'aucune n'a été générée. */
   menus: PlanSemaine | null
+  /** La conversation avec le coach, conservée d'une session à l'autre. */
+  conversation: MessageCoach[]
+  /**
+   * Date ISO de l'accord donné au coach, `null` tant qu'il n'a pas été donné.
+   *
+   * Le consentement général couvre ce que l'application conserve ; celui-ci
+   * couvre autre chose — envoyer le journal du jour à un tiers pour obtenir une
+   * réponse. Le RGPD demande un consentement par finalité (art. 6.1.a), et
+   * c'est aussi la seule façon honnête de poser la question : tant qu'il est
+   * `null`, rien ne part.
+   */
+  consentementCoach: string | null
   eau: JournalEau[]
   envies: EnvieEntree[]
   scores: ScoreJeu[]
@@ -87,6 +100,8 @@ export function etatInitial(u: Utilisateur): EtatUtilisateur {
     mesuresSante: [],
     seances: [],
     menus: null,
+    conversation: [],
+    consentementCoach: null,
     eau: [],
     envies: [],
     scores: [],
@@ -172,6 +187,8 @@ function fusionner(u: Utilisateur, partiel: Partial<EtatUtilisateur>): EtatUtili
     mesuresSante: partiel.mesuresSante ?? [],
     seances: partiel.seances ?? [],
     menus: partiel.menus ?? null,
+    conversation: partiel.conversation ?? [],
+    consentementCoach: partiel.consentementCoach ?? null,
     eau: partiel.eau ?? [],
     envies: partiel.envies ?? [],
     scores: partiel.scores ?? [],
@@ -226,6 +243,7 @@ export type {
   JournalEau,
   JournalRepas,
   MesureSante,
+  MessageCoach,
   PeseeEntree,
   PlanSemaine,
   Profil,

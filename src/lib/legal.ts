@@ -93,9 +93,9 @@ export const DESTINATAIRES = [
   },
   {
     nom: 'Anthropic',
-    role: 'Analyse des photos de repas',
+    role: 'Analyse des photos de repas et coach conversationnel',
     donnees:
-      'La photo que vous envoyez, uniquement au moment où vous demandez son analyse. Elle n’est ni conservée par nous, ni rattachée à votre compte.',
+      'La photo que vous envoyez, uniquement au moment où vous demandez son analyse. Pour le coach, et seulement après votre accord donné dans l’écran dédié : votre question, votre profil (âge, sexe, taille, poids, objectif) et votre journée en cours. Rien de tout cela n’est conservé par nous ni rattaché à votre compte, et le coach reste refusable sans rien perdre du reste.',
   },
   {
     nom: 'Open Food Facts',

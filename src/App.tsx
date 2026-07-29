@@ -17,6 +17,7 @@ import { PagePlan } from './pages/PagePlan'
 import { Poids } from './pages/Poids'
 import { Envies } from './pages/Envies'
 import { Cuisine } from './pages/Cuisine'
+import { Coach } from './pages/Coach'
 import { Menus } from './pages/Menus'
 import { Sport } from './pages/Sport'
 import { Jeux } from './pages/Jeux'
@@ -115,6 +116,8 @@ function ecranPour(chemin: string) {
       return <Envies />
     case '/app/cuisine':
       return <Cuisine />
+    case '/app/coach':
+      return <Coach />
     case '/app/menus':
       return <Menus />
     case '/app/sport':

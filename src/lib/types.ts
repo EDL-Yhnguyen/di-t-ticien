@@ -267,6 +267,15 @@ export interface SeanceSport {
   kcal: number
 }
 
+/* ───────────────────────── Coach conversationnel ───────────────────────── */
+
+export interface MessageCoach {
+  id: string
+  role: 'utilisateur' | 'coach'
+  texte: string
+  envoyeLe: string
+}
+
 /* ───────────────────────── Planificateur de menus ───────────────────────── */
 
 /** Un jour de la semaine planifiée. `null` = rien de prévu à ce repas. */
