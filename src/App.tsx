@@ -32,6 +32,10 @@ const PagePlan = lazy(() => import('./pages/PagePlan').then((m) => ({ default: m
 const Poids = lazy(() => import('./pages/Poids').then((m) => ({ default: m.Poids })))
 const Envies = lazy(() => import('./pages/Envies').then((m) => ({ default: m.Envies })))
 const Cuisine = lazy(() => import('./pages/Cuisine').then((m) => ({ default: m.Cuisine })))
+const GardeManger = lazy(() =>
+  import('./pages/GardeManger').then((m) => ({ default: m.GardeManger })),
+)
+const Cuisiner = lazy(() => import('./pages/Cuisiner').then((m) => ({ default: m.Cuisiner })))
 const Coach = lazy(() => import('./pages/Coach').then((m) => ({ default: m.Coach })))
 const Menus = lazy(() => import('./pages/Menus').then((m) => ({ default: m.Menus })))
 const Stats = lazy(() => import('./pages/Stats').then((m) => ({ default: m.Stats })))
@@ -52,6 +56,8 @@ const Profil = lazy(() => import('./pages/Profil').then((m) => ({ default: m.Pro
 const ECRANS_A_PRECHARGER = [
   () => import('./pages/Ajouter'),
   () => import('./pages/Cuisine'),
+  () => import('./pages/GardeManger'),
+  () => import('./pages/Cuisiner'),
   () => import('./pages/Profil'),
   () => import('./pages/Menus'),
   () => import('./pages/Stats'),
@@ -204,6 +210,10 @@ function ecranPour(chemin: string) {
       return <Envies />
     case '/app/cuisine':
       return <Cuisine />
+    case '/app/garde-manger':
+      return <GardeManger />
+    case '/app/cuisiner':
+      return <Cuisiner />
     case '/app/coach':
       return <Coach />
     case '/app/stats':

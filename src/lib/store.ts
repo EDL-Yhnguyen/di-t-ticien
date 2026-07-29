@@ -4,6 +4,7 @@ import { supabase } from './supabase'
 import { jourISO } from './utils'
 import type {
   Aliment,
+  ArticleStock,
   Consentement,
   EntreeJournal,
   EnvieEntree,
@@ -43,6 +44,8 @@ export interface EtatUtilisateur {
   seances: SeanceSport[]
   /** La semaine de menus en cours. `null` tant qu'aucune n'a été générée. */
   menus: PlanSemaine | null
+  /** Le contenu du frigo, des placards et du congélateur. */
+  stocks: ArticleStock[]
   /** La conversation avec le coach, conservée d'une session à l'autre. */
   conversation: MessageCoach[]
   /**
@@ -100,6 +103,7 @@ export function etatInitial(u: Utilisateur): EtatUtilisateur {
     mesuresSante: [],
     seances: [],
     menus: null,
+    stocks: [],
     conversation: [],
     consentementCoach: null,
     eau: [],
@@ -187,6 +191,7 @@ function fusionner(u: Utilisateur, partiel: Partial<EtatUtilisateur>): EtatUtili
     mesuresSante: partiel.mesuresSante ?? [],
     seances: partiel.seances ?? [],
     menus: partiel.menus ?? null,
+    stocks: partiel.stocks ?? [],
     conversation: partiel.conversation ?? [],
     consentementCoach: partiel.consentementCoach ?? null,
     eau: partiel.eau ?? [],
@@ -237,6 +242,7 @@ export function poidsLePlusRecent(etat: EtatUtilisateur): number {
 
 export type {
   Aliment,
+  ArticleStock,
   Consentement,
   EntreeJournal,
   EnvieEntree,

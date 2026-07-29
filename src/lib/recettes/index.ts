@@ -1,3 +1,4 @@
+import { cleIngredient } from '../ingredients'
 import type { Moment } from '../types'
 import { COLLATIONS } from './collation'
 import { DEJEUNERS } from './dejeuner'
@@ -124,11 +125,7 @@ export function listeDeCourses(idsRecettes: string[]): Record<Rayon, Ingredient[
   const vus = new Map<string, Ingredient>()
   for (const id of idsRecettes) {
     for (const ingredient of recetteParId(id)?.ingredients ?? []) {
-      const cle = ingredient.nom
-        .toLowerCase()
-        .split(' ')
-        .map((mot) => mot.replace(/s$/, ''))
-        .join(' ')
+      const cle = cleIngredient(ingredient.nom)
       const existant = vus.get(cle)
       if (!existant) {
         const copie = { ...ingredient }

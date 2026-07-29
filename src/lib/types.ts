@@ -290,3 +290,73 @@ export interface PlanSemaine {
   jours: JourMenu[]
   genereLe: string
 }
+
+/* ───────────────────── Rayons, courses et garde-manger ───────────────────── */
+
+/**
+ * Le rayon d'un produit. Défini ici et non dans le catalogue de recettes : un
+ * rayon est une notion de magasin, que la liste de courses et le garde-manger
+ * emploient autant que les ingrédients d'une recette.
+ */
+export type Rayon =
+  | 'Fruits et légumes'
+  | 'Boucherie, poissonnerie'
+  | 'Crèmerie'
+  | 'Surgelés'
+  | 'Boulangerie'
+  | 'Épicerie'
+
+/** Dans l'ordre où on traverse le magasin — la liste de courses suit ce fil. */
+export const RAYONS: Rayon[] = [
+  'Fruits et légumes',
+  'Boucherie, poissonnerie',
+  'Crèmerie',
+  'Surgelés',
+  'Boulangerie',
+  'Épicerie',
+]
+
+export type Emplacement = 'frigo' | 'placard' | 'congelateur'
+
+export const EMPLACEMENTS: Emplacement[] = ['frigo', 'placard', 'congelateur']
+
+export const LIBELLE_EMPLACEMENT: Record<Emplacement, string> = {
+  frigo: 'Réfrigérateur',
+  placard: 'Placards',
+  congelateur: 'Congélateur',
+}
+
+/**
+ * Un produit détenu, dans l'un des trois lieux de stockage.
+ *
+ * **La DLC et la DDM ne veulent pas dire la même chose et ne sont donc pas un
+ * seul champ.** La date limite de consommation (« à consommer jusqu'au »)
+ * est sanitaire : passée, le produit se jette. La date de durabilité minimale
+ * (« à consommer de préférence avant ») ne parle que de qualité gustative :
+ * passée, le produit se mange encore, souvent des semaines durant. Les
+ * confondre ferait jeter de la nourriture parfaitement bonne — exactement
+ * l'inverse de ce que cet écran cherche à faire.
+ */
+export interface ArticleStock {
+  id: string
+  nom: string
+  /** Ce qu'il en reste, tel qu'on le lit sur l'emballage : « 500 g », « 2 ». */
+  quantite: string
+  emplacement: Emplacement
+  rayon: Rayon
+  ajouteLe: string
+  /** Sanitaire, impérative. */
+  dlc?: string
+  /** Qualité seulement — dépassée, le produit reste consommable. */
+  ddm?: string
+  /** Pour le congélateur : la date d'entrée, d'où se déduit la durée restante. */
+  congeleLe?: string
+  /**
+   * Date d'ouverture. Une fois entamé, un produit ne tient plus jusqu'à sa DLC
+   * imprimée mais quelques jours seulement — ne pas en tenir compte donnerait
+   * une fausse sécurité sur ce qui est justement le plus risqué.
+   */
+  ouvertLe?: string
+  codeBarres?: string
+  note?: string
+}

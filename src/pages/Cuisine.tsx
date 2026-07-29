@@ -104,6 +104,21 @@ export function Cuisine() {
         </Carte>
       </Lien>
 
+      {/* L'autre porte d'entrée : partir de ce qu'on a déjà plutôt que du plat
+          qu'on voudrait. C'est la question du soir de semaine devant le frigo. */}
+      <Lien vers="/app/cuisiner">
+        <Carte className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken">
+          <Refrigerator size={20} className="shrink-0 text-basil" aria-hidden="true" />
+          <span className="min-w-0 flex-1">
+            <span className="block font-semibold text-ink">Cuisiner ce que j’ai</span>
+            <span className="block text-sm text-ink-soft">
+              Les recettes possibles avec votre garde-manger
+            </span>
+          </span>
+          <ChevronRight size={18} className="shrink-0 text-ink-faint" aria-hidden="true" />
+        </Carte>
+      </Lien>
+
       <div className="flex gap-1 rounded-full bg-sunken p-1" role="tablist">
         {(
           [

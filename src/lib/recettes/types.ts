@@ -1,22 +1,12 @@
-import type { Categorie, Moment } from '../types'
+import type { Categorie, Moment, Rayon } from '../types'
 
-export type Rayon =
-  | 'Fruits et légumes'
-  | 'Boucherie, poissonnerie'
-  | 'Crèmerie'
-  | 'Surgelés'
-  | 'Boulangerie'
-  | 'Épicerie'
-
-/** Dans l'ordre où on traverse le magasin — la liste de courses suit ce fil. */
-export const RAYONS: Rayon[] = [
-  'Fruits et légumes',
-  'Boucherie, poissonnerie',
-  'Crèmerie',
-  'Surgelés',
-  'Boulangerie',
-  'Épicerie',
-]
+/**
+ * Le rayon vit maintenant dans `lib/types.ts`, avec le garde-manger et les
+ * courses qui s'en servent autant que le catalogue. Réexporté ici pour que
+ * `from '../lib/recettes'` continue de le fournir, comme partout jusqu'ici.
+ */
+export type { Rayon }
+export { RAYONS } from '../types'
 
 export type Saison = 'printemps' | 'ete' | 'automne' | 'hiver'
 

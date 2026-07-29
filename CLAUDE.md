@@ -140,6 +140,8 @@ src/
     coachIA.ts          contexte envoyé à /api/coach et lecture de la réponse
     stats.ts            tendances sur une période : calories, macros, qualité, sport, poids
     journalRecette.ts   conversion d'une recette en entrée de journal
+    stocks.ts           garde-manger : échéances, urgences, recettes réalisables
+    ingredients.ts      rapprochement des noms de produits (stock ↔ recettes ↔ courses)
   components/
     Mosaique.tsx        treemap « squarified » : aire = kcal, couleur = Nutri
     nutrition.tsx       PastilleNutri, JaugeEnergie, BarreMacro, bandes
@@ -169,6 +171,8 @@ api/
 | `/app/poids` | `Poids.tsx` | pesées, tendance, date d'arrivée estimée |
 | `/app/envies` | `Envies.tsx` | anti-grignotage, minuteur, journal |
 | `/app/cuisine` | `Cuisine.tsx` | recettes + liste de courses |
+| `/app/garde-manger` | `GardeManger.tsx` | frigo, placards, congélateur, dates limites |
+| `/app/cuisiner` | `Cuisiner.tsx` | ce que le stock permet de cuisiner |
 | `/app/coach` | `Coach.tsx` | coach conversationnel (accord préalable) |
 | `/app/stats` | `Stats.tsx` | tendances sur 7 / 30 / 90 jours |
 | `/app/menus` | `Menus.tsx` | semaine de menus, remplacement, courses |
@@ -494,6 +498,23 @@ Le geste est offert à deux endroits : la fiche d'une recette dans Cuisine, et
 la fiche d'un repas du planning dans Menus. Les deux passent par le composant
 `AuJournal`, qui laisse corriger la part avant d'enregistrer.
 
+## Le garde-manger
+
+Le programme complet du module « Cuisine, Recettes & Courses » — six sprints,
+et les quatre points du brief qui ne peuvent pas se faire littéralement — est
+dans **`CUISINE.md`**. À lire avant d'y toucher. L'essentiel à ne pas défaire :
+
+- **La DLC et la DDM sont deux champs distincts**, et pas par scrupule : la
+  première est sanitaire, la seconde ne parle que du goût. Les fondre ferait
+  jeter des aliments parfaitement bons, ce qui est l'inverse du but. Le
+  vocabulaire des écrans suit : « à jeter » d'un côté, « moins bon » de l'autre.
+- **`ouvertLe` avance l'échéance** : un produit entamé ne tient pas jusqu'à sa
+  date imprimée, qui ne vaut que pour un emballage fermé.
+- **`memeProduit()` rapproche sur un seul mot porteur** et se trompe parfois.
+  C'est assumé, à une condition : **l'écran affiche toujours l'article du stock
+  qui a produit la correspondance**. Ne pas retirer cet affichage pour gagner
+  de la place — c'est lui qui rend l'erreur inoffensive.
+
 ## Le catalogue de recettes
 
 `src/lib/recettes/` — un fichier par moment de repas, réunis par `index.ts`
@@ -656,6 +677,32 @@ Vérification manuelle attendue :
 ---
 
 ## Historique du projet
+
+### 29 juillet 2026 — Le garde-manger (module Cuisine, sprint C1)
+
+Premier sprint du module « Cuisine, Recettes & Courses » demandé par Yann. Le
+programme des six sprints est dans `CUISINE.md`.
+
+- **`/app/garde-manger`** : frigo, placards, congélateur. Tableau de bord des
+  dates groupé par horizon — date dépassée, aujourd'hui, demain, cette semaine —
+  parce que « ce soir » et « dans six jours » n'appellent pas la même décision.
+  Ajout au clavier ou au code-barres, en réemployant le scanner et Open Food
+  Facts déjà en place plutôt qu'un second chemin.
+- **`/app/cuisiner`** : ce que le stock permet, l'anti-gaspillage en tête. Une
+  recette dont il manque un ingrédient reste proposée — c'est souvent une
+  course à faire, pas un abandon.
+- **`ingredients.ts`** sort la normalisation des noms de `listeDeCourses`, qui
+  la portait en ligne : les courses, le stock et les recettes rapprochent
+  désormais les mêmes noms de la même façon.
+- **`Rayon` remonte de `lib/recettes/types.ts` vers `lib/types.ts`** — c'est
+  une notion de magasin, dont le garde-manger se sert autant que le catalogue.
+  Réexporté à l'ancienne adresse : aucun import existant ne bouge.
+
+Trois défauts corrigés en vérifiant, dont deux que le typecheck ne pouvait pas
+voir : « œufs » ne se rapprochait de rien (la ligature `œ` n'a aucune
+décomposition Unicode, même en NFKD, et devenait « uf » — trop court pour être
+retenu), et la moitié des mots vides ne filtrait plus rien parce qu'ils
+n'étaient pas normalisés comme les mots qu'ils devaient écarter.
 
 ### 29 juillet 2026 — Poids du chargement, robustesse, mouvement réduit
 
