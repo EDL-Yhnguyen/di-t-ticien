@@ -51,7 +51,7 @@ définit pas le produit.
 |---|---|---|
 | Build | Vite | ^8.1.5 |
 | UI | React + React DOM | ^19.2.8 |
-| Langage | TypeScript | ^7.0.2 |
+| Langage | TypeScript | ^5.9.3 — **ne pas repasser en 7**, voir « Vercel » |
 | Styles | Tailwind CSS (plugin Vite) | ^4.3.3 |
 | Animation | framer-motion | ^12.42.2 |
 | Icônes | lucide-react | ^1.27.0 |
@@ -480,6 +480,19 @@ passer par le tableau de bord Supabase, Authentication → Users.
   `max-age=0, must-revalidate`, `assets/*` en `immutable` un an.
 - Chaque `git push` sur `main` redéploie.
 
+### TypeScript reste en 5.x tant qu'il y a un dossier `/api`
+
+Dès qu'une fonction serverless existe, Vercel charge le **TypeScript du
+projet** pour la compiler, et attend l'API historique du compilateur
+(`ts.sys.readFile`). TypeScript 7 est le portage natif en Go : il ne l'expose
+pas. Le build Vite réussit, puis le déploiement meurt juste après sur
+`Error: Cannot read properties of undefined (reading 'readFile')`.
+
+Le piège est que la panne n'apparaît **qu'une fois `/api` peuplé** : avant
+cela, TypeScript 7 passait très bien, Vercel n'ayant aucune raison de le
+charger. Remonter en 7 sans supprimer `/api` casserait la production à
+nouveau.
+
 ---
 
 ## Git
@@ -504,7 +517,16 @@ Il n'y a **ni linter ni suite de tests** dans le projet. Le seul contrôle
 automatisé est le typecheck du build :
 
 ```bash
-npm run build
+npm run build      # tsc -b (src) && tsc -p tsconfig.api.json (api) && vite build
+```
+
+**`npm run build` ne remplace pas un `npm ci`.** Il réutilise `node_modules`
+et ne relit jamais le lockfile ; Vercel installe avec `npm ci`, qui refuse un
+`package.json` et un `package-lock.json` désaccordés. Après toute
+modification de dépendance, le contrôle fidèle est une copie propre :
+
+```bash
+npm ci && npm run build
 ```
 
 Vérification manuelle attendue :
@@ -518,6 +540,27 @@ Vérification manuelle attendue :
 ---
 
 ## Historique du projet
+
+### 29 juillet 2026 — Déblocage du déploiement Vercel
+
+Quatre déploiements de suite en échec depuis 08:01, dont les sprints journal
+alimentaire et RGPD : ils étaient commités mais **jamais arrivés en ligne**, la
+production restant figée sur `a48b6c0`.
+
+**Cause :** TypeScript 7 (portage natif Go) n'expose plus `ts.sys`, l'API que
+le builder de Vercel appelle pour compiler les fonctions `/api`. Détail
+expliqué dans la section « Vercel ». Le symptôme trompait : le build Vite
+réussissait intégralement, l'échec tombait après.
+
+**Deux fausses pistes écartées en chemin**, notées pour ne pas y revenir : le
+cache de build empoisonné (un redeploy sans cache échoue à l'identique) et un
+`package-lock.json` généré sous Windows sans les binaires Linux (les bindings
+`@rolldown/*`, `lightningcss-*` et `@tailwindcss/oxide-*` y sont tous).
+
+**Correctifs :** TypeScript en 5.9.3, `@types/node` ajouté pour le `process.env`
+de la fonction Edge, et surtout `tsconfig.api.json` — `tsc -b` ne couvrait que
+`src/`, donc `/api` n'était typechecké nulle part avant Vercel. C'est ce trou
+qui a rendu la panne invisible en local ; le `build` le referme.
 
 ### 29 juillet 2026 — Équilibre devient Mamakilo
 

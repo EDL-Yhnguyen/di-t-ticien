@@ -1,0 +1,28 @@
+{
+  // Les fonctions serverless sont compilées par Vercel, pas par Vite : elles
+  // échappaient donc au seul contrôle automatisé du projet. C'est ce trou qui
+  // a laissé passer la panne de déploiement du 29/07/2026, invisible en local.
+  //
+  // Elles ont leur propre projet parce que leurs globales ne sont pas celles
+  // du navigateur : « node » ici donnerait accès à `process` depuis `src/`,
+  // où un `process.env` compile mais casse à l'exécution.
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "types": ["node"],
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true
+  },
+  "include": ["api"]
+}
