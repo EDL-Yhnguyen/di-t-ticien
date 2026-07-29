@@ -12,11 +12,21 @@ import Anthropic from '@anthropic-ai/sdk'
  * journal : c'est la règle produit, pas une précaution de façade.
  */
 
-export const config = { runtime: 'edge' }
+/**
+ * Runtime Node, et non Edge : `@anthropic-ai/sdk` importe `node:fs` et
+ * `node:path`, que le runtime Edge n'a pas. Un déploiement en Edge échoue au
+ * build, pas à l'exécution — l'erreur est franche, mais elle bloque tout le
+ * site, pas seulement cette fonction.
+ *
+ * `maxDuration` parce qu'une analyse d'image raisonne quelques secondes : la
+ * durée par défaut coupe la réponse au milieu et l'écran affiche un échec
+ * réseau qui n'en est pas un.
+ */
+export const config = { runtime: 'nodejs', maxDuration: 60 }
 
 const MODELE = 'claude-opus-5'
 
-/** 4 Mo est la limite d'une requête Edge ; on refuse bien avant d'y arriver. */
+/** 4,5 Mo est la limite du corps d'une requête ; on refuse bien avant. */
 const TAILLE_MAX = 3_500_000
 
 const TYPES_ACCEPTES = ['image/jpeg', 'image/png', 'image/webp'] as const
@@ -95,11 +105,13 @@ function json(corps: unknown, statut: number): Response {
   })
 }
 
-export default async function handler(requete: Request): Promise<Response> {
-  if (requete.method !== 'POST') {
-    return json({ erreur: 'Méthode non autorisée.' }, 405)
-  }
-
+/**
+ * Export nommé d'après la méthode HTTP, et non `export default` : c'est ce qui
+ * fait lire à Vercel une fonction web (`Request` → `Response`). Un export par
+ * défaut serait appelé avec les objets Node `(req, res)`, où `requete.json()`
+ * n'existe pas. Le 405 des autres méthodes devient automatique.
+ */
+export async function POST(requete: Request): Promise<Response> {
   const cle = process.env.ANTHROPIC_API_KEY
   if (!cle) {
     // Le message est lu tel quel par l'écran : il doit dire quoi faire.
