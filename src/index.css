@@ -46,6 +46,42 @@
      sombre pour rester lisible en texte — les deux usages divergent. */
   --bandeau-haut: #6d3fc4;
   --bandeau-bas: #4b2a8a;
+
+  /* ── Nutri-Score ──────────────────────────────────────────────
+     Ce ne sont pas des couleurs d'interface : c'est l'échelle officielle
+     française, celle imprimée sur les emballages. Un utilisateur la
+     reconnaît avant même de lire la lettre — la redessiner à notre goût
+     détruirait précisément ce qui la rend lisible. Elles ne servent qu'à
+     dire la qualité d'un aliment, jamais à habiller un bouton.
+
+     Chaque teinte porte son encre : le vert foncé et le rouge tiennent du
+     texte blanc, le vert clair, le jaune et l'orange demandent du texte
+     sombre. Emprunter l'encre d'une autre casse le contraste. */
+  --nutri-a: #038141;
+  --nutri-a-encre: #ffffff;
+  --nutri-b: #85bb2f;
+  --nutri-b-encre: #14300a;
+  --nutri-c: #fecb02;
+  --nutri-c-encre: #3d3000;
+  --nutri-d: #ee8100;
+  --nutri-d-encre: #351b00;
+  --nutri-e: #e63e11;
+  --nutri-e-encre: #ffffff;
+
+  /* Bandes de charge calorique d'une recette : vert, bleu, orange. */
+  --bande-vert: #1f8a4d;
+  --bande-bleu: #2563c9;
+  --bande-orange: #d9700f;
+
+  /* Les trois macronutriments. Ils ont leurs propres jetons plutôt que
+     d'emprunter ceux de l'assiette : « légume » et « lipide » ne veulent pas
+     dire la même chose, et un vert sur la barre des graisses ferait lire
+     l'inverse du sens voulu. Les trois barres ne se touchent pas, la
+     contrainte est donc le contraste sur fond clair, pas la séparation entre
+     voisines. */
+  --macro-proteines: #6535bf;
+  --macro-glucides: #b06a10;
+  --macro-lipides: #1f74a8;
 }
 
 .dark {
@@ -77,6 +113,28 @@
 
   --bandeau-haut: #452a75;
   --bandeau-bas: #2b1a4a;
+
+  /* Les cinq teintes sont remontées juste assez pour tenir sur un fond
+     sombre sans cesser d'être reconnaissables. L'encre passe au sombre
+     partout : sur ce fond, les cinq pastilles sont devenues claires. */
+  --nutri-a: #12a45a;
+  --nutri-a-encre: #042a13;
+  --nutri-b: #93cc34;
+  --nutri-b-encre: #16300a;
+  --nutri-c: #f5c518;
+  --nutri-c-encre: #3a2e00;
+  --nutri-d: #f28c1c;
+  --nutri-d-encre: #3a1e00;
+  --nutri-e: #f0532b;
+  --nutri-e-encre: #360d02;
+
+  --bande-vert: #35b06a;
+  --bande-bleu: #5b93ef;
+  --bande-orange: #f0972f;
+
+  --macro-proteines: #a482ea;
+  --macro-glucides: #d99a3a;
+  --macro-lipides: #58a8d8;
 }
 
 @theme inline {
@@ -103,6 +161,25 @@
 
   --color-bandeau-haut: var(--bandeau-haut);
   --color-bandeau-bas: var(--bandeau-bas);
+
+  --color-nutri-a: var(--nutri-a);
+  --color-nutri-a-encre: var(--nutri-a-encre);
+  --color-nutri-b: var(--nutri-b);
+  --color-nutri-b-encre: var(--nutri-b-encre);
+  --color-nutri-c: var(--nutri-c);
+  --color-nutri-c-encre: var(--nutri-c-encre);
+  --color-nutri-d: var(--nutri-d);
+  --color-nutri-d-encre: var(--nutri-d-encre);
+  --color-nutri-e: var(--nutri-e);
+  --color-nutri-e-encre: var(--nutri-e-encre);
+
+  --color-bande-vert: var(--bande-vert);
+  --color-bande-bleu: var(--bande-bleu);
+  --color-bande-orange: var(--bande-orange);
+
+  --color-macro-proteines: var(--macro-proteines);
+  --color-macro-glucides: var(--macro-glucides);
+  --color-macro-lipides: var(--macro-lipides);
 
   --font-display: 'Faustina', Georgia, 'Times New Roman', serif;
   --font-sans: 'Figtree', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -214,8 +291,26 @@
   }
 }
 
+/* Le seul moment orchestré de l'application : les tuiles de la mosaïque se
+   posent l'une après l'autre, comme on pose un carrelage. Chaque tuile porte
+   son propre délai, calculé à partir de son rang. */
+@keyframes poser {
+  from {
+    opacity: 0;
+    transform: scale(0.84);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 .animate-rise {
   animation: rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.animate-poser {
+  animation: poser 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
 .animate-flame {

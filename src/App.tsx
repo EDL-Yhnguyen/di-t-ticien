@@ -9,6 +9,8 @@ import { Connexion } from './pages/Connexion'
 import { Onboarding } from './pages/Onboarding'
 import { NouveauMotDePasse } from './pages/NouveauMotDePasse'
 import { Aujourdhui } from './pages/Aujourdhui'
+import { Ajouter } from './pages/Ajouter'
+import { Sante } from './pages/Sante'
 import { PagePlan } from './pages/PagePlan'
 import { Poids } from './pages/Poids'
 import { Envies } from './pages/Envies'
@@ -89,6 +91,10 @@ function EchecOuverture({
 
 function ecranPour(chemin: string) {
   switch (chemin) {
+    case '/app/ajouter':
+      return <Ajouter />
+    case '/app/sante':
+      return <Sante />
     case '/app/plan':
       return <PagePlan />
     case '/app/poids':

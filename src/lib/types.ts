@@ -2,7 +2,17 @@ export type Sexe = 'femme' | 'homme'
 
 export type Activite = 'sedentaire' | 'leger' | 'modere' | 'actif'
 
-export type Moment = 'petit-dejeuner' | 'dejeuner' | 'diner'
+export type Moment = 'petit-dejeuner' | 'dejeuner' | 'collation' | 'diner'
+
+/** Dans l'ordre où ils arrivent dans la journée — sert partout où l'on trie. */
+export const MOMENTS: Moment[] = ['petit-dejeuner', 'dejeuner', 'collation', 'diner']
+
+export const LIBELLE_MOMENT: Record<Moment, string> = {
+  'petit-dejeuner': 'Petit déjeuner',
+  dejeuner: 'Déjeuner',
+  collation: 'Collation',
+  diner: 'Dîner',
+}
 
 /** Les catégories de l'assiette équilibrée telle que la prescrit la diététicienne. */
 export type Categorie =
@@ -105,4 +115,79 @@ export interface ScoreJeu {
   jeu: string
   score: number
   joueLe: string
+}
+
+/* ───────────────────────── Journal alimentaire ───────────────────────── */
+
+export type NutriScore = 'A' | 'B' | 'C' | 'D' | 'E'
+
+/**
+ * Valeurs nutritionnelles pour 100 g — ou 100 ml pour un liquide.
+ *
+ * C'est l'unité de référence de tous les étiquetages européens : la garder
+ * comme pivot évite de reconvertir à chaque lecture, et c'est exactement ce
+ * que renvoie Open Food Facts.
+ */
+export interface ValeursPour100 {
+  kcal: number
+  proteines: number
+  glucides: number
+  sucres: number
+  lipides: number
+  satures: number
+  fibres: number
+  /** En grammes de sel, pas de sodium — c'est la mention de l'étiquette. */
+  sel: number
+}
+
+export type SourceAliment = 'base' | 'code-barres' | 'photo' | 'manuel' | 'recette'
+
+/**
+ * Une catégorie d'aliment, au sens du barème Nutri-Score : les boissons et les
+ * matières grasses ne sont pas notées avec le même barème que le reste.
+ */
+export type FamilleAliment = 'general' | 'boisson' | 'matiere-grasse' | 'fromage'
+
+export interface Aliment {
+  id: string
+  nom: string
+  marque?: string
+  codeBarres?: string
+  famille: FamilleAliment
+  valeurs: ValeursPour100
+  /** Part de fruits, légumes et légumineuses, en %. Entre dans le Nutri-Score. */
+  partFruitsLegumes?: number
+  /** Portion usuelle proposée à la saisie. */
+  portionG?: number
+  portionLibelle?: string
+  nutriScore?: NutriScore
+  /**
+   * Vrai quand la note vient de notre calcul et non de l'étiquette officielle.
+   * L'écran doit le dire : un score estimé n'engage pas le fabricant.
+   */
+  nutriScoreEstime?: boolean
+  source: SourceAliment
+}
+
+/** Un aliment réellement mangé, à une date et un moment donnés. */
+export interface EntreeJournal {
+  id: string
+  date: string
+  moment: Moment
+  horodatage: string
+  aliment: Aliment
+  quantiteG: number
+}
+
+/**
+ * Une mesure importée de l'app Santé d'Apple.
+ *
+ * Les PWA n'ont aucun accès à HealthKit : ces valeurs arrivent par l'import
+ * du fichier d'export, jamais par une synchronisation.
+ */
+export interface MesureSante {
+  date: string
+  pas?: number
+  depenseKcal?: number
+  poidsKg?: number
 }

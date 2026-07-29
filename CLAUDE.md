@@ -8,9 +8,15 @@ modification. Le mettre à jour **après** chaque évolution importante
 
 ## Ce qu'est le projet
 
-**Équilibre** — application web installable (PWA) de suivi diététique.
-Une seule base de code : le site *est* l'application, installable sur iPhone
-et Android depuis le navigateur, sans App Store.
+**Équilibre** — application web installable (PWA) de suivi diététique et coach
+nutrition. Une seule base de code : le site *est* l'application, installable
+sur iPhone et Android depuis le navigateur, sans App Store.
+
+Le produit tient sur un **journal alimentaire réel** : l'utilisateur note ce
+qu'il mange (recherche, code-barres, photo, saisie), et tout le reste —
+mosaïque, analyses, top/flop, recommandations — en découle. Le mode « plan
+prescrit » d'origine (cocher les composants d'une ordonnance) subsiste en
+parallèle sur `/app/plan`, pour les personnes suivies par une diététicienne.
 
 Dépôt : `EDL-Yhnguyen/di-t-ticien` (public)
 Production : https://di-t-ticien.vercel.app
@@ -40,7 +46,13 @@ définit pas le produit.
 | Animation | framer-motion | ^12.42.2 |
 | Icônes | lucide-react | ^1.27.0 |
 | Backend | @supabase/supabase-js | ^2.110.9 |
+| Codes-barres | zxing-wasm (repli iOS) | ^3.1.2 |
+| Vision (serveur) | @anthropic-ai/sdk | ^0.115.0 |
 | Hébergement | Vercel | — |
+
+**`@anthropic-ai/sdk` ne doit jamais être importé depuis `src/`.** Il n'existe
+que pour `api/analyser-assiette.ts`. Un contrôle rapide après build :
+`grep -c anthropic dist/assets/index-*.js` doit renvoyer 0.
 
 **Pas de framework serveur.** L'application est entièrement cliente ; Supabase
 fournit l'authentification et la base. Tout code ayant besoin d'un secret
@@ -90,6 +102,19 @@ src/
     badges.ts           BADGES[] déclaratif + badgesADebloquer()
     recettes/           catalogue de recettes (voir « Conventions »)
     utils.ts            helpers (jourISO, classes, …)
+    ── journal alimentaire ──
+    journal.ts          apports, totaux, bilan par repas, top/flop, cibles
+    nutriscore.ts       barème 2023, indice Équilibre, bandes vert/bleu/orange
+    aliments.ts         base d'aliments courants embarquée + recherche locale
+    openfoodfacts.ts    recherche et code-barres (API publique, sans clé)
+    decodeur.ts         BarcodeDetector, avec repli WebAssembly pour iOS
+    photo.ts            préparation de l'image + appel de /api
+    coach.ts            analyses, recommandations, alternatives (règles)
+    appleSante.ts       lecture par tranches de l'export.xml d'Apple Santé
+  components/
+    Mosaique.tsx        treemap « squarified » : aire = kcal, couleur = Nutri
+    nutrition.tsx       PastilleNutri, JaugeEnergie, BarreMacro, bandes
+    Scanner.tsx         caméra + boucle de décodage des codes-barres
   pages/                un fichier par écran, nommé comme la route
 public/
   sw.js                 service worker (cache)
@@ -97,6 +122,8 @@ public/
   icone-*.png           icônes d'installation
 supabase/
   schema.sql            à exécuter une fois dans le SQL Editor
+api/
+  analyser-assiette.ts  fonction Vercel Edge : photo → aliments estimés
 ```
 
 ### Écrans actuels
@@ -105,7 +132,9 @@ supabase/
 |---|---|---|
 | `/` | `Accueil.tsx` | page publique |
 | `/connexion`, `/inscription` | `Connexion.tsx` | authentification |
-| `/app` | `Aujourdhui.tsx` | écran principal du jour |
+| `/app` | `Aujourdhui.tsx` | mosaïque du jour, analyses, recommandation |
+| `/app/ajouter` | `Ajouter.tsx` | recherche, code-barres, photo, saisie |
+| `/app/sante` | `Sante.tsx` | import du fichier Apple Santé |
 | `/app/poids` | `Poids.tsx` | pesées, tendance, date d'arrivée estimée |
 | `/app/envies` | `Envies.tsx` | anti-grignotage, minuteur, journal |
 | `/app/cuisine` | `Cuisine.tsx` | recettes + liste de courses |
@@ -205,6 +234,61 @@ dans un des deux thèmes.
 - Réservés au bandeau (texte blanc dessus) : `bandeau-haut`, `bandeau-bas`
 - Rayons : `rounded-card` (1.5rem), `rounded-tile` (1rem)
 - Polices : `--font-display` (Faustina, d'office sur h1/h2/h3), `--font-sans` (Figtree)
+
+---
+
+## Le journal alimentaire
+
+### Le modèle, en trois objets
+
+`Aliment` porte des `ValeursPour100` (kcal, protéines, glucides, sucres,
+lipides, saturés, fibres, sel) — l'unité de tous les étiquetages européens et
+ce que renvoie Open Food Facts. `EntreeJournal` associe un aliment, une
+quantité en grammes, une date et un `Moment`. Tout le reste se dérive :
+`src/lib/journal.ts` ne stocke rien, il calcule.
+
+**`Moment` compte désormais `collation`.** Toute table `Record<Moment, …>`
+doit avoir ses quatre clés, sinon le typecheck échoue — c'est voulu.
+
+### Nutri-Score : d'où vient la note
+
+| Source | Note | Marquage |
+|---|---|---|
+| Open Food Facts | déclarée par le fabricant, **fait foi** | aucune |
+| Notre calcul (`nutriscore.ts`) | barème 2023, aliments saisis et recettes | `nutriScoreEstime: true` |
+
+Une note estimée **doit** s'afficher comme telle (`<PastilleNutri estime />`).
+Ne jamais recalculer par-dessus une note d'Open Food Facts.
+
+### Deux échelles de couleur, deux questions
+
+- **Nutri-Score A→E** (`--nutri-*`) : la *qualité* d'un aliment. C'est
+  l'échelle officielle imprimée sur les emballages — ne pas la redessiner, sa
+  reconnaissance immédiate est tout son intérêt. Chaque teinte a son encre
+  (`--nutri-c-encre` etc.) ; emprunter celle d'une autre casse le contraste.
+- **Bandes vert / bleu / orange** (`--bande-*`) : la *charge calorique* d'une
+  recette, relative à l'objectif de la personne. 500 kcal n'est pas la même
+  chose pour deux profils, donc la bande se calcule, elle n'est jamais figée
+  dans le catalogue.
+
+`--macro-*` a ses propres valeurs et n'emprunte pas les jetons `assiette-*`,
+réservés à `PagePlan` : « légume » et « lipide » ne veulent pas dire la même
+chose.
+
+### Les limites, à ne pas maquiller dans l'interface
+
+- **Apple Santé est un import, pas une synchronisation.** Aucune API web
+  n'accède à HealthKit. `Sante.tsx` le dit explicitement ; ne pas
+  réintroduire le mot « synchroniser ».
+- **Le scan photo est une estimation.** L'écran laisse corriger chaque
+  quantité avant l'ajout au journal. Sans `ANTHROPIC_API_KEY`, la fonction
+  répond 503 avec `configurable: true` et l'onglet renvoie vers la saisie
+  manuelle — l'application reste entièrement utilisable.
+- **Weight Watchers est propriétaire.** L'« indice Équilibre » est notre
+  formule, sur données publiques. Ne pas aspirer leur catalogue.
+- **`BarcodeDetector` n'existe pas sur Safari.** D'où le repli zxing-wasm.
+  Le `.wasm` est servi depuis notre domaine via `?url` (et non depuis un
+  CDN) pour que le service worker le mette en cache.
 
 ---
 
@@ -326,6 +410,35 @@ Construction d'Équilibre : assiette, plan, poids, envies, cuisine, jeux,
 profil, badges. Authentification Supabase avec repli navigateur. Déploiement
 Vercel. Palette de l'assiette validée au script de simulation daltonienne.
 Police Faustina retenue pour l'affichage.
+
+### 29 juillet 2026 — Le journal alimentaire et la mosaïque
+
+Bascule du produit : d'une liste à cocher contre une ordonnance vers un vrai
+journal alimentaire, socle du coach nutrition.
+
+- **L'assiette centrale est remplacée par la mosaïque** (`Mosaique.tsx`) :
+  un treemap où l'aire dit les calories et la couleur dit le Nutri-Score. Le
+  top et le flop du jour s'y lisent sans calcul. Concept choisi par Yann parmi
+  trois propositions (anneaux façon Apple Santé, ruban horaire).
+- **Quatre façons d'ajouter** : recherche locale (base embarquée, hors
+  connexion) et Open Food Facts, scan de code-barres, photo d'assiette,
+  saisie manuelle des valeurs de l'emballage.
+- **Analyse repas par repas**, recommandation du repas suivant et alternatives
+  — toutes en règles lisibles dans `coach.ts`, jamais par un modèle : une
+  remarque sur l'alimentation de quelqu'un doit pouvoir être expliquée.
+- **Onglet « Ajouter » au centre de la barre**, en relief. « Envies » sort des
+  onglets et reste atteignable depuis Aujourd'hui et le profil.
+- **Import Apple Santé** par le fichier d'export, lu par tranches de 4 Mo.
+- **Recettes colorées** vert / bleu / orange selon leur charge pour le profil.
+
+**Vérifié à l'écran** avant livraison : mobile 390 px et bureau 1280 px,
+thèmes clair et sombre, aucune erreur console. Deux défauts corrigés à ce
+moment-là — un quatrième onglet hors écran sur mobile, et des barres de macros
+qui empruntaient les couleurs réservées à l'assiette.
+
+**Reste à faire :** `ANTHROPIC_API_KEY` à ajouter dans Vercel pour activer le
+scan photo ; l'éclatement de `recettes.ts` en `recettes/` est toujours en
+suspens ; conformité RGPD (consentement, export, suppression) toujours ouverte.
 
 ### 28 juillet 2026 — Mémoire projet et audit
 

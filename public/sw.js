@@ -7,7 +7,7 @@
  * navigateur, jamais dans le cache HTTP.
  */
 
-const VERSION = 'equilibre-v1'
+const VERSION = 'equilibre-v2'
 const COQUILLE = `${VERSION}-coquille`
 const RESSOURCES = `${VERSION}-ressources`
 const POLICES = `${VERSION}-polices`
@@ -54,7 +54,13 @@ self.addEventListener('fetch', (evenement) => {
     return
   }
 
-  // Fichiers versionnés par empreinte : le cache d'abord, ils ne changent jamais.
+  // Les analyses d'assiette passent par le réseau, toujours : une réponse en
+  // cache serait celle d'une autre photo.
+  if (url.origin === self.location.origin && url.pathname.startsWith('/api/')) return
+
+  // Fichiers versionnés par empreinte : le cache d'abord, ils ne changent
+  // jamais. C'est aussi ce qui garde le décodeur de codes-barres (un .wasm
+  // émis dans /assets/) disponible hors connexion après le premier scan.
   if (url.origin === self.location.origin && url.pathname.startsWith('/assets/')) {
     evenement.respondWith(
       caches.match(requete).then(

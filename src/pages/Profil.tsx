@@ -4,9 +4,11 @@ import {
   ChevronRight,
   ExternalLink,
   Gamepad2,
+  HeartPulse,
   LogOut,
   Moon,
   NotebookText,
+  ShieldHalf,
   Stethoscope,
   Sun,
 } from 'lucide-react'
@@ -133,6 +135,25 @@ export function Profil() {
             <Award size={19} className="shrink-0 text-apricot" aria-hidden="true" />
             <span className="flex-1 font-medium text-ink">Mes badges</span>
             <span className="text-sm text-ink-faint tnum">{etat.badges.length}</span>
+            <ChevronRight size={17} className="shrink-0 text-ink-faint" aria-hidden="true" />
+          </Lien>
+          <Lien
+            vers="/app/sante"
+            className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken"
+          >
+            <HeartPulse size={19} className="shrink-0 text-basil" aria-hidden="true" />
+            <span className="flex-1 font-medium text-ink">Importer depuis Apple Santé</span>
+            {etat.mesuresSante.length > 0 && (
+              <span className="text-sm text-ink-faint tnum">{etat.mesuresSante.length} j</span>
+            )}
+            <ChevronRight size={17} className="shrink-0 text-ink-faint" aria-hidden="true" />
+          </Lien>
+          <Lien
+            vers="/app/envies"
+            className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken"
+          >
+            <ShieldHalf size={19} className="shrink-0 text-berry" aria-hidden="true" />
+            <span className="flex-1 font-medium text-ink">Anti-grignotage</span>
             <ChevronRight size={17} className="shrink-0 text-ink-faint" aria-hidden="true" />
           </Lien>
           <Lien

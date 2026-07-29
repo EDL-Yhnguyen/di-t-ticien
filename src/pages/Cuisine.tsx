@@ -1,5 +1,7 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Check, Clock, ShoppingBasket } from 'lucide-react'
+import { useSession } from '../context/AppContext'
+import { EtiquetteBande } from '../components/nutrition'
 import { Carte, EtatVide, Etiquette, Feuille, TitreSection } from '../components/ui'
 import {
   PLACARD,
@@ -9,7 +11,12 @@ import {
   recetteParId,
   type Recette,
 } from '../lib/recettes'
+import { cibleDuRepas } from '../lib/journal'
+import { LIBELLE_BANDE, bandePour } from '../lib/nutriscore'
+import type { Bande } from '../lib/nutriscore'
+import { objectifCalorique } from '../lib/nutrition'
 import { TEINTE_MOMENT } from '../lib/plan'
+import { poidsLePlusRecent } from '../lib/store'
 import { classes } from '../lib/utils'
 
 const MOMENTS = [
@@ -18,10 +25,33 @@ const MOMENTS = [
   { cle: 'diner', libelle: 'Dîner' },
 ] as const
 
+const BANDES: Bande[] = ['vert', 'bleu', 'orange']
+
 export function Cuisine() {
+  const { etat } = useSession()
   const [onglet, setOnglet] = useState<'recettes' | 'courses'>('recettes')
   const [ouverte, setOuverte] = useState<Recette | null>(null)
   const [panier, setPanier] = useState<string[]>([])
+  const [filtre, setFiltre] = useState<Bande | null>(null)
+
+  // La bande d'une recette dépend de la personne : 500 kcal est un dîner
+  // copieux pour l'une et un dîner juste pour l'autre. On la calcule donc
+  // contre l'objectif du profil, jamais contre un barème figé.
+  const objectif = objectifCalorique({
+    poidsKg: poidsLePlusRecent(etat),
+    tailleCm: etat.profil.tailleCm,
+    age: etat.profil.age,
+    sexe: etat.profil.sexe,
+    activite: etat.profil.activite,
+  })
+
+  const bandes = useMemo(() => {
+    const table = new Map<string, Bande>()
+    for (const recette of RECETTES) {
+      table.set(recette.id, bandePour(recette.kcal, cibleDuRepas(objectif, recette.moment)))
+    }
+    return table
+  }, [objectif])
 
   function basculerPanier(id: string) {
     setPanier((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]))
@@ -61,8 +91,41 @@ export function Cuisine() {
 
       {onglet === 'recettes' ? (
         <div className="space-y-6">
+          <fieldset>
+            <legend className="mb-2 text-xs font-bold tracking-[0.14em] text-ink-faint uppercase">
+              Charge du repas
+            </legend>
+            <div className="flex flex-wrap gap-1.5">
+              {[null, ...BANDES].map((bande) => {
+                const actif = filtre === bande
+                return (
+                  <button
+                    key={bande ?? 'toutes'}
+                    type="button"
+                    aria-pressed={actif}
+                    onClick={() => setFiltre(bande)}
+                    className={classes(
+                      'rounded-full px-3.5 py-2 text-xs font-semibold transition',
+                      actif
+                        ? 'bg-iris text-white'
+                        : 'bg-surface text-ink-soft hover:bg-sunken hover:text-ink',
+                    )}
+                  >
+                    {bande ? LIBELLE_BANDE[bande] : 'Toutes'}
+                  </button>
+                )
+              })}
+            </div>
+            <p className="mt-2 text-xs text-ink-soft">
+              Calculé sur votre objectif du jour : « léger » tient largement dans le repas,
+              « copieux » le dépasse.
+            </p>
+          </fieldset>
+
           {MOMENTS.map(({ cle, libelle }) => {
-            const recettes = RECETTES.filter((r) => r.moment === cle)
+            const recettes = RECETTES.filter(
+              (r) => r.moment === cle && (filtre === null || bandes.get(r.id) === filtre),
+            )
             if (recettes.length === 0) return null
             return (
               <section key={cle}>
@@ -72,20 +135,18 @@ export function Cuisine() {
                 <ul className="space-y-2">
                   {recettes.map((recette) => {
                     const teinte = TEINTE_MOMENT[recette.moment]
+                    const bande = bandes.get(recette.id) ?? 'bleu'
                     return (
                       <li key={recette.id}>
                         <Carte className="flex items-stretch gap-3 overflow-hidden">
-                          <span
-                            aria-hidden="true"
-                            className={classes('w-1.5 shrink-0', teinte.barre)}
-                          />
                           <button
                             type="button"
                             onClick={() => setOuverte(recette)}
-                            className="min-w-0 flex-1 py-4 text-left"
+                            className="min-w-0 flex-1 py-4 pl-4 text-left"
                           >
                             <span className="block font-semibold text-ink">{recette.titre}</span>
-                            <span className="mt-1.5 flex flex-wrap items-center gap-2">
+                            <span className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                              <EtiquetteBande bande={bande} />
                               <span
                                 className={classes(
                                   'flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold',
@@ -131,21 +192,47 @@ export function Cuisine() {
               </section>
             )
           })}
+
+          {filtre !== null && !RECETTES.some((r) => bandes.get(r.id) === filtre) && (
+            <EtatVide
+              emoji="🥕"
+              titre={`Aucune recette « ${LIBELLE_BANDE[filtre].toLowerCase()} »`}
+              action={
+                <button
+                  type="button"
+                  onClick={() => setFiltre(null)}
+                  className="text-sm font-semibold text-iris underline underline-offset-4"
+                >
+                  Voir toutes les recettes
+                </button>
+              }
+            >
+              Le catalogue ne contient rien dans cette bande pour votre objectif actuel. Les
+              bandes se recalculent dès que votre poids ou votre activité changent.
+            </EtatVide>
+          )}
         </div>
       ) : (
         <ListeCourses panier={panier} />
       )}
 
       <Feuille ouvert={ouverte !== null} titre={ouverte?.titre ?? ''} onFermer={() => setOuverte(null)}>
-        {ouverte && <DetailRecette recette={ouverte} />}
+        {ouverte && (
+          <DetailRecette recette={ouverte} bande={bandes.get(ouverte.id) ?? 'bleu'} />
+        )}
       </Feuille>
     </div>
   )
 }
 
-function DetailRecette({ recette }: { recette: Recette }) {
+function DetailRecette({ recette, bande }: { recette: Recette; bande: Bande }) {
   return (
     <div className="space-y-6">
+      <p className="flex items-center gap-2 rounded-tile bg-sunken px-3 py-2.5">
+        <EtiquetteBande bande={bande} />
+        <span className="text-xs text-ink-soft">pour votre objectif du jour</span>
+      </p>
+
       <div className="flex flex-wrap gap-2">
         <Etiquette ton="neutre">{recette.minutes} min</Etiquette>
         <Etiquette ton="neutre">{recette.kcal} kcal</Etiquette>

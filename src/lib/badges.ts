@@ -1,5 +1,5 @@
 import type { EtatUtilisateur } from './store'
-import { poidsActuel } from './store'
+import { poidsLePlusRecent } from './store'
 import { VERRES_PAR_JOUR } from './plan'
 import { jourISO } from './utils'
 
@@ -12,10 +12,18 @@ export interface Badge {
   atteint: (etat: EtatUtilisateur) => boolean
 }
 
-/** Une journée compte dès que deux repas sur trois ont été renseignés. */
+/**
+ * Une journée compte dès que deux repas ont été renseignés.
+ *
+ * Les deux façons de renseigner comptent : noter ce qu'on a mangé dans le
+ * journal, ou cocher les composants du plan prescrit. Ne reconnaître que l'une
+ * des deux romprait la série de quelqu'un qui change de méthode en cours de
+ * route — c'est-à-dire de tous ceux qui viennent de l'ancienne version.
+ */
 export function journeeRenseignee(etat: EtatUtilisateur, date: string): boolean {
-  const repas = etat.repas.filter((r) => r.date === date && r.composantsCoches.length > 0)
-  return repas.length >= 2
+  const coches = etat.repas.filter((r) => r.date === date && r.composantsCoches.length > 0)
+  const notes = new Set(etat.journal.filter((e) => e.date === date).map((e) => e.moment))
+  return coches.length + notes.size >= 2
 }
 
 /**
@@ -36,7 +44,10 @@ export function serie(etat: EtatUtilisateur): number {
 }
 
 export function joursRenseignes(etat: EtatUtilisateur): number {
-  const jours = new Set(etat.repas.filter((r) => r.composantsCoches.length > 0).map((r) => r.date))
+  const jours = new Set([
+    ...etat.repas.filter((r) => r.composantsCoches.length > 0).map((r) => r.date),
+    ...etat.journal.map((e) => e.date),
+  ])
   return [...jours].filter((d) => journeeRenseignee(etat, d)).length
 }
 
@@ -45,7 +56,7 @@ export function enviesResistees(etat: EtatUtilisateur): number {
 }
 
 export function kilosPerdus(etat: EtatUtilisateur): number {
-  return Math.max(0, etat.profil.poidsDepartKg - poidsActuel(etat))
+  return Math.max(0, etat.profil.poidsDepartKg - poidsLePlusRecent(etat))
 }
 
 function joursHydratationAtteinte(etat: EtatUtilisateur): number {
@@ -74,7 +85,8 @@ export const BADGES: Badge[] = [
     titre: 'Première assiette',
     condition: 'Renseigner un premier repas',
     emoji: '🍽️',
-    atteint: (etat) => etat.repas.some((r) => r.composantsCoches.length > 0),
+    atteint: (etat) =>
+      etat.journal.length > 0 || etat.repas.some((r) => r.composantsCoches.length > 0),
   },
   palierSerie(3, 'Trois jours tenus', '🌱'),
   palierSerie(7, 'Une semaine pleine', '🌿'),
@@ -91,7 +103,7 @@ export const BADGES: Badge[] = [
     titre: 'Objectif atteint',
     condition: 'Atteindre le poids visé',
     emoji: '🏆',
-    atteint: (etat) => poidsActuel(etat) <= etat.profil.poidsObjectifKg,
+    atteint: (etat) => poidsLePlusRecent(etat) <= etat.profil.poidsObjectifKg,
   },
   {
     code: 'envie-1',

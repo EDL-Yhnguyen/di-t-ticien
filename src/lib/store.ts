@@ -3,9 +3,12 @@ import { estCompteElodie } from './auth'
 import { supabase } from './supabase'
 import { jourISO } from './utils'
 import type {
+  Aliment,
+  EntreeJournal,
   EnvieEntree,
   JournalEau,
   JournalRepas,
+  MesureSante,
   PeseeEntree,
   Profil,
   ScoreJeu,
@@ -22,7 +25,14 @@ import type {
 export interface EtatUtilisateur {
   profil: Profil
   pesees: PeseeEntree[]
+  /** Cases cochées du plan prescrit — l'ancien mode, conservé tel quel. */
   repas: JournalRepas[]
+  /** Ce qui a réellement été mangé, avec ses valeurs nutritionnelles. */
+  journal: EntreeJournal[]
+  /** Aliments créés à la main par l'utilisateur, proposés à la recherche. */
+  alimentsPerso: Aliment[]
+  /** Mesures importées depuis l'app Santé d'Apple. */
+  mesuresSante: MesureSante[]
   eau: JournalEau[]
   envies: EnvieEntree[]
   scores: ScoreJeu[]
@@ -62,6 +72,9 @@ export function etatInitial(u: Utilisateur): EtatUtilisateur {
     profil,
     pesees: [{ date: jourISO(), poidsKg: profil.poidsDepartKg }],
     repas: [],
+    journal: [],
+    alimentsPerso: [],
+    mesuresSante: [],
     eau: [],
     envies: [],
     scores: [],
@@ -122,6 +135,9 @@ function fusionner(u: Utilisateur, partiel: Partial<EtatUtilisateur>): EtatUtili
     profil: { ...base.profil, ...partiel.profil, id: u.id, email: u.email },
     pesees: partiel.pesees ?? base.pesees,
     repas: partiel.repas ?? [],
+    journal: partiel.journal ?? [],
+    alimentsPerso: partiel.alimentsPerso ?? [],
+    mesuresSante: partiel.mesuresSante ?? [],
     eau: partiel.eau ?? [],
     envies: partiel.envies ?? [],
     scores: partiel.scores ?? [],
@@ -156,4 +172,26 @@ export function meilleurScore(etat: EtatUtilisateur, jeu: string): number {
   return etat.scores.filter((s) => s.jeu === jeu).reduce((max, s) => Math.max(max, s.score), 0)
 }
 
-export type { EnvieEntree, JournalEau, JournalRepas, PeseeEntree, Profil, ScoreJeu }
+/**
+ * Le poids le plus récent, en préférant une mesure importée d'Apple Santé
+ * quand elle est plus fraîche que la dernière pesée saisie à la main.
+ */
+export function poidsLePlusRecent(etat: EtatUtilisateur): number {
+  const importees = etat.mesuresSante
+    .filter((m) => typeof m.poidsKg === 'number')
+    .map((m) => ({ date: m.date, poidsKg: m.poidsKg as number }))
+  const toutes = [...etat.pesees, ...importees].sort((a, b) => a.date.localeCompare(b.date))
+  return toutes.at(-1)?.poidsKg ?? etat.profil.poidsDepartKg
+}
+
+export type {
+  Aliment,
+  EntreeJournal,
+  EnvieEntree,
+  JournalEau,
+  JournalRepas,
+  MesureSante,
+  PeseeEntree,
+  Profil,
+  ScoreJeu,
+}

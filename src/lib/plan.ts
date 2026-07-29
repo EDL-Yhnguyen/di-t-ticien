@@ -146,6 +146,7 @@ export const OPTIONS_HERBALIFE: { id: string; libelle: string; kcal: number }[] 
 export const TEINTE_MOMENT: Record<Moment, { fond: string; texte: string; barre: string }> = {
   'petit-dejeuner': { fond: 'bg-apricot-wash', texte: 'text-apricot', barre: 'bg-apricot' },
   dejeuner: { fond: 'bg-basil-wash', texte: 'text-basil', barre: 'bg-basil' },
+  collation: { fond: 'bg-berry-wash', texte: 'text-berry', barre: 'bg-berry' },
   diner: { fond: 'bg-iris-wash', texte: 'text-iris', barre: 'bg-iris' },
 }
 

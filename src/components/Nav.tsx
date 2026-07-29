@@ -1,13 +1,20 @@
-import { ChefHat, CloudOff, LineChart, ShieldHalf, User, Utensils } from 'lucide-react'
+import { ChefHat, CloudOff, LineChart, Plus, ShieldHalf, User, Utensils } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useApp } from '../context/AppContext'
 import { Lien, useRoutage } from '../lib/router'
 import { classes } from '../lib/utils'
 
+/**
+ * Noter un aliment est devenu le geste principal de l'application : il occupe
+ * donc le centre de la barre, en relief, là où le pouce tombe naturellement.
+ * « Envies » quitte les onglets — l'écran reste atteignable depuis le grand
+ * bouton d'Aujourd'hui et depuis les raccourcis du profil, qui sont les deux
+ * endroits où on le cherche vraiment.
+ */
 const ONGLETS = [
   { vers: '/app', libelle: 'Aujourd’hui', Icone: Utensils },
   { vers: '/app/poids', libelle: 'Poids', Icone: LineChart },
-  { vers: '/app/envies', libelle: 'Envies', Icone: ShieldHalf },
+  { vers: '/app/ajouter', libelle: 'Ajouter', Icone: Plus, saillant: true },
   { vers: '/app/cuisine', libelle: 'Cuisine', Icone: ChefHat },
   { vers: '/app/profil', libelle: 'Profil', Icone: User },
 ]
@@ -25,9 +32,38 @@ export function BarreOnglets() {
       aria-label="Navigation principale"
       className="safe-bottom fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/90 backdrop-blur-lg md:hidden"
     >
-      <ul className="mx-auto flex max-w-lg">
-        {ONGLETS.map(({ vers, libelle, Icone }) => {
+      <ul className="mx-auto flex max-w-lg items-end">
+        {ONGLETS.map(({ vers, libelle, Icone, saillant }) => {
           const actif = estActif(chemin, vers)
+
+          if (saillant) {
+            return (
+              <li key={vers} className="flex-1">
+                <Lien
+                  vers={vers}
+                  className="flex flex-col items-center gap-1 px-1 pt-1 pb-1.5"
+                >
+                  <span
+                    className={classes(
+                      'grid size-11 place-items-center rounded-2xl text-white shadow-soft transition',
+                      actif ? 'bg-iris brightness-110' : 'bg-iris hover:brightness-110',
+                    )}
+                  >
+                    <Icone size={23} strokeWidth={2.6} aria-hidden="true" />
+                  </span>
+                  <span
+                    className={classes(
+                      'text-[0.6875rem] font-semibold',
+                      actif ? 'text-iris' : 'text-ink-faint',
+                    )}
+                  >
+                    {libelle}
+                  </span>
+                </Lien>
+              </li>
+            )
+          }
+
           return (
             <li key={vers} className="flex-1">
               <Lien
@@ -72,25 +108,31 @@ export function RailLateral() {
       </Lien>
 
       <ul className="space-y-1">
-        {ONGLETS.map(({ vers, libelle, Icone }) => {
-          const actif = estActif(chemin, vers)
-          return (
-            <li key={vers}>
-              <Lien
-                vers={vers}
-                className={classes(
-                  'flex items-center gap-3 rounded-2xl px-3 py-2.5 font-semibold transition',
-                  actif
-                    ? 'bg-iris-wash text-iris'
-                    : 'text-ink-soft hover:bg-sunken hover:text-ink',
-                )}
-              >
-                <Icone size={20} strokeWidth={actif ? 2.4 : 1.9} aria-hidden="true" />
-                {libelle}
-              </Lien>
-            </li>
-          )
-        })}
+        {/* Le rail a la place d'afficher Envies, que la barre mobile n'a pas. */}
+        {[...ONGLETS, { vers: '/app/envies', libelle: 'Envies', Icone: ShieldHalf }].map(
+          ({ vers, libelle, Icone }) => {
+            const actif = estActif(chemin, vers)
+            const ajout = vers === '/app/ajouter'
+            return (
+              <li key={vers}>
+                <Lien
+                  vers={vers}
+                  className={classes(
+                    'flex items-center gap-3 rounded-2xl px-3 py-2.5 font-semibold transition',
+                    ajout
+                      ? 'bg-iris text-white hover:brightness-110'
+                      : actif
+                        ? 'bg-iris-wash text-iris'
+                        : 'text-ink-soft hover:bg-sunken hover:text-ink',
+                  )}
+                >
+                  <Icone size={20} strokeWidth={actif || ajout ? 2.4 : 1.9} aria-hidden="true" />
+                  {libelle}
+                </Lien>
+              </li>
+            )
+          },
+        )}
       </ul>
     </nav>
   )
