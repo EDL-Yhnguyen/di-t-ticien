@@ -557,10 +557,13 @@ retirés, reconnexion refusée). Un défaut corrigé à ce moment-là : l'avis d
 suppression partielle était placé sur l'accueil alors que le parcours atterrit
 sur `/connexion`.
 
-**Reste à faire :** `EDITEUR.contact` à remplacer par une vraie boîte relevée
-et `REGION_BASE` à confirmer, dans `src/lib/legal.ts` ; `supabase/schema.sql`
-à rejouer pour créer `supprimer_mon_compte()` ; `ANTHROPIC_API_KEY` à ajouter
-dans Vercel pour activer le scan photo.
+**Reste à faire :** `supprimer_mon_compte()` **n'existe pas encore dans la
+base** — vérifié le 29/07/2026, seule `marquer_maj` est déclarée. Tant qu'elle
+manque, « supprimer mon compte » efface les données mais laisse l'identifiant,
+et l'application le dit. Le connecteur Supabase est en lecture seule : c'est
+un copier-coller à faire dans le SQL Editor. Restent aussi `REGION_BASE` à
+confirmer dans `legal.ts`, et `ANTHROPIC_API_KEY` à ajouter dans Vercel pour
+activer le scan photo.
 
 ### 28 juillet 2026 — Mémoire projet et audit
 

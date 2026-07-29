@@ -43,7 +43,7 @@ export const EDITEUR: Editeur = {
   nom: '',
   statut: 'particulier, éditeur à titre non professionnel',
   adresse: '',
-  contact: 'equilibre-contact@example.com',
+  contact: 'yhnguyen.edl@gmail.com',
 }
 
 /**
