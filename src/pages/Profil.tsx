@@ -1,35 +1,44 @@
 import { useEffect, useState } from 'react'
 import {
+  AlertCircle,
   Award,
   ChevronRight,
+  Download,
   ExternalLink,
   Gamepad2,
   HeartPulse,
   LogOut,
   Moon,
   NotebookText,
+  ShieldCheck,
   ShieldHalf,
   Stethoscope,
   Sun,
+  Trash2,
 } from 'lucide-react'
 import { useApp, useSession } from '../context/AppContext'
 import { Bouton, Bascule, Carte, Champ, ChoixListe, Feuille, TitreSection } from '../components/ui'
 import { Lien } from '../lib/router'
 import { LIBELLE_ACTIVITE, depenseJournaliere, objectifCalorique } from '../lib/nutrition'
-import { poidsActuel } from '../lib/store'
+import { poidsActuel, type EtatUtilisateur } from '../lib/store'
 import { modeDemo } from '../lib/supabase'
+import { telechargerExport } from '../lib/rgpd'
 import type { Activite, Praticien } from '../lib/types'
-import { entier, nombre } from '../lib/utils'
+import { dateComplete, entier, nombre } from '../lib/utils'
 
 const CLE_THEME = 'equilibre:theme'
 
 const PRATICIEN_VIDE: Praticien = { nom: '', role: '', email: '', telephone: '', suivi: '' }
 
 export function Profil() {
-  const { seDeconnecter } = useApp()
+  const { seDeconnecter, supprimerCompte } = useApp()
   const { etat, modifier } = useSession()
   const [mesuresOuvertes, setMesuresOuvertes] = useState(false)
   const [praticienOuvert, setPraticienOuvert] = useState(false)
+  const [suppressionOuverte, setSuppressionOuverte] = useState(false)
+  const [suppressionEnCours, setSuppressionEnCours] = useState(false)
+  const [erreurSuppression, setErreurSuppression] = useState<string | null>(null)
+  const [confirmationSaisie, setConfirmationSaisie] = useState('')
   const [sombre, setSombre] = useState(() => document.documentElement.classList.contains('dark'))
 
   const [taille, setTaille] = useState(String(etat.profil.tailleCm))
@@ -63,6 +72,23 @@ export function Profil() {
       brouillon.profil.activite = activite
     })
     setMesuresOuvertes(false)
+  }
+
+  function ouvrirSuppression() {
+    setConfirmationSaisie('')
+    setErreurSuppression(null)
+    setSuppressionOuverte(true)
+  }
+
+  async function confirmerSuppression() {
+    setErreurSuppression(null)
+    setSuppressionEnCours(true)
+    try {
+      await supprimerCompte()
+    } catch (cause) {
+      setErreurSuppression(cause instanceof Error ? cause.message : 'La suppression a échoué.')
+      setSuppressionEnCours(false)
+    }
   }
 
   // Repartir de l'état à chaque ouverture : les champs locaux ne se
@@ -256,8 +282,51 @@ export function Profil() {
           <p className="text-sm text-ink-soft">
             {modeDemo
               ? 'Vos données sont enregistrées dans ce navigateur uniquement. Elles ne quittent pas cet appareil, et disparaîtraient si vous effaciez les données du site.'
-              : 'Vos données sont enregistrées sur votre compte et synchronisées entre vos appareils. Vous seule y avez accès.'}
+              : 'Vos données sont enregistrées sur votre compte et synchronisées entre vos appareils. Vous seul y avez accès.'}
           </p>
+          {etat.consentement && (
+            <p className="mt-3 flex items-start gap-2 border-t border-line pt-3 text-xs text-ink-faint">
+              <ShieldCheck size={14} className="mt-0.5 shrink-0 text-basil" aria-hidden="true" />
+              Traitement accepté le {dateComplete(etat.consentement.accepteLe)}.
+            </p>
+          )}
+        </Carte>
+
+        <Carte className="mt-3 divide-y divide-line">
+          <button
+            type="button"
+            onClick={() => telechargerExport(etat)}
+            className="flex w-full items-center gap-3 px-5 py-4 text-left transition hover:bg-sunken"
+          >
+            <Download size={19} className="shrink-0 text-iris" aria-hidden="true" />
+            <span className="min-w-0 flex-1">
+              <span className="block font-medium text-ink">Exporter mes données</span>
+              <span className="block text-xs text-ink-soft">
+                Tout ce que l’application conserve, dans un fichier.
+              </span>
+            </span>
+          </button>
+          <Lien
+            vers="/confidentialite"
+            className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken"
+          >
+            <ShieldCheck size={19} className="shrink-0 text-basil" aria-hidden="true" />
+            <span className="flex-1 font-medium text-ink">Confidentialité et mentions légales</span>
+            <ChevronRight size={17} className="shrink-0 text-ink-faint" aria-hidden="true" />
+          </Lien>
+          <button
+            type="button"
+            onClick={ouvrirSuppression}
+            className="flex w-full items-center gap-3 px-5 py-4 text-left transition hover:bg-sunken"
+          >
+            <Trash2 size={19} className="shrink-0 text-berry" aria-hidden="true" />
+            <span className="min-w-0 flex-1">
+              <span className="block font-medium text-berry">Supprimer mon compte</span>
+              <span className="block text-xs text-ink-soft">
+                Efface définitivement vos données et votre compte.
+              </span>
+            </span>
+          </button>
         </Carte>
       </section>
 
@@ -311,6 +380,61 @@ export function Profil() {
           />
           <Bouton pleineLargeur onClick={enregistrerMesures}>
             Enregistrer
+          </Bouton>
+        </div>
+      </Feuille>
+
+      <Feuille
+        ouvert={suppressionOuverte}
+        titre="Supprimer mon compte"
+        onFermer={() => setSuppressionOuverte(false)}
+      >
+        <div className="space-y-5">
+          <p className="text-sm leading-relaxed text-ink-soft">
+            Tout part : votre profil{inventaire(etat)}. Aucune copie n’est conservée et il n’y a
+            pas de délai pour revenir en arrière.
+          </p>
+          <p className="rounded-tile bg-sunken px-4 py-3 text-sm text-ink-soft">
+            Si vous voulez en garder une trace, fermez cette fenêtre et commencez par{' '}
+            <button
+              type="button"
+              onClick={() => telechargerExport(etat)}
+              className="font-semibold text-iris underline underline-offset-2"
+            >
+              exporter vos données
+            </button>
+            .
+          </p>
+
+          <Champ
+            id="confirmation-suppression"
+            label="Tapez SUPPRIMER pour confirmer"
+            aide="Une saisie volontaire, pour qu’un bouton rouge ne suffise pas à tout effacer."
+            autoComplete="off"
+            autoCapitalize="characters"
+            spellCheck={false}
+            value={confirmationSaisie}
+            onChange={(e) => setConfirmationSaisie(e.target.value)}
+          />
+
+          {erreurSuppression && (
+            <p
+              role="alert"
+              className="flex items-start gap-2 rounded-2xl bg-berry-wash px-4 py-3 text-sm text-berry"
+            >
+              <AlertCircle size={17} className="mt-0.5 shrink-0" aria-hidden="true" />
+              {erreurSuppression}
+            </p>
+          )}
+
+          <Bouton
+            ton="alerte"
+            pleineLargeur
+            disabled={confirmationSaisie.trim().toUpperCase() !== 'SUPPRIMER' || suppressionEnCours}
+            onClick={() => void confirmerSuppression()}
+          >
+            <Trash2 size={17} aria-hidden="true" />
+            {suppressionEnCours ? 'Suppression…' : 'Supprimer définitivement'}
           </Bouton>
         </div>
       </Feuille>
@@ -376,6 +500,28 @@ export function Profil() {
       </Feuille>
     </div>
   )
+}
+
+/**
+ * Ce qu'on s'apprête à détruire, chiffré. Les catégories vides sont tues :
+ * annoncer « vos 0 entrée de journal » à quelqu'un qui n'en a aucune sonne
+ * faux, et allonge une phrase qu'il faut lire jusqu'au bout.
+ */
+function inventaire(etat: EtatUtilisateur): string {
+  const parts = [
+    [etat.pesees.length, 'pesée', 'pesées'],
+    [etat.journal.length, 'entrée de journal', 'entrées de journal'],
+    [etat.envies.length, 'envie notée', 'envies notées'],
+    [etat.badges.length, 'badge', 'badges'],
+  ] as const
+
+  const listees = parts
+    .filter(([n]) => n > 0)
+    .map(([n, singulier, pluriel]) => `${n} ${n > 1 ? pluriel : singulier}`)
+
+  if (listees.length === 0) return ''
+  if (listees.length === 1) return `, ${listees[0]}`
+  return `, ${listees.slice(0, -1).join(', ')} et ${listees.at(-1)}`
 }
 
 function Ligne({ libelle, valeur }: { libelle: string; valeur: string }) {

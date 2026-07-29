@@ -20,12 +20,23 @@ const FORMAT_COURT = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: '
 
 const FORMAT_MOIS = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' })
 
+/** Avec l'année — pour les dates qu'on relit des mois plus tard (consentement, mentions). */
+const FORMAT_COMPLET = new Intl.DateTimeFormat('fr-FR', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+})
+
 export function dateLongue(iso: string | Date): string {
   return FORMAT_LONG.format(typeof iso === 'string' ? new Date(`${iso}T12:00:00`) : iso)
 }
 
 export function dateCourte(iso: string | Date): string {
   return FORMAT_COURT.format(typeof iso === 'string' ? new Date(`${iso}T12:00:00`) : iso)
+}
+
+export function dateComplete(iso: string | Date): string {
+  return FORMAT_COMPLET.format(typeof iso === 'string' ? new Date(`${iso.slice(0, 10)}T12:00:00`) : iso)
 }
 
 export function moisAnnee(iso: string | Date): string {

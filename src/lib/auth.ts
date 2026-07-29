@@ -255,6 +255,34 @@ export async function utilisateurCourant(): Promise<Utilisateur | null> {
   return compte ? { id: compte.id, email: compte.email, prenom: compte.prenom } : null
 }
 
+/**
+ * Supprime le compte lui-même. Renvoie `false` quand seule la déconnexion a
+ * pu être faite — l'appelant doit alors le dire plutôt que de laisser croire
+ * à un effacement complet.
+ *
+ * `auth.admin.deleteUser` exige la clé `service_role`, qui n'a rien à faire
+ * dans un navigateur. La suppression passe donc par `supprimer_mon_compte`,
+ * une fonction `security definer` déclarée dans `supabase/schema.sql` qui
+ * n'efface que la ligne de son appelant. Tant qu'elle n'a pas été exécutée
+ * dans le projet Supabase, l'appel échoue : les données sont quand même
+ * détruites en amont, mais l'identifiant survit côté Supabase.
+ */
+export async function supprimerCompte(userId: string): Promise<boolean> {
+  if (supabase) {
+    const { error } = await supabase.rpc('supprimer_mon_compte')
+    await supabase.auth.signOut()
+    if (error) {
+      console.error('[auth] suppression du compte :', error)
+      return false
+    }
+    return true
+  }
+
+  ecrireComptes(lireComptes().filter((c) => c.id !== userId))
+  localStorage.removeItem(CLE_SESSION)
+  return true
+}
+
 export async function changerMotDePasse(nouveau: string): Promise<void> {
   if (nouveau.length < MDP_MINIMUM) {
     throw new ErreurAuth(`Choisissez un mot de passe d’au moins ${MDP_MINIMUM} caractères.`)

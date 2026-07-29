@@ -1,31 +1,36 @@
 import { useMemo, useState } from 'react'
-import { Check, Clock, ShoppingBasket } from 'lucide-react'
+import { Check, Clock, Refrigerator, ShoppingBasket } from 'lucide-react'
 import { useSession } from '../context/AppContext'
 import { EtiquetteBande } from '../components/nutrition'
 import { Carte, EtatVide, Etiquette, Feuille, TitreSection } from '../components/ui'
 import {
+  LIBELLE_TAG,
   PLACARD,
   RAYONS,
   RECETTES,
   listeDeCourses,
   recetteParId,
+  recettesDuMoment,
   type Recette,
+  type Tag,
 } from '../lib/recettes'
 import { cibleDuRepas } from '../lib/journal'
 import { LIBELLE_BANDE, bandePour } from '../lib/nutriscore'
 import type { Bande } from '../lib/nutriscore'
 import { objectifCalorique } from '../lib/nutrition'
-import { TEINTE_MOMENT } from '../lib/plan'
+import { LIBELLE_CATEGORIE, TEINTE_MOMENT } from '../lib/plan'
 import { poidsLePlusRecent } from '../lib/store'
+import { LIBELLE_MOMENT, MOMENTS } from '../lib/types'
 import { classes } from '../lib/utils'
 
-const MOMENTS = [
-  { cle: 'petit-dejeuner', libelle: 'Petit déjeuner' },
-  { cle: 'dejeuner', libelle: 'Déjeuner' },
-  { cle: 'diner', libelle: 'Dîner' },
-] as const
-
 const BANDES: Bande[] = ['vert', 'bleu', 'orange']
+
+/**
+ * Toutes les étiquettes ne méritent pas un filtre : celles-ci répondent aux
+ * questions qu'on se pose vraiment devant le frigo. Les autres restent
+ * affichées sur la fiche.
+ */
+const TAGS_FILTRABLES: Tag[] = ['rapide', 'vegetarien', 'batch', 'nomade']
 
 export function Cuisine() {
   const { etat } = useSession()
@@ -33,6 +38,7 @@ export function Cuisine() {
   const [ouverte, setOuverte] = useState<Recette | null>(null)
   const [panier, setPanier] = useState<string[]>([])
   const [filtre, setFiltre] = useState<Bande | null>(null)
+  const [tags, setTags] = useState<Tag[]>([])
 
   // La bande d'une recette dépend de la personne : 500 kcal est un dîner
   // copieux pour l'une et un dîner juste pour l'autre. On la calcule donc
@@ -56,6 +62,19 @@ export function Cuisine() {
   function basculerPanier(id: string) {
     setPanier((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]))
   }
+
+  function basculerTag(tag: Tag) {
+    setTags((t) => (t.includes(tag) ? t.filter((x) => x !== tag) : [...t, tag]))
+  }
+
+  // Les étiquettes se cumulent : « rapide » et « végétarien » cochés ensemble
+  // ne montrent que ce qui est les deux à la fois.
+  function retenue(recette: Recette): boolean {
+    if (filtre !== null && bandes.get(recette.id) !== filtre) return false
+    return tags.every((tag) => recette.tags.includes(tag))
+  }
+
+  const aucuneRetenue = !RECETTES.some(retenue)
 
   return (
     <div className="space-y-6">
@@ -122,15 +141,40 @@ export function Cuisine() {
             </p>
           </fieldset>
 
-          {MOMENTS.map(({ cle, libelle }) => {
-            const recettes = RECETTES.filter(
-              (r) => r.moment === cle && (filtre === null || bandes.get(r.id) === filtre),
-            )
+          <fieldset>
+            <legend className="mb-2 text-xs font-bold tracking-[0.14em] text-ink-faint uppercase">
+              Ce qu’il vous faut
+            </legend>
+            <div className="flex flex-wrap gap-1.5">
+              {TAGS_FILTRABLES.map((tag) => {
+                const actif = tags.includes(tag)
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    aria-pressed={actif}
+                    onClick={() => basculerTag(tag)}
+                    className={classes(
+                      'rounded-full px-3.5 py-2 text-xs font-semibold transition',
+                      actif
+                        ? 'bg-basil text-white'
+                        : 'bg-surface text-ink-soft hover:bg-sunken hover:text-ink',
+                    )}
+                  >
+                    {LIBELLE_TAG[tag]}
+                  </button>
+                )
+              })}
+            </div>
+          </fieldset>
+
+          {MOMENTS.map((moment) => {
+            const recettes = recettesDuMoment(moment).filter(retenue)
             if (recettes.length === 0) return null
             return (
-              <section key={cle}>
+              <section key={moment}>
                 <TitreSection eyebrow={`${recettes.length} recette${recettes.length > 1 ? 's' : ''}`}>
-                  {libelle}
+                  {LIBELLE_MOMENT[moment]}
                 </TitreSection>
                 <ul className="space-y-2">
                   {recettes.map((recette) => {
@@ -193,22 +237,25 @@ export function Cuisine() {
             )
           })}
 
-          {filtre !== null && !RECETTES.some((r) => bandes.get(r.id) === filtre) && (
+          {aucuneRetenue && (
             <EtatVide
               emoji="🥕"
-              titre={`Aucune recette « ${LIBELLE_BANDE[filtre].toLowerCase()} »`}
+              titre="Aucune recette ne coche tout"
               action={
                 <button
                   type="button"
-                  onClick={() => setFiltre(null)}
+                  onClick={() => {
+                    setFiltre(null)
+                    setTags([])
+                  }}
                   className="text-sm font-semibold text-iris underline underline-offset-4"
                 >
                   Voir toutes les recettes
                 </button>
               }
             >
-              Le catalogue ne contient rien dans cette bande pour votre objectif actuel. Les
-              bandes se recalculent dès que votre poids ou votre activité changent.
+              Le catalogue ne contient rien qui réponde à ces critères pour votre objectif actuel.
+              Les bandes se recalculent dès que votre poids ou votre activité changent.
             </EtatVide>
           )}
         </div>
@@ -238,10 +285,22 @@ function DetailRecette({ recette, bande }: { recette: Recette; bande: Bande }) {
         <Etiquette ton="neutre">{recette.kcal} kcal</Etiquette>
         {recette.couvre.map((c) => (
           <Etiquette key={c} ton="basil">
-            {c}
+            {LIBELLE_CATEGORIE[c]}
+          </Etiquette>
+        ))}
+        {recette.tags.map((t) => (
+          <Etiquette key={t} ton="iris">
+            {LIBELLE_TAG[t]}
           </Etiquette>
         ))}
       </div>
+
+      {recette.conservation && (
+        <p className="flex items-center gap-2 text-sm text-ink-soft">
+          <Refrigerator size={15} className="shrink-0 text-ink-faint" aria-hidden="true" />
+          Se garde {recette.conservation}.
+        </p>
+      )}
 
       <section>
         <h3 className="mb-2 text-sm font-bold tracking-[0.12em] text-ink-faint uppercase">

@@ -12,6 +12,7 @@ import * as auth from '../lib/auth'
 import type { Utilisateur } from '../lib/auth'
 import { charger, enregistrer, type EtatUtilisateur } from '../lib/store'
 import { badgesADebloquer, type Badge } from '../lib/badges'
+import { toutSupprimer, type ResultatSuppression } from '../lib/rgpd'
 
 interface Application {
   utilisateur: Utilisateur | null
@@ -33,6 +34,14 @@ interface Application {
   seConnecter: (identifiant: string, motDePasse: string) => Promise<void>
   sInscrire: (identifiant: string, motDePasse: string, prenom: string) => Promise<void>
   seDeconnecter: () => Promise<void>
+  /** Efface les données puis le compte, et referme la session. Sans retour possible. */
+  supprimerCompte: () => Promise<ResultatSuppression>
+  /**
+   * Message à montrer après une suppression partielle. L'écran qui l'a
+   * déclenchée disparaît avec la session : il ne peut pas le porter lui-même.
+   */
+  avisSuppression: string | null
+  fermerAvisSuppression: () => void
 }
 
 const ContexteApp = createContext<Application | null>(null)
@@ -48,6 +57,7 @@ export function FournisseurApp({ children }: { children: ReactNode }) {
   const [erreurChargement, setErreurChargement] = useState<string | null>(null)
   const [erreurEnregistrement, setErreurEnregistrement] = useState<string | null>(null)
   const [badgeACelebrer, setBadgeACelebrer] = useState<Badge | null>(null)
+  const [avisSuppression, setAvisSuppression] = useState<string | null>(null)
   const [tentative, setTentative] = useState(0)
 
   const enregistrementDiffere = useRef<number | null>(null)
@@ -185,6 +195,30 @@ export function FournisseurApp({ children }: { children: ReactNode }) {
     setErreurEnregistrement(null)
   }, [])
 
+  const supprimerCompte = useCallback(async (): Promise<ResultatSuppression> => {
+    if (!utilisateur) throw new Error('Aucune session active.')
+    // Une écriture différée qui partirait après l'effacement recréerait la
+    // ligne que l'on vient de détruire.
+    if (enregistrementDiffere.current) {
+      window.clearTimeout(enregistrementDiffere.current)
+      enregistrementDiffere.current = null
+    }
+    enAttente.current = null
+
+    const resultat = await toutSupprimer(utilisateur.id)
+    setAvisSuppression(
+      resultat.compteSupprime
+        ? null
+        : 'Vos données ont bien été effacées, mais votre identifiant de connexion existe encore. ' +
+            'La fonction « supprimer_mon_compte » n’a pas été créée dans le projet Supabase : ' +
+            'relancez le contenu de supabase/schema.sql.',
+    )
+    setUtilisateur(null)
+    setEtat(null)
+    setErreurEnregistrement(null)
+    return resultat
+  }, [utilisateur])
+
   const valeur = useMemo(
     () => ({
       utilisateur,
@@ -200,6 +234,9 @@ export function FournisseurApp({ children }: { children: ReactNode }) {
       seConnecter,
       sInscrire,
       seDeconnecter,
+      supprimerCompte,
+      avisSuppression,
+      fermerAvisSuppression: () => setAvisSuppression(null),
     }),
     [
       utilisateur,
@@ -214,6 +251,8 @@ export function FournisseurApp({ children }: { children: ReactNode }) {
       seConnecter,
       sInscrire,
       seDeconnecter,
+      supprimerCompte,
+      avisSuppression,
     ],
   )
 

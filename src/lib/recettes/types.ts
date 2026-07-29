@@ -1,12 +1,5 @@
 import type { Categorie, Moment } from '../types'
 
-/**
- * Les recettes couvrent aussi la collation, qui n'existe pas dans le plan :
- * l'ordonnance ne prescrit pas d'encas, mais la page Envies en propose un
- * quand la faim est réelle. D'où un moment de plus ici que dans `Moment`.
- */
-export type MomentRecette = Moment | 'collation'
-
 export type Rayon =
   | 'Fruits et légumes'
   | 'Boucherie, poissonnerie'
@@ -71,7 +64,7 @@ export interface Ingredient {
 export interface Recette {
   id: string
   titre: string
-  moment: MomentRecette
+  moment: Moment
   minutes: number
   kcal: number
   /** Ce que la recette couvre dans l'assiette — sert à la relier au plan. */

@@ -5,7 +5,9 @@ import { Cadre } from './components/Nav'
 import { Bouton, Carte, Chargement } from './components/ui'
 import { Celebration } from './components/Celebration'
 import { Accueil } from './pages/Accueil'
+import { Confidentialite } from './pages/Confidentialite'
 import { Connexion } from './pages/Connexion'
+import { Consentement } from './pages/Consentement'
 import { Onboarding } from './pages/Onboarding'
 import { NouveauMotDePasse } from './pages/NouveauMotDePasse'
 import { Aujourdhui } from './pages/Aujourdhui'
@@ -18,6 +20,7 @@ import { Cuisine } from './pages/Cuisine'
 import { Jeux } from './pages/Jeux'
 import { Badges } from './pages/Badges'
 import { Profil } from './pages/Profil'
+import { consentementAJour } from './lib/rgpd'
 
 export function App() {
   const { utilisateur, etat, chargement, erreurChargement, reessayerChargement } = useApp()
@@ -41,14 +44,21 @@ export function App() {
     return <EchecOuverture message={erreurChargement} onReessayer={reessayerChargement} />
   }
 
+  // Avant toute garde : c'est la page qu'on doit pouvoir lire depuis l'écran
+  // de consentement, qui bloque justement tout le reste.
+  if (chemin === '/confidentialite') return <Confidentialite />
+
   if (!connecte || !etat) {
     if (chemin === '/connexion') return <Connexion mode="connexion" />
     if (chemin === '/inscription') return <Connexion mode="inscription" />
     return <Accueil />
   }
 
-  // Deux passages obligés avant d'atteindre l'application.
+  // Trois passages obligés avant d'atteindre l'application. Le consentement
+  // précède l'onboarding : c'est ce dernier qui demande les premières données
+  // de santé, il ne peut pas s'ouvrir sans accord préalable.
   if (etat.profil.motDePasseAChanger) return <NouveauMotDePasse />
+  if (!consentementAJour(etat.consentement)) return <Consentement />
   if (!etat.profil.onboardingFait) return <Onboarding />
 
   return (

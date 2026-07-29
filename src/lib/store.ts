@@ -4,6 +4,7 @@ import { supabase } from './supabase'
 import { jourISO } from './utils'
 import type {
   Aliment,
+  Consentement,
   EntreeJournal,
   EnvieEntree,
   JournalEau,
@@ -24,6 +25,8 @@ import type {
  */
 export interface EtatUtilisateur {
   profil: Profil
+  /** `null` tant que le traitement des données de santé n'a pas été accepté. */
+  consentement: Consentement | null
   pesees: PeseeEntree[]
   /** Cases cochées du plan prescrit — l'ancien mode, conservé tel quel. */
   repas: JournalRepas[]
@@ -70,6 +73,7 @@ export function etatInitial(u: Utilisateur): EtatUtilisateur {
   const profil = profilInitial(u)
   return {
     profil,
+    consentement: null,
     pesees: [{ date: jourISO(), poidsKg: profil.poidsDepartKg }],
     repas: [],
     journal: [],
@@ -128,11 +132,31 @@ export async function enregistrer(userId: string, etat: EtatUtilisateur): Promis
   localStorage.setItem(CLE_LOCALE(userId), JSON.stringify(etat))
 }
 
+/**
+ * Efface le document de l'utilisateur — le droit à l'effacement (art. 17).
+ *
+ * Séparé de la suppression du compte : la RLS autorise déjà chacun à détruire
+ * sa propre ligne, alors que retirer le compte lui-même demande un privilège
+ * qu'un navigateur n'a pas. Les deux sont enchaînés par `rgpd.ts`.
+ */
+export async function effacerDonnees(userId: string): Promise<void> {
+  if (supabase) {
+    const { error } = await supabase.from('donnees').delete().eq('user_id', userId)
+    if (error) {
+      console.error('[store] effacement :', error)
+      throw new Error('Vos données n’ont pas pu être supprimées. Réessayez dans un instant.')
+    }
+    return
+  }
+  localStorage.removeItem(CLE_LOCALE(userId))
+}
+
 /** Complète un document ancien avec les champs ajoutés depuis sa création. */
 function fusionner(u: Utilisateur, partiel: Partial<EtatUtilisateur>): EtatUtilisateur {
   const base = etatInitial(u)
   return {
     profil: { ...base.profil, ...partiel.profil, id: u.id, email: u.email },
+    consentement: partiel.consentement ?? null,
     pesees: partiel.pesees ?? base.pesees,
     repas: partiel.repas ?? [],
     journal: partiel.journal ?? [],
@@ -186,6 +210,7 @@ export function poidsLePlusRecent(etat: EtatUtilisateur): number {
 
 export type {
   Aliment,
+  Consentement,
   EntreeJournal,
   EnvieEntree,
   JournalEau,

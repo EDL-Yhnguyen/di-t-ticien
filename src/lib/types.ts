@@ -83,6 +83,18 @@ export interface Profil {
   creeLe: string
 }
 
+/**
+ * La trace du consentement au traitement des données de santé.
+ *
+ * Le RGPD demande de pouvoir *démontrer* le consentement (art. 7.1) : il ne
+ * suffit pas de savoir qu'il a été donné, il faut savoir quand et à quel
+ * texte. D'où la version, qui est la date de la politique acceptée.
+ */
+export interface Consentement {
+  version: string
+  accepteLe: string
+}
+
 export interface PeseeEntree {
   date: string
   poidsKg: number

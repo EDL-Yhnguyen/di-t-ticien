@@ -174,6 +174,12 @@ export function Accueil() {
           Équilibre n’est pas un dispositif médical et ne remplace pas une consultation. Pour un
           suivi personnalisé, consultez un diététicien-nutritionniste.
         </p>
+        <Lien
+          vers="/confidentialite"
+          className="mt-3 inline-block text-sm font-semibold text-ink-soft underline underline-offset-4 transition hover:text-ink"
+        >
+          Confidentialité et mentions légales
+        </Lien>
       </footer>
     </div>
   )

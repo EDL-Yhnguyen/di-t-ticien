@@ -1,12 +1,12 @@
 import { useState, type FormEvent } from 'react'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, X } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { Bouton, Champ } from '../components/ui'
 import { Lien } from '../lib/router'
 import { modeDemo } from '../lib/supabase'
 
 export function Connexion({ mode }: { mode: 'connexion' | 'inscription' }) {
-  const { seConnecter, sInscrire } = useApp()
+  const { seConnecter, sInscrire, avisSuppression, fermerAvisSuppression } = useApp()
   const [identifiant, setIdentifiant] = useState('')
   const [motDePasse, setMotDePasse] = useState('')
   const [prenom, setPrenom] = useState('')
@@ -31,6 +31,26 @@ export function Connexion({ mode }: { mode: 'connexion' | 'inscription' }) {
   return (
     <div className="grid min-h-svh place-items-center bg-ground px-5 py-10">
       <div className="w-full max-w-sm">
+        {/* Une suppression de compte ramène ici : c'est le seul écran où son
+            compte rendu peut encore être lu. */}
+        {avisSuppression && (
+          <div
+            role="status"
+            className="mb-6 flex items-start gap-2 rounded-2xl bg-berry-wash px-4 py-3"
+          >
+            <AlertCircle size={17} className="mt-0.5 shrink-0 text-berry" aria-hidden="true" />
+            <p className="flex-1 text-sm text-berry">{avisSuppression}</p>
+            <button
+              type="button"
+              onClick={fermerAvisSuppression}
+              aria-label="Masquer ce message"
+              className="grid size-6 shrink-0 place-items-center rounded-full text-berry transition hover:bg-berry/15"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        )}
+
         <Lien vers="/" className="mb-8 flex items-center justify-center gap-2.5">
           <span className="grid size-10 place-items-center rounded-xl bg-iris text-lg text-white">
             🍽
@@ -115,6 +135,15 @@ export function Connexion({ mode }: { mode: 'connexion' | 'inscription' }) {
             pour les synchroniser entre vos appareils.
           </p>
         )}
+
+        <p className="mt-5 text-center">
+          <Lien
+            vers="/confidentialite"
+            className="text-xs font-semibold text-ink-faint underline underline-offset-4 transition hover:text-ink-soft"
+          >
+            Confidentialité et mentions légales
+          </Lien>
+        </p>
       </div>
     </div>
   )

@@ -64,3 +64,29 @@ drop trigger if exists donnees_maj on public.donnees;
 create trigger donnees_maj
   before update on public.donnees
   for each row execute function public.marquer_maj();
+
+-- Droit à l'effacement (RGPD, art. 17).
+--
+-- Supprimer une ligne de `auth.users` demande un privilège qu'un navigateur ne
+-- doit pas avoir : la clé `service_role` n'a rien à faire dans un front-end.
+-- Cette fonction fait l'inverse — elle s'exécute avec les droits de son
+-- propriétaire, mais n'efface que l'appelant, et personne d'autre. La ligne de
+-- `public.donnees` part avec, par la cascade déclarée plus haut.
+create or replace function public.supprimer_mon_compte()
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if auth.uid() is null then
+    raise exception 'Aucune session active.';
+  end if;
+  delete from auth.users where id = auth.uid();
+end;
+$$;
+
+-- Contrairement à `marquer_maj`, celle-ci doit bien être appelable depuis
+-- l'application — mais seulement par quelqu'un de connecté.
+revoke execute on function public.supprimer_mon_compte() from public, anon;
+grant execute on function public.supprimer_mon_compte() to authenticated;

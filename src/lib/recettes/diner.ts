@@ -1,0 +1,135 @@
+import type { Recette } from './types'
+
+/**
+ * Le dîner suit la même structure que le déjeuner, en un peu plus léger : la
+ * portion de féculents descend, les légumes prennent la place. Quantités pour
+ * une personne.
+ */
+export const DINERS: Recette[] = [
+  {
+    id: 'cabillaud-papillote',
+    titre: 'Cabillaud en papillote, riz et courgettes',
+    moment: 'diner',
+    minutes: 30,
+    kcal: 430,
+    couvre: ['proteine', 'feculent', 'legume', 'matiere-grasse'],
+    tags: ['une-casserole'],
+    ingredients: [
+      { nom: 'Dos de cabillaud', quantite: '130 g', rayon: 'Boucherie, poissonnerie' },
+      { nom: 'Riz basmati', quantite: '50 g cru', rayon: 'Épicerie' },
+      { nom: 'Courgette', quantite: '1 moyenne', rayon: 'Fruits et légumes' },
+      { nom: 'Citron', quantite: '½', rayon: 'Fruits et légumes' },
+      { nom: 'Huile d’olive', quantite: '1 CàS', rayon: 'Épicerie' },
+      { nom: 'Thym', quantite: '1 branche', rayon: 'Fruits et légumes' },
+    ],
+    etapes: [
+      'Préchauffez le four à 200 °C.',
+      'Coupez la courgette en rondelles fines et déposez-les sur une feuille de papier cuisson.',
+      'Posez le cabillaud dessus, arrosez d’huile, ajoutez le citron en rondelles et le thym.',
+      'Fermez la papillote hermétiquement et enfournez 18 minutes.',
+      'Faites cuire le riz pendant ce temps.',
+    ],
+    astuce: 'La papillote se prépare le matin et attend au frais toute la journée.',
+  },
+  {
+    id: 'omelette-champignons',
+    titre: 'Omelette aux champignons et salade',
+    moment: 'diner',
+    minutes: 15,
+    kcal: 390,
+    couvre: ['proteine', 'legume', 'feculent', 'matiere-grasse'],
+    tags: ['rapide', 'vegetarien', 'economique'],
+    ingredients: [
+      { nom: 'Œufs', quantite: '2', rayon: 'Crèmerie' },
+      { nom: 'Champignons de Paris', quantite: '150 g', rayon: 'Fruits et légumes' },
+      { nom: 'Salade verte', quantite: '1 poignée', rayon: 'Fruits et légumes' },
+      { nom: 'Pain spécial de boulangerie', quantite: '2 tranches', rayon: 'Boulangerie' },
+      { nom: 'Huile d’olive', quantite: '1 CàS', rayon: 'Épicerie' },
+      { nom: 'Persil', quantite: 'quelques brins', rayon: 'Fruits et légumes' },
+    ],
+    etapes: [
+      'Faites revenir les champignons émincés à sec jusqu’à évaporation de leur eau.',
+      'Battez les œufs, salez, poivrez, versez sur les champignons.',
+      'Laissez prendre à feu doux 4 minutes, pliez en deux.',
+      'Servez avec la salade assaisonnée à l’huile d’olive et le pain.',
+    ],
+    astuce:
+      'Cuire les champignons à sec avant d’huiler évite qu’ils boivent toute la matière grasse.',
+    saisons: ['automne'],
+  },
+  {
+    id: 'saumon-brocolis',
+    titre: 'Saumon vapeur, écrasé de pommes de terre et brocolis',
+    moment: 'diner',
+    minutes: 30,
+    kcal: 510,
+    couvre: ['proteine', 'feculent', 'legume', 'matiere-grasse'],
+    tags: ['une-casserole', 'plaisir'],
+    ingredients: [
+      { nom: 'Pavé de saumon', quantite: '110 g', rayon: 'Boucherie, poissonnerie' },
+      { nom: 'Pommes de terre', quantite: '2 moyennes', rayon: 'Fruits et légumes' },
+      { nom: 'Brocolis', quantite: '200 g', rayon: 'Fruits et légumes' },
+      { nom: 'Huile d’olive', quantite: '1 CàS', rayon: 'Épicerie' },
+      { nom: 'Citron', quantite: '½', rayon: 'Fruits et légumes' },
+    ],
+    etapes: [
+      'Cuisez pommes de terre et brocolis à la vapeur, 20 minutes.',
+      'Ajoutez le saumon dans le panier vapeur les 10 dernières minutes.',
+      'Écrasez les pommes de terre à la fourchette avec l’huile d’olive.',
+      'Servez avec un filet de citron.',
+    ],
+  },
+  {
+    id: 'soupe-legumes-lentilles',
+    titre: 'Soupe épaisse de légumes aux lentilles corail',
+    moment: 'diner',
+    minutes: 30,
+    kcal: 375,
+    couvre: ['legume', 'proteine', 'feculent', 'matiere-grasse'],
+    tags: ['batch', 'vegetarien', 'une-casserole', 'economique'],
+    ingredients: [
+      { nom: 'Lentilles corail', quantite: '60 g crues', rayon: 'Épicerie' },
+      { nom: 'Carottes', quantite: '2', rayon: 'Fruits et légumes' },
+      { nom: 'Poireau', quantite: '1', rayon: 'Fruits et légumes' },
+      { nom: 'Pomme de terre', quantite: '1', rayon: 'Fruits et légumes' },
+      { nom: 'Huile d’olive', quantite: '1 CàS', rayon: 'Épicerie' },
+      { nom: 'Cumin', quantite: '1 cc', rayon: 'Épicerie' },
+    ],
+    etapes: [
+      'Émincez les légumes et faites-les suer 5 minutes dans l’huile.',
+      'Ajoutez les lentilles, le cumin et 800 ml d’eau.',
+      'Laissez cuire 20 minutes à petits bouillons.',
+      'Mixez à peine — la soupe doit rester épaisse pour tenir au corps.',
+    ],
+    astuce: 'Les lentilles corail se délitent en cuisant : c’est elles qui épaississent la soupe.',
+    conservation: '4 jours au réfrigérateur, 3 mois au congélateur',
+    saisons: ['automne', 'hiver'],
+  },
+  {
+    id: 'gratin-courgettes-jambon',
+    titre: 'Gratin de courgettes au jambon',
+    moment: 'diner',
+    minutes: 40,
+    kcal: 420,
+    couvre: ['proteine', 'legume', 'laitier', 'matiere-grasse'],
+    tags: ['batch', 'plaisir'],
+    ingredients: [
+      { nom: 'Courgettes', quantite: '2', rayon: 'Fruits et légumes' },
+      { nom: 'Jambon blanc', quantite: '1 tranche épaisse', rayon: 'Boucherie, poissonnerie' },
+      { nom: 'Fromage blanc', quantite: '100 g', rayon: 'Crèmerie' },
+      { nom: 'Œuf', quantite: '1', rayon: 'Crèmerie' },
+      { nom: 'Gruyère râpé', quantite: '20 g', rayon: 'Crèmerie' },
+      { nom: 'Muscade', quantite: '1 pincée', rayon: 'Épicerie' },
+    ],
+    etapes: [
+      'Faites revenir les courgettes en rondelles 10 minutes, sans matière grasse.',
+      'Battez l’œuf avec le fromage blanc et la muscade.',
+      'Mélangez avec les courgettes et le jambon en dés, versez dans un plat.',
+      'Parsemez de gruyère et enfournez 20 minutes à 200 °C.',
+    ],
+    astuce:
+      'Le fromage blanc remplace la crème sans qu’on le remarque, à condition de ne pas le faire bouillir.',
+    conservation: '3 jours au réfrigérateur',
+    saisons: ['ete', 'automne'],
+  },
+]

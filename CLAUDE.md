@@ -100,7 +100,9 @@ src/
     plan.ts             plan de référence, teintes, parts d'assiette
     nutrition.ts        Mifflin-St Jeor, dépense, objectif, trajectoire, IMC
     badges.ts           BADGES[] déclaratif + badgesADebloquer()
-    recettes/           catalogue de recettes (voir « Conventions »)
+    recettes/           catalogue de recettes (voir « Le catalogue de recettes »)
+    legal.ts            identité de l'éditeur, hébergeurs, destinataires
+    rgpd.ts             consentement, export des données, suppression du compte
     utils.ts            helpers (jourISO, classes, …)
     ── journal alimentaire ──
     journal.ts          apports, totaux, bilan par repas, top/flop, cibles
@@ -131,6 +133,7 @@ api/
 | Route | Fichier | Rôle |
 |---|---|---|
 | `/` | `Accueil.tsx` | page publique |
+| `/confidentialite` | `Confidentialite.tsx` | politique de confidentialité + mentions légales |
 | `/connexion`, `/inscription` | `Connexion.tsx` | authentification |
 | `/app` | `Aujourdhui.tsx` | mosaïque du jour, analyses, recommandation |
 | `/app/ajouter` | `Ajouter.tsx` | recherche, code-barres, photo, saisie |
@@ -143,9 +146,12 @@ api/
 | `/app/jeux` | `Jeux.tsx` | mémo, quiz, respiration |
 | `/app/profil` | `Profil.tsx` | mesures, réglages, thème |
 
-Deux écrans **bloquants** passent avant tout le reste dans `App()` :
-`motDePasseAChanger` → `NouveauMotDePasse.tsx`, puis `!onboardingFait` →
-`Onboarding.tsx`.
+Trois écrans **bloquants** passent avant tout le reste dans `App()`, dans cet
+ordre : `motDePasseAChanger` → `NouveauMotDePasse.tsx`, consentement absent ou
+périmé → `Consentement.tsx`, puis `!onboardingFait` → `Onboarding.tsx`.
+
+`/confidentialite` est testée **avant** ces trois gardes : c'est la page que
+l'écran de consentement doit pouvoir ouvrir alors qu'il bloque tout le reste.
 
 ---
 
@@ -292,6 +298,74 @@ chose.
 
 ---
 
+## Données personnelles — ce qui est obligatoire
+
+Un journal alimentaire et des pesées sont des **données de santé** (RGPD,
+art. 9). Trois mécanismes portent la conformité ; aucun n'est décoratif.
+
+### Le consentement précède la collecte
+
+`EtatUtilisateur.consentement` porte une **version** — la date du texte
+accepté, `VERSION_CONFIDENTIALITE` dans `legal.ts` — et un horodatage. Le RGPD
+demande de pouvoir *démontrer* l'accord (art. 7.1), pas seulement de le
+supposer : savoir *à quoi* la personne a dit oui fait partie de la preuve.
+
+**Changer `VERSION_CONFIDENTIALITE` redemande son accord à tout le monde.** Ne
+la toucher que si le texte change sur le fond : une donnée collectée en plus,
+un destinataire en plus. Une correction de formulation ne la change pas.
+
+Le refus n'est pas un « plus tard » : sans accord, rien ne peut être conservé,
+donc refuser supprime le compte. C'est dit avant, dans la feuille de
+confirmation.
+
+### L'export et la suppression sont des fonctionnalités, pas des promesses
+
+- **Export** (art. 15 et 20) : `telechargerExport()` sérialise le document
+  entier, tel quel. Ne pas le filtrer « pour faire propre » — c'est justement
+  l'intégralité qui est due.
+- **Suppression** (art. 17) : `toutSupprimer()` efface le document *puis* le
+  compte. Dans cet ordre, parce que la seconde étape est la seule qui puisse
+  échouer pour une raison de configuration.
+
+Retirer une ligne d'`auth.users` demande un privilège qu'un navigateur ne doit
+pas avoir. D'où `supprimer_mon_compte()`, une fonction `security definer` du
+`schema.sql` qui n'efface que son appelant. **Tant qu'elle n'a pas été
+exécutée dans le projet Supabase, la suppression est partielle** : les données
+partent, l'identifiant survit. Ce cas remonte un `avisSuppression` affiché sur
+`Connexion.tsx` — l'écran d'arrivée après une suppression. Ne pas le masquer.
+
+### `legal.ts` est à remplir, pas à deviner
+
+`EDITEUR` (nom, statut, adresse, contact) est vide par défaut et **doit** être
+renseigné avant toute mise à disposition du public : l'identification de
+l'éditeur est une obligation (LCEN, art. 6-III). Tant qu'il est vide,
+`/confidentialite` affiche un encart d'avertissement plutôt qu'une fausse
+mention. `REGION_BASE` doit correspondre à la région réelle du projet
+Supabase — c'est elle qui dit si les données de santé sortent de l'UE.
+
+Corollaire : **tout nouveau destinataire de données se déclare dans
+`DESTINATAIRES`** au moment où on l'ajoute au code, pas après.
+
+---
+
+## Le catalogue de recettes
+
+`src/lib/recettes/` — un fichier par moment de repas, réunis par `index.ts`
+qui expose `RECETTES`, `PLACARD`, `recetteParId`, `recettesDuMoment` et
+`listeDeCourses`. Les imports se font depuis `'../lib/recettes'`.
+
+Une recette porte davantage qu'un titre et des étapes : `couvre` (des
+`Categorie`, pas des libellés — l'affichage passe par `LIBELLE_CATEGORIE`),
+`tags` (les questions qu'on se pose devant le frigo : rapide, batch,
+végétarien, nomade…), `conservation` et `saisons`. `Cuisine.tsx` filtre sur
+les bandes **et** sur les étiquettes, en cumulant les critères.
+
+Ajouter une recette : la mettre dans le fichier de son moment, rien d'autre.
+`index.ts` la récupère. L'ordre des `...` dans `RECETTES` suit la journée, ce
+dont héritent les écrans qui listent sans regrouper.
+
+---
+
 ## Supabase
 
 ### Configuration
@@ -330,6 +404,10 @@ santé, c'est la *row level security* : quatre politiques (`select`, `insert`,
 
 Un trigger `donnees_maj` tient `maj_le` côté base (le client peut se tromper
 de fuseau, pas elle).
+
+**`schema.sql` a évolué** : il déclare aussi `supprimer_mon_compte()`. Un
+projet créé avant le 29/07/2026 doit le rejouer, sinon la suppression de
+compte reste partielle (voir « Données personnelles » plus haut).
 
 ### Confirmation e-mail — le piège
 
@@ -436,9 +514,37 @@ thèmes clair et sombre, aucune erreur console. Deux défauts corrigés à ce
 moment-là — un quatrième onglet hors écran sur mobile, et des barres de macros
 qui empruntaient les couleurs réservées à l'assiette.
 
-**Reste à faire :** `ANTHROPIC_API_KEY` à ajouter dans Vercel pour activer le
-scan photo ; l'éclatement de `recettes.ts` en `recettes/` est toujours en
-suspens ; conformité RGPD (consentement, export, suppression) toujours ouverte.
+### 29 juillet 2026 — Conformité RGPD et catalogue de recettes
+
+Le reliquat du sprint 1, qui bloquait toute mise à disposition du public.
+
+- **Consentement explicite** avant l'onboarding, versionné sur la date du
+  texte. Refuser supprime le compte — c'est la seule issue honnête.
+- **Export des données** en un fichier JSON complet, depuis le profil.
+- **Suppression du compte**, avec saisie de confirmation. Côté base, une
+  fonction `security definer` évite d'avoir à exposer `service_role`.
+- **`/confidentialite`** : politique et mentions légales en un seul écran,
+  atteignable connecté ou non, y compris depuis l'écran de consentement.
+  L'identité de l'éditeur reste **à remplir** dans `legal.ts`.
+- **Fin de l'éclatement des recettes.** `recettes.ts` était toujours le
+  module chargé ; `recettes/` existait à côté sans jamais être importé (la
+  résolution Node prend le fichier avant le dossier), donc quinze petits
+  déjeuners écrits au nouveau schéma dormaient en code mort. Les huit
+  anciennes recettes ont été migrées, déjeuners, dîners et collations
+  complétés — 30 recettes, avec étiquettes filtrables et conservation.
+
+**Vérifié à l'écran** avant livraison, au pilote Playwright : parcours complet
+inscription → consentement → onboarding → cuisine → profil → suppression, en
+390 px et 1280 px, thèmes clair et sombre, aucune erreur console. Export et
+suppression contrôlés de bout en bout (fichier produit, compte et document
+retirés, reconnexion refusée). Un défaut corrigé à ce moment-là : l'avis de
+suppression partielle était placé sur l'accueil alors que le parcours atterrit
+sur `/connexion`.
+
+**Reste à faire :** `EDITEUR` à renseigner dans `src/lib/legal.ts` et
+`REGION_BASE` à confirmer ; `supabase/schema.sql` à rejouer pour créer
+`supprimer_mon_compte()` ; `ANTHROPIC_API_KEY` à ajouter dans Vercel pour
+activer le scan photo.
 
 ### 28 juillet 2026 — Mémoire projet et audit
 
