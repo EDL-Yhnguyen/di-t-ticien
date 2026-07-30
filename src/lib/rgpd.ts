@@ -1,5 +1,6 @@
 import { supprimerCompte as supprimerCompteAuth } from './auth'
 import { VERSION_CONFIDENTIALITE } from './legal'
+import { CLES_PHOTOS, lirePhoto, viderPhotos } from './photos'
 import { toutEffacer as toutEffacerPrix, tousLesReleves } from './prix/depot'
 import { effacerDonnees, type EtatUtilisateur } from './store'
 import type { Consentement } from './types'
@@ -44,14 +45,39 @@ const LISEZ_MOI =
  * ce qui se trouve dans un stockage plutôt qu'un autre. Les oublier ferait d'un
  * choix technique une amputation du droit.
  */
-export function documentExport(etat: EtatUtilisateur, relevesPrix: unknown[] = []) {
+export function documentExport(
+  etat: EtatUtilisateur,
+  relevesPrix: unknown[] = [],
+  photos: Record<string, string> = {},
+) {
   return {
     _format: 'equilibre-export-v1',
     _exporteLe: new Date().toISOString(),
     _lisezMoi: LISEZ_MOI,
     ...etat,
     relevesPrix,
+    photos,
   }
+}
+
+/**
+ * Les photos vivent hors du document, sur l'appareil (voir `lib/photos.ts`).
+ * Même raison que pour les relevés de prix : le droit d'accès porte sur tout ce
+ * que l'application détient, pas sur ce qui a atterri dans un stockage plutôt
+ * qu'un autre. Elles sortent en data-URL, seule forme lisible dans du JSON.
+ */
+async function photosExportables(userId: string): Promise<Record<string, string>> {
+  const sortie: Record<string, string> = {}
+  for (const cle of CLES_PHOTOS) {
+    const blob = await lirePhoto(userId, cle).catch(() => null)
+    if (!blob) continue
+    sortie[cle] = await new Promise<string>((resoudre) => {
+      const lecteur = new FileReader()
+      lecteur.onload = () => resoudre(String(lecteur.result))
+      lecteur.readAsDataURL(blob)
+    })
+  }
+  return sortie
 }
 
 export async function telechargerExport(etat: EtatUtilisateur): Promise<void> {
@@ -59,7 +85,8 @@ export async function telechargerExport(etat: EtatUtilisateur): Promise<void> {
   // l'export du reste : un export partiel annoncé vaut mieux qu'un droit qui
   // échoue en silence.
   const releves = await tousLesReleves(etat.profil.id).catch(() => [])
-  const contenu = JSON.stringify(documentExport(etat, releves), null, 2)
+  const photos = await photosExportables(etat.profil.id)
+  const contenu = JSON.stringify(documentExport(etat, releves, photos), null, 2)
   const url = URL.createObjectURL(new Blob([contenu], { type: 'application/json' }))
   const lien = document.createElement('a')
   lien.href = url
@@ -93,5 +120,8 @@ export async function toutSupprimer(userId: string): Promise<ResultatSuppression
   // mes données » serait faux sans que rien ne le dise. Une base locale
   // absente n'est pas un échec de suppression — il n'y avait rien à effacer.
   await toutEffacerPrix(userId).catch(() => {})
+  // Même raison pour les photos : elles ne sont jamais parties de l'appareil,
+  // ce qui ne dispense pas de les effacer (art. 17).
+  await viderPhotos(userId).catch(() => {})
   return { compteSupprime: await supprimerCompteAuth(userId) }
 }

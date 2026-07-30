@@ -13,6 +13,7 @@ import {
 } from 'lucide-react'
 import { useSession } from '../context/AppContext'
 import { MarmiteExpression } from '../components/MarmiteExpression'
+import { usePhoto } from '../components/PhotoFamille'
 import { LegendeMosaique, Mosaique, couleurNutri } from '../components/Mosaique'
 import {
   BarreMacro,
@@ -49,6 +50,7 @@ export function Aujourdhui() {
   const { etat, modifier } = useSession()
   const date = jourISO()
   const nom = nomAffiche(etat.profil)
+  const photoFamille = usePhoto(etat.profil.id, 'famille')
   const [choisie, setChoisie] = useState<EntreeJournal | null>(null)
 
   const objectifBase = objectifCalorique({
@@ -103,8 +105,31 @@ export function Aujourdhui() {
       {/* Le bandeau porte la seule question qui compte au moment où l'on ouvre
           l'application : combien il reste. Il sort de la gouttière du gabarit
           pour que la carte de la mosaïque vienne chevaucher la couleur. */}
-      <div className="bandeau -mx-4 -mt-5 rounded-b-[2.75rem] px-4 pt-6 pb-24 md:-mx-8 md:-mt-10 md:px-8 md:pt-10">
-        <header className="animate-rise flex items-start justify-between gap-4">
+      <div className="bandeau relative -mx-4 -mt-5 overflow-hidden rounded-b-[2.75rem] px-4 pt-6 pb-24 md:-mx-8 md:-mt-10 md:px-8 md:pt-10">
+        {photoFamille && (
+          <>
+            <img
+              src={photoFamille}
+              alt=""
+              className="absolute inset-0 size-full object-cover"
+            />
+            {/* Le voile n'est pas décoratif : le bandeau porte du texte blanc et
+                on ne sait pas d'avance ce que l'utilisateur choisira.
+
+                Les opacités sont calculées sur le pire cas — une photo
+                entièrement blanche. À 62 %, le noir laisse un gris à 97, soit
+                6,2:1 pour du texte blanc ; à 72 %, 9,2:1. C'est le même seuil de
+                6:1 que celui auquel --bandeau-haut est calculé, et il faut cette
+                marge parce que les nuances de l'écran descendent jusqu'à 85 %
+                d'opacité. Le voile du premier jet (45 %) ne tenait que 3,4:1 :
+                sous le seuil, sur la moitié claire d'une photo ordinaire. */}
+            <div
+              className="absolute inset-0 bg-gradient-to-b from-black/62 to-black/72"
+              aria-hidden="true"
+            />
+          </>
+        )}
+        <header className="animate-rise relative flex items-start justify-between gap-4">
           <div>
             <p className="text-sm font-semibold tracking-[0.06em] text-white/85 uppercase">
               {dateLongue(date).replace(/^\w/, (c) => c.toUpperCase())}
@@ -122,7 +147,7 @@ export function Aujourdhui() {
           )}
         </header>
 
-        <div className="animate-rise mt-7" style={{ animationDelay: '60ms' }}>
+        <div className="animate-rise relative mt-7" style={{ animationDelay: '60ms' }}>
           <p className="flex items-baseline gap-2.5">
             <span
               className="font-display font-semibold text-white tnum"

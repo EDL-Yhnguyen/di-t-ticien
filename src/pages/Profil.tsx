@@ -29,6 +29,7 @@ import { Lien } from '../lib/router'
 import { LIBELLE_ACTIVITE, depenseJournaliere, objectifCalorique } from '../lib/nutrition'
 import { poidsActuel, type EtatUtilisateur } from '../lib/store'
 import { modeDemo } from '../lib/supabase'
+import { PhotoFamille, usePhoto } from '../components/PhotoFamille'
 import { telechargerExport } from '../lib/rgpd'
 import type { Activite, Praticien } from '../lib/types'
 import { dateComplete, entier, nombre } from '../lib/utils'
@@ -60,6 +61,11 @@ export function Profil() {
   const [brouillonPraticien, setBrouillonPraticien] = useState<Praticien>(
     praticien ?? PRATICIEN_VIDE,
   )
+
+  // L'en-tête et le réglage montrent la même photo : un seul jeton les tient
+  // d'accord, sans quoi changer l'avatar laisserait l'initiale en place.
+  const [jetonPhotos, setJetonPhotos] = useState(0)
+  const avatar = usePhoto(etat.profil.id, 'avatar', jetonPhotos)
 
   const mesures = {
     poidsKg: poidsActuel(etat),
@@ -122,9 +128,13 @@ export function Profil() {
   return (
     <div className="space-y-6">
       <header className="flex items-center gap-4">
-        <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-primaire-wash font-display text-2xl font-semibold text-primaire">
-          {etat.profil.prenom.slice(0, 1).toUpperCase() || '?'}
-        </span>
+        {avatar ? (
+          <img src={avatar} alt="" className="size-14 shrink-0 rounded-2xl bg-sunken object-cover" />
+        ) : (
+          <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-primaire-wash font-display text-2xl font-semibold text-primaire">
+            {etat.profil.prenom.slice(0, 1).toUpperCase() || '?'}
+          </span>
+        )}
         <div className="min-w-0">
           <h1 className="font-display text-2xl font-semibold text-ink">
             {etat.profil.prenom || 'Votre profil'}
@@ -169,6 +179,28 @@ export function Profil() {
               ? `L'application vous dira « Bonsoir, ${etat.profil.petitNom.trim()} ».`
               : 'Laissé vide, l’application s’en tient à votre prénom.'}
           </p>
+        </Carte>
+      </section>
+
+      <section>
+        <TitreSection>Mes photos</TitreSection>
+        <Carte className="space-y-6 p-5">
+          <PhotoFamille
+            userId={etat.profil.id}
+            cle="avatar"
+            forme="rond"
+            label="Ma photo"
+            aide="Elle remplace l’initiale en haut de cet écran."
+            onChange={() => setJetonPhotos((j) => j + 1)}
+          />
+          <div className="border-t border-line pt-6">
+            <PhotoFamille
+              userId={etat.profil.id}
+              cle="famille"
+              label="Ma photo de famille"
+              aide="Elle habille le haut de l’écran du jour. Comme la précédente, elle reste sur cet appareil : elle ne part sur aucun serveur, et ne vous suivra donc pas sur un autre téléphone."
+            />
+          </div>
         </Carte>
       </section>
 

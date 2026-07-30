@@ -140,6 +140,14 @@ export function Confidentialite() {
               Elles restent dans votre compte et ne sont transmises à personne.
             </li>
             <li>
+              <strong>Vos photos</strong>, si vous en choisissez : une photo de profil et une photo
+              de famille. Elles sont redimensionnées puis gardées{' '}
+              <strong>dans la mémoire de votre navigateur, sur cet appareil</strong>. Elles ne
+              rejoignent pas votre compte et ne sont envoyées à personne — c’est aussi pourquoi
+              elles ne vous suivent pas d’un appareil à l’autre. Elles figurent dans l’export de vos
+              données et sont effacées avec votre compte.
+            </li>
+            <li>
               <strong>Vos tickets de caisse</strong>, si vous en photographiez. L’image est lue{' '}
               <strong>sur votre appareil</strong> et n’est jamais envoyée nulle part ; elle n’est
               pas conservée non plus. Ce qui en est tiré — produit, prix, enseigne, date — reste
