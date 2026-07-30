@@ -5,6 +5,7 @@ import {
   ChevronRight,
   Flame,
   ListOrdered,
+  Share2,
   Timer,
   X,
 } from 'lucide-react'
@@ -20,6 +21,7 @@ import {
 import { useEcranAllume, useMinuteurs } from '../lib/cuisineEnDirect'
 import type { Minuteur } from '../lib/cuisineEnDirect'
 import { ingredientsPour } from '../lib/catalogue'
+import { partagerCarte } from '../lib/partage'
 import { useRoutage } from '../lib/router'
 import { classes } from '../lib/utils'
 
@@ -226,10 +228,25 @@ export function ModeCuisine() {
           </button>
 
           {derniere ? (
-            <Bouton pleineLargeur onClick={terminer}>
-              <Check size={18} aria-hidden="true" />
-              C’est prêt
-            </Bouton>
+            <>
+              {/* Le geste de partage se propose au moment du plat réussi, et
+                  n'emporte que son nom : ni calories, ni bande de charge, ni
+                  Nutri-Score. Voir `outils/partage.mjs`. */}
+              <button
+                type="button"
+                onClick={() =>
+                  void partagerCarte({ titre: recette.titre, sousTitre: 'Fait à la maison' })
+                }
+                aria-label="Partager ce plat"
+                className="grid size-12 shrink-0 place-items-center rounded-full border border-line text-ink-soft transition hover:bg-sunken"
+              >
+                <Share2 size={20} />
+              </button>
+              <Bouton pleineLargeur onClick={terminer}>
+                <Check size={18} aria-hidden="true" />
+                C’est prêt
+              </Bouton>
+            </>
           ) : (
             <Bouton pleineLargeur onClick={() => allerAEtape(etape + 1)}>
               Étape suivante
