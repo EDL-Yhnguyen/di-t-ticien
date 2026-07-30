@@ -59,6 +59,20 @@ export function classes(...valeurs: (string | false | null | undefined)[]): stri
   return valeurs.filter(Boolean).join(' ')
 }
 
+/**
+ * Un identifiant local, avec un repli quand `crypto.randomUUID` manque.
+ *
+ * Il manque plus souvent qu'on ne croit : l'API n'est exposée que sur une
+ * origine sûre, ce qui exclut un `http://` sur le réseau local — soit
+ * exactement la façon dont on teste une PWA depuis un téléphone.
+ */
+export function identifiant(prefixe = 'i'): string {
+  return (
+    globalThis.crypto?.randomUUID?.() ??
+    `${prefixe}${Date.now()}${Math.round(Math.random() * 1e6)}`
+  )
+}
+
 export function limiter(valeur: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, valeur))
 }

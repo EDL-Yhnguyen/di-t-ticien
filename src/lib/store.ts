@@ -10,6 +10,7 @@ import type {
   EnvieEntree,
   JournalEau,
   JournalRepas,
+  ListeCourses,
   MesureSante,
   MessageCoach,
   PeseeEntree,
@@ -46,6 +47,13 @@ export interface EtatUtilisateur {
   menus: PlanSemaine | null
   /** Le contenu du frigo, des placards et du congélateur. */
   stocks: ArticleStock[]
+  /**
+   * Les listes de courses, en cours et closes dans le même tableau —
+   * `clotureeLe` les distingue. Elles sont enregistrées et non calculées : une
+   * case cochée qui ne survit pas au rechargement fait racheter ce qui est déjà
+   * dans le caddie.
+   */
+  courses: ListeCourses[]
   /** La conversation avec le coach, conservée d'une session à l'autre. */
   conversation: MessageCoach[]
   /**
@@ -104,6 +112,7 @@ export function etatInitial(u: Utilisateur): EtatUtilisateur {
     seances: [],
     menus: null,
     stocks: [],
+    courses: [],
     conversation: [],
     consentementCoach: null,
     eau: [],
@@ -192,6 +201,7 @@ function fusionner(u: Utilisateur, partiel: Partial<EtatUtilisateur>): EtatUtili
     seances: partiel.seances ?? [],
     menus: partiel.menus ?? null,
     stocks: partiel.stocks ?? [],
+    courses: partiel.courses ?? [],
     conversation: partiel.conversation ?? [],
     consentementCoach: partiel.consentementCoach ?? null,
     eau: partiel.eau ?? [],
@@ -248,6 +258,7 @@ export type {
   EnvieEntree,
   JournalEau,
   JournalRepas,
+  ListeCourses,
   MesureSante,
   MessageCoach,
   PeseeEntree,

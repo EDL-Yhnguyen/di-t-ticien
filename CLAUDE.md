@@ -141,6 +141,7 @@ src/
     stats.ts            tendances sur une période : calories, macros, qualité, sport, poids
     journalRecette.ts   conversion d'une recette en entrée de journal
     stocks.ts           garde-manger : échéances, urgences, recettes réalisables
+    courses.ts          listes de courses enregistrées : cumul, versement, retour au stock
     ingredients.ts      rapprochement des noms de produits (stock ↔ recettes ↔ courses)
   components/
     Mosaique.tsx        treemap « squarified » : aire = kcal, couleur = Nutri
@@ -173,6 +174,7 @@ api/
 | `/app/cuisine` | `Cuisine.tsx` | recettes + liste de courses |
 | `/app/garde-manger` | `GardeManger.tsx` | frigo, placards, congélateur, dates limites |
 | `/app/cuisiner` | `Cuisiner.tsx` | ce que le stock permet de cuisiner |
+| `/app/courses` | `Courses.tsx` | listes de courses, cochage enregistré, retour de courses |
 | `/app/coach` | `Coach.tsx` | coach conversationnel (accord préalable) |
 | `/app/stats` | `Stats.tsx` | tendances sur 7 / 30 / 90 jours |
 | `/app/menus` | `Menus.tsx` | semaine de menus, remplacement, courses |
@@ -515,6 +517,24 @@ dans **`CUISINE.md`**. À lire avant d'y toucher. L'essentiel à ne pas défaire
   qui a produit la correspondance**. Ne pas retirer cet affichage pour gagner
   de la place — c'est lui qui rend l'erreur inoffensive.
 
+## Les courses
+
+Sprint C2, livré le 30/07/2026 ; les décisions détaillées sont dans
+`CUISINE.md`. Ce qu'il faut savoir avant d'y toucher :
+
+- **La liste de `/app/courses` est enregistrée ; celle de `menu.ts` est
+  calculée.** Ce n'est pas un doublon : la seconde est un aperçu d'une semaine,
+  la première est ce qu'on emporte et qu'on coche. Un cochage qui ne survit pas
+  au rechargement fait racheter ce qui est déjà dans le caddie.
+- **Deux arithmétiques différentes seraient une erreur** : `cumulerQuantites`
+  vit dans `ingredients.ts` et sert aux deux, sinon « 2 + 2 oignons » d'un côté
+  et « 4 oignons » de l'autre feraient deux lignes pour la même chose.
+- **Le rapprochement des lignes se fait sur `cleIngredient`** (au pluriel près),
+  pas sur `memeProduit` : sur une liste de courses, fusionner à tort fait partir
+  au magasin avec une quantité fausse.
+- **Le retour de courses n'invente aucune date limite.** Les articles entrent au
+  garde-manger sans DLC ni DDM, et l'écran le dit.
+
 ## Le catalogue de recettes
 
 `src/lib/recettes/` — un fichier par moment de repas, réunis par `index.ts`
@@ -677,6 +697,37 @@ Vérification manuelle attendue :
 ---
 
 ## Historique du projet
+
+### 30 juillet 2026 — Les courses (module Cuisine, sprint C2)
+
+Deuxième sprint du module « Cuisine, Recettes & Courses ». Les décisions
+structurantes sont dans `CUISINE.md`, section C2.
+
+- **`/app/courses`** : liste rangée dans l'ordre du magasin, cochage enregistré
+  dans le document, plusieurs listes en parallèle (le marché du samedi et le
+  drive de la semaine ne se cochent pas ensemble), historique des listes closes
+  et « refaire cette liste ».
+- **Verser une semaine de menus ou le placard du plan**, en écartant d'office ce
+  que le garde-manger couvre déjà — sans jamais le cacher, et en nommant
+  l'article du stock qui a produit la correspondance.
+- **Retour de courses** : ce qui est coché entre au garde-manger, avec un
+  rangement déduit du rayon et corrigeable ligne à ligne, puis la liste part à
+  l'historique. Aucune date n'est inventée.
+- **Les ingrédients manquants de `/app/cuisiner` partent sur la liste** : « il
+  manque un ingrédient » était un constat, c'est devenu une course à faire.
+- **`listeDeCourses` du catalogue et la liste enregistrée partagent la même
+  arithmétique**, remontée dans `ingredients.ts` — soixante lignes dupliquées en
+  moins, et surtout un seul comportement.
+
+**Vérifié à l'écran** au pilote Playwright sur le build de production en mode
+démo, 390 px et 1280 px, clair et sombre, aucune erreur console : versement d'une
+semaine de 28 repas, second versement averti, cumul et cochage contrôlés **dans
+le document** et après rechargement, retour de courses, historique et copie de
+liste.
+
+**Un défaut corrigé en vérifiant** : les pluriels en « -x ». « 1 rouleau » et
+« 2 rouleaux » ne se reconnaissaient pas, et la liste affichait « 1 rouleau +
+2 rouleaux » au lieu de « 3 rouleaux ».
 
 ### 29 juillet 2026 — Le garde-manger (module Cuisine, sprint C1)
 

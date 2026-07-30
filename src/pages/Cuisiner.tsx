@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Check, ChefHat, Clock, Leaf, ShoppingBasket } from 'lucide-react'
 import { useSession } from '../context/AppContext'
 import { Bouton, Carte, Etiquette, EtatVide, TitreSection } from '../components/ui'
+import { ajouterArticle, listesEnCours, nouvelleListe } from '../lib/courses'
 import { Lien } from '../lib/router'
 import { recettesRealisables } from '../lib/stocks'
 import type { RecetteRealisable } from '../lib/stocks'
@@ -199,7 +200,30 @@ function Filtres<T>({
 
 function CarteRecette({ proposition }: { proposition: RecetteRealisable }) {
   const { recette, couverts, manquants, part, sauve } = proposition
+  const { etat, modifier } = useSession()
   const [deplie, setDeplie] = useState(false)
+  const [ajoutes, setAjoutes] = useState(false)
+
+  function ajouterLesManquants() {
+    const ouverte = listesEnCours(etat.courses)[0] ?? null
+    const cible = ouverte ?? nouvelleListe()
+
+    modifier((brouillon) => {
+      if (!ouverte) brouillon.courses.push(cible)
+      const dans = brouillon.courses.find((l) => l.id === cible.id)
+      if (!dans) return
+      for (const ingredient of manquants) {
+        ajouterArticle(dans, {
+          nom: ingredient.nom,
+          quantite: ingredient.quantite,
+          rayon: ingredient.rayon,
+          origine: 'recette',
+          recette: recette.titre,
+        })
+      }
+    })
+    setAjoutes(true)
+  }
 
   return (
     <Carte className="overflow-hidden">
@@ -289,6 +313,30 @@ function CarteRecette({ proposition }: { proposition: RecetteRealisable }) {
                   </li>
                 ))}
               </ul>
+
+              {/* Une recette dont il manque un ingrédient est une course à
+                  faire, pas un abandon : c'est le geste qui manquait pour que
+                  cet écran serve à quelque chose une fois le frigo à moitié
+                  vide. */}
+              <Bouton
+                ton="doux"
+                pleineLargeur
+                className="mt-3"
+                onClick={ajouterLesManquants}
+                disabled={ajoutes}
+              >
+                <ShoppingBasket size={16} aria-hidden="true" />
+                {ajoutes
+                  ? 'Ajouté à ma liste de courses'
+                  : `Ajouter ${manquants.length === 1 ? 'ce produit' : `ces ${manquants.length} produits`} à mes courses`}
+              </Bouton>
+              {ajoutes && (
+                <Lien vers="/app/courses" className="mt-2 block">
+                  <Bouton ton="fantome" pleineLargeur>
+                    Ouvrir ma liste
+                  </Bouton>
+                </Lien>
+              )}
             </>
           )}
 

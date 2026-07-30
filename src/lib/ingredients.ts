@@ -102,3 +102,113 @@ export function memeProduit(a: string, b: string): boolean {
   const motsB = new Set(motsPorteurs(b))
   return motsA.some((mot) => motsB.has(mot))
 }
+
+/* ─────────────────────────── Cumuler les quantités ─────────────────────────── */
+
+/**
+ * Cette arithmétique vivait dans `listeDeCourses`, qui était seule à en avoir
+ * besoin. La liste de courses persistante y ajoute des produits saisis à la
+ * main et des semaines entières versées l'une après l'autre : il fallait que
+ * les deux additionnent de la même façon, sinon « 2 + 2 oignons » d'un côté et
+ * « 4 oignons » de l'autre feraient deux lignes pour la même chose.
+ */
+
+const FRACTIONS: Record<string, number> = {
+  '½': 0.5,
+  '¼': 0.25,
+  '¾': 0.75,
+  '⅓': 1 / 3,
+  '⅔': 2 / 3,
+}
+
+/** Unités qui ne prennent jamais de « s » : « 3 CàS », pas « 3 CàSs ». */
+const UNITES_INVARIABLES = new Set(['g', 'kg', 'mg', 'ml', 'cl', 'dl', 'l', 'cc', 'cs', 'càs', 'càc'])
+
+interface Quantite {
+  valeur: number
+  /** Ce qui suit le nombre : « g », « CàS », « tranches », ou rien du tout. */
+  unite: string
+}
+
+/**
+ * Lit « 2 tranches », « 1 ½ », « 40 g » — et rend `null` sur « quelques brins »
+ * ou « pour la semaine », qui ne sont pas des nombres.
+ */
+function lireQuantite(texte: string): Quantite | null {
+  const m = /^(\d+(?:[.,]\d+)?)?\s*([½¼¾⅓⅔])?\s*(.*)$/.exec(texte.trim())
+  if (!m) return null
+
+  const [, entier, fraction, reste] = m
+  if (!entier && !fraction) return null
+
+  const valeur = (entier ? Number(entier.replace(',', '.')) : 0) + (fraction ? FRACTIONS[fraction] : 0)
+  return { valeur, unite: reste.trim() }
+}
+
+/**
+ * Deux unités se cumulent si elles désignent la même chose au singulier près.
+ * « 60 g crues » et « 50 g cru » restent séparés : l'écart de forme cache ici
+ * un écart d'état — cuit ou cru —, et additionner les deux mentirait.
+ *
+ * Le pluriel se défait en `-s` **et en `-x`** : « 1 rouleau » et « 2 rouleaux »
+ * faisaient sinon deux termes juxtaposés au lieu de trois rouleaux, et on relit
+ * « 1 rouleau + 2 rouleaux » au rayon en se demandant ce qu'on doit prendre.
+ */
+function memeUnite(a: string, b: string): boolean {
+  const forme = (u: string) => u.toLowerCase().replace(/[sx]$/, '')
+  return forme(a) === forme(b)
+}
+
+/** « 1 ½ pot » et non « 1 ½ pots » : en français le pluriel commence à deux. */
+function accorder(unite: string, valeur: number): string {
+  if (valeur < 2 || unite === '' || unite.includes(' ')) return unite
+  if (UNITES_INVARIABLES.has(unite.toLowerCase()) || /[sx]$/.test(unite)) return unite
+  // Rouleaux, morceaux, tuyaux : le pluriel de ces mots-là est en « x », et un
+  // « 3 rouleaus » dans une liste de courses se voit tout de suite. Les mots en
+  // « -eu » sont laissés de côté : leurs exceptions (pneus, bleus) sont plus
+  // fréquentes que les unités qu'ils désigneraient.
+  if (/(eau|au)$/.test(unite)) return `${unite}x`
+  return `${unite}s`
+}
+
+function ecrireQuantite(q: Quantite): string {
+  // Trois tiers font un entier, pas « 1,0 » : on recolle avant d'écrire.
+  const arrondie = Math.abs(q.valeur - Math.round(q.valeur)) < 0.02 ? Math.round(q.valeur) : q.valeur
+  const entier = Math.floor(arrondie)
+  const reste = arrondie - entier
+
+  let nombre = String(entier)
+  const glyphe = Object.entries(FRACTIONS).find(([, v]) => Math.abs(reste - v) < 0.02)?.[0]
+  if (glyphe) nombre = entier === 0 ? glyphe : `${entier} ${glyphe}`
+  else if (reste > 0.02) nombre = arrondie.toFixed(1).replace('.', ',')
+
+  return q.unite ? `${nombre} ${accorder(q.unite, arrondie)}` : nombre
+}
+
+/**
+ * Additionne `ajout` dans `existante`, en juxtaposant ce qui n'est pas
+ * comparable : « 1 CàS » et « ½ » n'ont pas de somme, mais sur une semaine de
+ * menus la juxtaposition seule donnait « 1 + ¼ + 1 + ½ + ½ », illisible au
+ * rayon.
+ */
+export function cumulerQuantites(existante: string, ajout: string): string {
+  // Le terme à grossir se cherche parmi tous, pas seulement le dernier :
+  // « 1 moyenne », « 3 », « 1 moyenne » doit donner « 2 moyennes + 3 » et non
+  // trois termes côte à côte parce que les unités alternent.
+  const termes = existante.split(' + ')
+  const lu = lireQuantite(ajout)
+  const place = lu
+    ? termes.findIndex((terme) => {
+        const t = lireQuantite(terme)
+        return t !== null && memeUnite(t.unite, lu.unite)
+      })
+    : termes.indexOf(ajout.trim()) // « quelques brins » deux fois reste « quelques brins »
+
+  if (place === -1) return `${existante} + ${ajout}`
+  if (!lu) return existante
+
+  const terme = lireQuantite(termes[place]) as Quantite
+  const unite = terme.unite.length >= lu.unite.length ? terme.unite : lu.unite
+  termes[place] = ecrireQuantite({ valeur: terme.valeur + lu.valeur, unite })
+  return termes.join(' + ')
+}

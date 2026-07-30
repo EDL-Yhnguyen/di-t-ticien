@@ -36,6 +36,7 @@ const GardeManger = lazy(() =>
   import('./pages/GardeManger').then((m) => ({ default: m.GardeManger })),
 )
 const Cuisiner = lazy(() => import('./pages/Cuisiner').then((m) => ({ default: m.Cuisiner })))
+const Courses = lazy(() => import('./pages/Courses').then((m) => ({ default: m.Courses })))
 const Coach = lazy(() => import('./pages/Coach').then((m) => ({ default: m.Coach })))
 const Menus = lazy(() => import('./pages/Menus').then((m) => ({ default: m.Menus })))
 const Stats = lazy(() => import('./pages/Stats').then((m) => ({ default: m.Stats })))
@@ -58,6 +59,7 @@ const ECRANS_A_PRECHARGER = [
   () => import('./pages/Cuisine'),
   () => import('./pages/GardeManger'),
   () => import('./pages/Cuisiner'),
+  () => import('./pages/Courses'),
   () => import('./pages/Profil'),
   () => import('./pages/Menus'),
   () => import('./pages/Stats'),
@@ -214,6 +216,8 @@ function ecranPour(chemin: string) {
       return <GardeManger />
     case '/app/cuisiner':
       return <Cuisiner />
+    case '/app/courses':
+      return <Courses />
     case '/app/coach':
       return <Coach />
     case '/app/stats':

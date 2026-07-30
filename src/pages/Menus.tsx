@@ -12,6 +12,7 @@ import {
   planPerime,
   totalDuJour,
 } from '../lib/menu'
+import { listesEnCours, nouvelleListe, propositionsDuPlan, verser } from '../lib/courses'
 import { objectifCalorique } from '../lib/nutrition'
 import { LIBELLE_TAG, RAYONS, recetteParId } from '../lib/recettes'
 import type { Recette, Tag } from '../lib/recettes'
@@ -480,8 +481,29 @@ function FeuilleCourses({
   plan: PlanSemaine
   onFermer: () => void
 }) {
+  const { etat, modifier } = useSession()
   const groupes = useMemo(() => coursesDuPlan(plan), [plan])
   const rayonsRemplis = RAYONS.filter((rayon) => groupes[rayon].length > 0)
+  const [verse, setVerse] = useState(0)
+
+  /**
+   * Cette feuille est un aperçu : rien n'y est cochable, parce que la liste
+   * qu'on emporte est enregistrée et vit sur `/app/courses`. Le versement écarte
+   * d'emblée ce que le garde-manger couvre déjà — on ne rachète pas ce qu'on a.
+   */
+  function verserDansMaListe() {
+    const propositions = propositionsDuPlan(plan, etat.stocks, listesEnCours(etat.courses)[0] ?? null)
+    const retenues = propositions.filter((p) => !p.enStock && !p.dejaDansListe)
+    const ouverte = listesEnCours(etat.courses)[0] ?? null
+    const cible = ouverte ?? nouvelleListe()
+
+    modifier((brouillon) => {
+      if (!ouverte) brouillon.courses.push(cible)
+      const dans = brouillon.courses.find((l) => l.id === cible.id)
+      if (dans) verser(dans, retenues, 'recette', plan)
+    })
+    setVerse(retenues.length)
+  }
 
   return (
     <Feuille ouvert={ouvert} titre="Liste de courses" onFermer={onFermer}>
@@ -493,6 +515,24 @@ function FeuilleCourses({
             Les ingrédients des {plan.jours.length} jours, regroupés dans l’ordre où l’on traverse
             le magasin.
           </p>
+
+          <div className="space-y-3">
+            <Bouton pleineLargeur onClick={verserDansMaListe}>
+              <ShoppingBasket size={17} aria-hidden="true" />
+              Verser dans ma liste de courses
+            </Bouton>
+            {verse > 0 && (
+              <p className="text-sm text-basil" role="status">
+                {verse} produit{verse > 1 ? 's' : ''} ajouté{verse > 1 ? 's' : ''}. Ce que votre
+                garde-manger couvre déjà a été laissé de côté.
+              </p>
+            )}
+            <Lien vers="/app/courses" className="block">
+              <Bouton ton="fantome" pleineLargeur>
+                Ouvrir ma liste de courses
+              </Bouton>
+            </Lien>
+          </div>
           {rayonsRemplis.map((rayon) => (
             <section key={rayon}>
               <TitreSection>{rayon}</TitreSection>

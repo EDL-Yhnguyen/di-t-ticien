@@ -16,6 +16,7 @@ import {
   NotebookText,
   Refrigerator,
   ShieldCheck,
+  ShoppingBasket,
   ShieldHalf,
   Stethoscope,
   Sun,
@@ -45,6 +46,12 @@ export function Profil() {
   const [erreurSuppression, setErreurSuppression] = useState<string | null>(null)
   const [confirmationSaisie, setConfirmationSaisie] = useState('')
   const [sombre, setSombre] = useState(() => document.documentElement.classList.contains('dark'))
+
+  // Le nombre qui décide d'ouvrir l'écran : ce qui reste à prendre sur les
+  // listes en cours. Le total, lui, ne dit rien une fois au magasin.
+  const coursesAPrendre = etat.courses
+    .filter((l) => l.clotureeLe === null)
+    .reduce((somme, l) => somme + l.articles.filter((a) => !a.pris).length, 0)
 
   const [taille, setTaille] = useState(String(etat.profil.tailleCm))
   const [age, setAge] = useState(String(etat.profil.age))
@@ -157,6 +164,17 @@ export function Profil() {
           >
             <Refrigerator size={19} className="shrink-0 text-corail" aria-hidden="true" />
             <span className="flex-1 font-medium text-ink">Mon garde-manger</span>
+            <ChevronRight size={17} className="shrink-0 text-ink-faint" aria-hidden="true" />
+          </Lien>
+          <Lien
+            vers="/app/courses"
+            className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken"
+          >
+            <ShoppingBasket size={19} className="shrink-0 text-corail" aria-hidden="true" />
+            <span className="flex-1 font-medium text-ink">Ma liste de courses</span>
+            {coursesAPrendre > 0 && (
+              <span className="text-sm text-ink-faint tnum">{coursesAPrendre}</span>
+            )}
             <ChevronRight size={17} className="shrink-0 text-ink-faint" aria-hidden="true" />
           </Lien>
           <Lien

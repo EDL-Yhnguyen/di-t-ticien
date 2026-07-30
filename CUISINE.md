@@ -15,7 +15,7 @@ pour ne pas redécouvrir les mêmes murs à chaque reprise.
 | # | Sprint | Contenu | Sections du brief | État |
 |---|---|---|---|---|
 | **C1** | Garde-manger | Frigo / placards / congélateur, DLC et DDM, tableau de bord des dates, « Que puis-je cuisiner ? » | 8, 9, 10, 11, 12, 16 | **Livré** le 29/07/2026 |
-| **C2** | Courses | Liste par rayon depuis le plan **et** ajouts libres, cochage persistant, plusieurs listes, historique, retour de courses → garde-manger | 6 | À faire |
+| **C2** | Courses | Liste par rayon depuis le plan **et** ajouts libres, cochage persistant, plusieurs listes, historique, retour de courses → garde-manger | 6 | **Livré** le 30/07/2026 |
 | **C3** | Recettes premium | Schéma étendu (cuisine du monde, difficulté, coût, portions, régimes, nutriments, substitutions, conservation, réchauffage, variantes d'appareils), fiche détaillée, recherche multicritère, favoris | 1, 2, 3, 19 | À faire |
 | **C4** | Planification | Calendrier jour / semaine / mois, glisser-déposer, copier un jour ou une semaine, modèles, semaines préconstruites, génération multi-semaines, export `.ics` | 4, 5 | À faire |
 | **C5** | Mode Cuisine | Plein écran, étapes une à une, minuteurs, écran maintenu allumé, batch cooking et ordre des cuissons | 17, 18 | À faire |
@@ -123,6 +123,86 @@ Deux défauts corrigés à ce moment-là : le nom du produit tronqué en 390 px
 (« Filet de pou… ») à cause d'un bouton crayon redondant avec la ligne
 entière, et une liste d'urgences en bloc là où le brief demande un tableau de
 bord distinguant aujourd'hui, demain et la semaine.
+
+---
+
+## C2 — Les courses (livré le 30/07/2026)
+
+### Ce qui est en place
+
+- `ArticleCourse` et `ListeCourses` dans `lib/types.ts`, rangés dans
+  `EtatUtilisateur.courses` — listes en cours et closes dans le même tableau,
+  `clotureeLe` les distingue.
+- `lib/courses.ts` : fabrique, ajout avec cumul, versement d'une semaine ou du
+  placard, bilan, clôture, copie, passage au garde-manger.
+- `/app/courses` : liste par rayon, cochage enregistré, ajout au clavier ou au
+  code-barres, plusieurs listes en parallèle, historique et « refaire cette
+  liste », retour de courses.
+- Quatre portes d'entrée : le panier de `Cuisine`, la feuille de courses de
+  `Menus`, les ingrédients manquants de `Cuisiner`, et les raccourcis du profil
+  et du garde-manger.
+
+### Les décisions à ne pas défaire
+
+**Le cochage est dans le document, pas dans l'écran.** C'est toute la
+différence avec la liste calculée de `menu.ts`, qui reste comme aperçu : on fait
+ses courses en plusieurs fois, d'un téléphone qu'on range entre deux rayons, et
+une case perdue au rechargement fait racheter ce qui est déjà dans le caddie.
+
+**Une ligne déjà cochée qui grossit redevient à prendre.** Cocher veut dire
+« j'ai pris ce qui était écrit » : si la semaine suivante réclame deux oignons de
+plus, laisser la case cochée ferait passer devant le rayon sans s'arrêter.
+
+**Les lignes cochées ne descendent pas en bas de la liste.** On coche en
+marchant ; une liste qui se réordonne sous les yeux fait perdre sa place et
+relire tout le rayon. Le barré suffit.
+
+**Ce qu'on a déjà ne se rachète pas** : le versement d'une semaine confronte
+chaque ingrédient au garde-manger et arrive décoché sur ce qui est couvert —
+mais la ligne reste visible et cochable, avec **le nom de l'article du stock qui
+a produit la correspondance**. `memeProduit` rapproche sur un seul mot porteur et
+se trompe parfois ; c'est cet affichage qui rend l'erreur inoffensive (même
+règle qu'en C1).
+
+**Le rapprochement des lignes de courses se fait sur `cleIngredient`**, plus
+strict que le `memeProduit` du garde-manger : fusionner deux lignes à tort fait
+partir au magasin avec une quantité fausse, alors qu'un faux rapprochement de
+stock ne coûte qu'une suggestion de recette à côté.
+
+**`plansVerses` retient les semaines déjà versées.** Verser deux fois la même
+doublerait toutes les quantités sans que rien ne le signale. L'écran prévient, il
+n'interdit pas : regénérer une semaine change son `genereLe`, donc c'est bien un
+nouveau versement.
+
+**Le retour de courses n'invente aucune date.** Les articles entrent au
+garde-manger sans DLC ni DDM, et l'écran dit qu'il reste à les noter : une date
+posée au hasard donnerait une fausse sécurité, exactement ce que C1 cherche à
+éviter. Le rangement proposé vient du rayon et se corrige ligne à ligne — les
+pommes de terre et la salade sortent du même rayon et ne vont pas au même
+endroit. Un produit rapporté qui existe déjà au garde-manger fait **une seconde
+ligne** plutôt qu'un cumul : deux achats ont deux dates, et les fondre en
+perdrait une.
+
+**Ranger et clore sont un seul geste**, parce qu'on vide les sacs en rentrant.
+Les séparer laisserait derrière soi des listes ouvertes dont on n'a plus rien à
+faire.
+
+### Vérifié à l'écran avant livraison
+
+Au pilote Playwright, sur le build de production en mode démo, en 390 px et
+1280 px, thèmes clair et sombre, aucune erreur console : versement d'une semaine
+de 28 repas (81 lignes cumulées, dont 2 écartées d'office parce qu'au frigo),
+second versement averti, ajout manuel, cumul contrôlé **dans le document**,
+cochage vérifié après rechargement, retour de courses (garde-manger passé de 2 à
+4 articles, tous sans date, liste close), historique et « refaire cette liste »
+(articles repris, tout décoché, `plansVerses` vidé), et les manquants de
+`/app/cuisiner` versés sur la liste.
+
+**Un défaut corrigé à ce moment-là**, que le typecheck ne pouvait pas voir : le
+pluriel en « -x ». « 1 rouleau » et « 2 rouleaux » ne se reconnaissaient pas —
+`memeUnite` ne défaisait que le « -s » — et donnaient « 1 rouleau + 2 rouleaux »
+au rayon au lieu de « 3 rouleaux ». `accorder` avait le défaut symétrique et
+aurait écrit « 3 rouleaus ».
 
 **Piège du banc d'essai** : injecter des données dans le `localStorage` d'une
 page ouverte ne sert à rien — `AppContext` vide son debounce sur `pagehide` et

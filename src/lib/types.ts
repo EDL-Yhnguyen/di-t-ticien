@@ -316,6 +316,60 @@ export const RAYONS: Rayon[] = [
   'Épicerie',
 ]
 
+/**
+ * D'où vient une ligne de courses.
+ *
+ * Affichée à l'écran, parce qu'une liste construite depuis une semaine de
+ * menus contient des lignes que la personne n'a pas écrites : sans dire d'où
+ * elles sortent, « 3 oignons » a l'air d'une erreur et se fait supprimer.
+ */
+export type OrigineCourse = 'recette' | 'manuel' | 'placard'
+
+export interface ArticleCourse {
+  id: string
+  nom: string
+  /** Cumulée à mesure des ajouts : « 3 oignons », « 2 CàS + ½ ». */
+  quantite: string
+  rayon: Rayon
+  origine: OrigineCourse
+  /** Les recettes qui ont amené cette ligne — de quoi répondre à « pourquoi ? ». */
+  recettes: string[]
+  /**
+   * Le cochage est dans le document, pas dans l'écran : on fait ses courses en
+   * plusieurs fois, souvent d'un téléphone qu'on range entre deux rayons. Une
+   * case perdue au rechargement fait racheter ce qu'on a déjà dans le caddie.
+   */
+  pris: boolean
+  ajouteLe: string
+}
+
+/**
+ * Une liste de courses.
+ *
+ * Il y en a plusieurs parce qu'on ne fait pas ses courses en une fois : le
+ * marché du samedi et le drive de la semaine ne se cochent pas ensemble. Une
+ * liste close part à l'historique plutôt qu'à la corbeille — c'est ce qui
+ * permet de refaire la même la semaine suivante.
+ */
+export interface ListeCourses {
+  id: string
+  nom: string
+  creeLe: string
+  /** Horodatage de clôture. `null` tant que la liste est en cours. */
+  clotureeLe: string | null
+  articles: ArticleCourse[]
+  /**
+   * Les semaines de menus déjà versées, repérées par leur `genereLe`.
+   *
+   * Sans cette trace, verser deux fois la même semaine doublerait toutes les
+   * quantités sans que rien ne le signale — et on part au magasin avec quatorze
+   * œufs pour sept. L'écran s'en sert pour prévenir, pas pour interdire :
+   * regénérer une semaine change son `genereLe`, donc son versement est bien un
+   * nouveau versement.
+   */
+  plansVerses?: string[]
+}
+
 export type Emplacement = 'frigo' | 'placard' | 'congelateur'
 
 export const EMPLACEMENTS: Emplacement[] = ['frigo', 'placard', 'congelateur']

@@ -3,7 +3,8 @@ import { CalendarDays, Check, ChevronRight, Clock, Refrigerator, ShoppingBasket 
 import { useSession } from '../context/AppContext'
 import { AuJournal } from '../components/AuJournal'
 import { EtiquetteBande } from '../components/nutrition'
-import { Carte, EtatVide, Etiquette, Feuille, TitreSection } from '../components/ui'
+import { Bouton, Carte, EtatVide, Etiquette, Feuille, TitreSection } from '../components/ui'
+import { listesEnCours, nouvelleListe, propositionsDeRecettes, verser } from '../lib/courses'
 import {
   LIBELLE_TAG,
   PLACARD,
@@ -294,7 +295,7 @@ export function Cuisine() {
           )}
         </div>
       ) : (
-        <ListeCourses panier={panier} />
+        <ApercuCourses panier={panier} />
       )}
 
       <Feuille ouvert={ouverte !== null} titre={ouverte?.titre ?? ''} onFermer={() => setOuverte(null)}>
@@ -394,12 +395,35 @@ function DetailRecette({
   )
 }
 
-function ListeCourses({ panier }: { panier: string[] }) {
+/**
+ * L'aperçu du panier de recettes — un brouillon, pas la liste qu'on emporte.
+ *
+ * Le cochage ici est volontairement local : c'est `/app/courses` qui tient la
+ * liste enregistrée, et deux cochages persistés pour la même chose se
+ * contrediraient. D'où le bouton de versement, qui fait passer ce brouillon
+ * dans la vraie liste.
+ */
+function ApercuCourses({ panier }: { panier: string[] }) {
+  const { etat, modifier } = useSession()
   const [pris, setPris] = useState<string[]>([])
+  const [verse, setVerse] = useState(0)
   const groupes = listeDeCourses(panier)
 
   function basculer(nom: string) {
     setPris((p) => (p.includes(nom) ? p.filter((x) => x !== nom) : [...p, nom]))
+  }
+
+  function verserDansMaListe() {
+    const propositions = propositionsDeRecettes(panier, etat.stocks, null)
+    const ouverte = listesEnCours(etat.courses)[0] ?? null
+    const cible = ouverte ?? nouvelleListe()
+
+    modifier((brouillon) => {
+      if (!ouverte) brouillon.courses.push(cible)
+      const dans = brouillon.courses.find((l) => l.id === cible.id)
+      if (dans) verser(dans, propositions, 'recette')
+    })
+    setVerse(propositions.length)
   }
 
   return (
@@ -417,6 +441,25 @@ function ListeCourses({ panier }: { panier: string[] }) {
             {panier.length} recette{panier.length > 1 ? 's' : ''} —{' '}
             {panier.map((id) => recetteParId(id)?.titre).filter(Boolean).join(', ')}
           </p>
+
+          <Carte className="space-y-3 px-5 py-4">
+            <Bouton pleineLargeur onClick={verserDansMaListe}>
+              <ShoppingBasket size={17} aria-hidden="true" />
+              Verser dans ma liste de courses
+            </Bouton>
+            {verse > 0 && (
+              <p className="text-sm text-basil" role="status">
+                {verse} produit{verse > 1 ? 's' : ''} ajouté{verse > 1 ? 's' : ''} — les quantités
+                déjà présentes ont été cumulées.
+              </p>
+            )}
+            <Lien vers="/app/courses" className="block">
+              <Bouton ton="fantome" pleineLargeur>
+                Ouvrir ma liste
+                <ChevronRight size={16} aria-hidden="true" />
+              </Bouton>
+            </Lien>
+          </Carte>
 
           {RAYONS.map((rayon) => {
             const items = groupes[rayon]

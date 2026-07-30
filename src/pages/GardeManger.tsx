@@ -6,6 +6,7 @@ import {
   Package,
   Plus,
   Refrigerator,
+  ShoppingBasket,
   Snowflake,
   Trash2,
 } from 'lucide-react'
@@ -44,6 +45,9 @@ export function GardeManger() {
   const [saisie, setSaisie] = useState<ArticleStock | 'nouveau' | null>(null)
 
   const stocks = etat.stocks
+  const courses = etat.courses
+    .filter((l) => l.clotureeLe === null)
+    .reduce((somme, l) => somme + l.articles.filter((a) => !a.pris).length, 0)
   const bilan = useMemo(() => bilanStock(stocks), [stocks])
   const urgents = useMemo(() => articlesUrgents(stocks), [stocks])
   const affiches = useMemo(() => stocksDe(stocks, onglet), [stocks, onglet])
@@ -104,6 +108,15 @@ export function GardeManger() {
             <Bouton ton="doux" pleineLargeur>
               <ChefHat size={18} aria-hidden="true" />
               Que puis-je cuisiner ?
+            </Bouton>
+          </Lien>
+          {/* L'aller-retour est le vrai parcours : ce qui manque part sur la
+              liste, et ce qu'on rapporte revient ici. */}
+          <Lien vers="/app/courses" className="block sm:col-span-2">
+            <Bouton ton="fantome" pleineLargeur>
+              <ShoppingBasket size={18} aria-hidden="true" />
+              Ma liste de courses
+              {courses > 0 && <span className="tnum">({courses})</span>}
             </Bouton>
           </Lien>
         </div>
