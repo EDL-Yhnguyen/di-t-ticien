@@ -144,6 +144,8 @@ src/
     courses.ts          listes de courses enregistrées : cumul, versement, retour au stock
     catalogue.ts        lectures du catalogue : difficulté, régimes, macros, illustration, recherche
     ics.ts              export d’une semaine de menus vers un agenda (.ics)
+    cuisson.ts          durées lisibles dans une étape, ordre de démarrage d’un batch
+    cuisineEnDirect.ts  minuteurs et maintien de l’écran allumé (effets navigateur)
     ingredients.ts      rapprochement des noms de produits (stock ↔ recettes ↔ courses)
   components/
     Mosaique.tsx        treemap « squarified » : aire = kcal, couleur = Nutri
@@ -177,6 +179,7 @@ api/
 | `/app/garde-manger` | `GardeManger.tsx` | frigo, placards, congélateur, dates limites |
 | `/app/cuisiner` | `Cuisiner.tsx` | ce que le stock permet de cuisiner |
 | `/app/courses` | `Courses.tsx` | listes de courses, cochage enregistré, retour de courses |
+| `/app/mode-cuisine` | `ModeCuisine.tsx` | **hors gabarit** : une étape à la fois, minuteurs, batch |
 | `/app/coach` | `Coach.tsx` | coach conversationnel (accord préalable) |
 | `/app/stats` | `Stats.tsx` | tendances sur 7 / 30 / 90 jours |
 | `/app/menus` | `Menus.tsx` | planification jour / semaine / mois, modèles, export agenda |
@@ -724,6 +727,36 @@ Vérification manuelle attendue :
 ---
 
 ## Historique du projet
+
+### 30 juillet 2026 — Le mode Cuisine (module Cuisine, sprint C5)
+
+Cuisiner devient un écran à part entière. Décisions détaillées dans
+`CUISINE.md`, section C5.
+
+- **`/app/mode-cuisine`, hors du gabarit** : ni barre d'onglets ni rail. On y est
+  les mains occupées, et tout ce qui n'aide pas à l'étape en cours est un élément
+  à contourner du dos de la main. C'est la première route traitée avant le
+  `Cadre` dans `App.tsx`, mais elle reste sous la barrière d'erreur.
+- **La séance est enregistrée** (`EtatUtilisateur.cuisine`) : on retrouve la
+  recette à l'étape où on l'avait laissée, et un bandeau de reprise le signale
+  sur les écrans de cuisine. Une seule structure sert la recette unique et le
+  batch cooking.
+- **Minuteurs déduits du texte des étapes**, sans annotation ajoutée au
+  catalogue, et comptés sur des horodatages absolus — un onglet en arrière-plan
+  ferait dériver un compteur décrémenté de plusieurs minutes.
+- **Batch cooking** : plusieurs recettes dans une séance, étapes indépendantes,
+  et un ordre de démarrage. Les étapes ne sont pas entrelacées : le catalogue ne
+  dit pas lesquelles demandent une présence.
+- **Écran maintenu allumé** par `Screen Wake Lock`, absence silencieuse là où
+  l'API manque.
+
+**Vérifié au pilote Playwright** sur le build de production en mode démo, 390 px
+et 1280 px, clair et sombre : minuteur déduit et décompte constaté, étape
+retrouvée après rechargement, batch de trois recettes à étapes indépendantes.
+Les parcours C2, C3 et C4 rejoués sans régression.
+
+**Un défaut corrigé en vérifiant** : la carte du minuteur recouvrait le bouton
+« Étape suivante » en 390 px.
 
 ### 30 juillet 2026 — La planification (module Cuisine, sprint C4)
 

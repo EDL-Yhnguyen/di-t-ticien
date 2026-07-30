@@ -3,7 +3,9 @@ import { Check, ChefHat, Clock, Leaf, ShoppingBasket } from 'lucide-react'
 import { useSession } from '../context/AppContext'
 import { Bouton, Carte, Etiquette, EtatVide, TitreSection } from '../components/ui'
 import { ajouterArticle, listesEnCours, nouvelleListe } from '../lib/courses'
-import { Lien } from '../lib/router'
+import { seanceDeCuisine } from '../lib/cuisson'
+import { Lien, useRoutage } from '../lib/router'
+import { BandeauCuisineEnCours } from './ModeCuisine'
 import { recettesRealisables } from '../lib/stocks'
 import type { RecetteRealisable } from '../lib/stocks'
 import type { Moment } from '../lib/types'
@@ -63,6 +65,7 @@ export function Cuisiner() {
   return (
     <div className="space-y-6">
       <EnTete />
+      <BandeauCuisineEnCours />
 
       {/* ── Filtres ── */}
       <section className="animate-rise space-y-3" style={{ animationDelay: '60ms' }}>
@@ -201,6 +204,7 @@ function Filtres<T>({
 function CarteRecette({ proposition }: { proposition: RecetteRealisable }) {
   const { recette, couverts, manquants, part, sauve } = proposition
   const { etat, modifier } = useSession()
+  const { aller } = useRoutage()
   const [deplie, setDeplie] = useState(false)
   const [ajoutes, setAjoutes] = useState(false)
 
@@ -358,6 +362,22 @@ function CarteRecette({ proposition }: { proposition: RecetteRealisable }) {
               </li>
             ))}
           </ol>
+
+          {/* On est venu chercher quoi faire ce soir : le geste suivant est de
+              s'y mettre, pas de relire. */}
+          <Bouton
+            pleineLargeur
+            className="mt-4"
+            onClick={() => {
+              modifier((brouillon) => {
+                brouillon.cuisine = seanceDeCuisine([recette.id])
+              })
+              aller('/app/mode-cuisine')
+            }}
+          >
+            <ChefHat size={17} aria-hidden="true" />
+            Cuisiner maintenant
+          </Bouton>
 
           {recette.astuce && (
             <p className="mt-3 rounded-tile bg-sunken px-3.5 py-2.5 text-sm text-ink-soft">

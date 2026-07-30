@@ -37,6 +37,9 @@ const GardeManger = lazy(() =>
 )
 const Cuisiner = lazy(() => import('./pages/Cuisiner').then((m) => ({ default: m.Cuisiner })))
 const Courses = lazy(() => import('./pages/Courses').then((m) => ({ default: m.Courses })))
+const ModeCuisine = lazy(() =>
+  import('./pages/ModeCuisine').then((m) => ({ default: m.ModeCuisine })),
+)
 const Coach = lazy(() => import('./pages/Coach').then((m) => ({ default: m.Coach })))
 const Menus = lazy(() => import('./pages/Menus').then((m) => ({ default: m.Menus })))
 const Stats = lazy(() => import('./pages/Stats').then((m) => ({ default: m.Stats })))
@@ -60,6 +63,7 @@ const ECRANS_A_PRECHARGER = [
   () => import('./pages/GardeManger'),
   () => import('./pages/Cuisiner'),
   () => import('./pages/Courses'),
+  () => import('./pages/ModeCuisine'),
   () => import('./pages/Profil'),
   () => import('./pages/Menus'),
   () => import('./pages/Stats'),
@@ -136,6 +140,23 @@ export function App() {
   if (etat.profil.motDePasseAChanger) return <NouveauMotDePasse />
   if (!consentementAJour(etat.consentement)) return <Consentement />
   if (!etat.profil.onboardingFait) return <Onboarding />
+
+  // Le mode cuisine s'affiche **hors du gabarit** : ni barre d'onglets, ni rail.
+  // On y est les mains occupées, et tout ce qui n'aide pas à l'étape en cours
+  // est un élément à contourner du dos de la main. Il reste sous la barrière
+  // d'erreur — une exception y laisserait sinon un écran noir sans issue.
+  if (chemin === '/app/mode-cuisine') {
+    return (
+      <>
+        <BarriereErreur>
+          <Suspense fallback={<AttenteEcran />}>
+            <ModeCuisine />
+          </Suspense>
+        </BarriereErreur>
+        <Celebration />
+      </>
+    )
+  }
 
   return (
     <>

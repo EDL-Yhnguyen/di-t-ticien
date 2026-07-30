@@ -18,7 +18,7 @@ pour ne pas redécouvrir les mêmes murs à chaque reprise.
 | **C2** | Courses | Liste par rayon depuis le plan **et** ajouts libres, cochage persistant, plusieurs listes, historique, retour de courses → garde-manger | 6 | **Livré** le 30/07/2026 |
 | **C3** | Recettes premium | Schéma étendu (cuisine du monde, difficulté, coût, portions, régimes, nutriments, substitutions, conservation, réchauffage, variantes d'appareils), fiche détaillée, recherche multicritère, favoris | 1, 2, 3, 19 | **Livré** le 30/07/2026 |
 | **C4** | Planification | Calendrier jour / semaine / mois, glisser-déposer, copier un jour ou une semaine, modèles, semaines préconstruites, génération multi-semaines, export `.ics` | 4, 5 | **Livré** le 30/07/2026 |
-| **C5** | Mode Cuisine | Plein écran, étapes une à une, minuteurs, écran maintenu allumé, batch cooking et ordre des cuissons | 17, 18 | À faire |
+| **C5** | Mode Cuisine | Plein écran, étapes une à une, minuteurs, écran maintenu allumé, batch cooking et ordre des cuissons | 17, 18 | **Livré** le 30/07/2026 |
 | **C6** | Ports d'IA et passage à l'échelle | `src/lib/ia/` : interfaces et bouchons documentés, sans aucun appel réel ; schéma Supabase du catalogue et du partage familial | 7, 13, 14, 15, 21 | À faire |
 
 **C1 avant tout le reste** : les sections 11, 12 et 16 du brief supposent un
@@ -370,6 +370,84 @@ compacte.
 **Piège du banc d'essai** : un test peut passer sans rien prouver. La première
 vérification de l'échange portait sur deux dîners identiques (le mardi venait
 d'être recopié depuis le lundi) : l'assertion était vraie quoi qu'il arrive.
+
+---
+
+## C5 — Le mode Cuisine (livré le 30/07/2026)
+
+### Ce qui est en place
+
+- `EtatUtilisateur.cuisine` : la séance en cours (`SeanceCuisine`), **une seule
+  structure pour une recette et pour le batch cooking**.
+- `lib/cuisson.ts` (pur) : durées lisibles dans le texte d'une étape, chrono,
+  ordre de démarrage d'une séance à plusieurs recettes.
+- `lib/cuisineEnDirect.ts` (effets navigateur) : minuteurs et maintien de
+  l'écran allumé.
+- `/app/mode-cuisine`, **hors du gabarit** : une étape à la fois en grand,
+  minuteurs, ingrédients à portée, onglets entre recettes, ordre de démarrage.
+- Quatre portes d'entrée : la fiche d'une recette, le panier (batch), une
+  proposition de `/app/cuisiner`, un repas du planning. Plus un bandeau de
+  reprise sur les deux écrans de cuisine.
+
+### Les décisions à ne pas défaire
+
+**La séance est enregistrée, pas gardée dans l'écran.** On cuisine en posant son
+téléphone, on répond au téléphone, l'onglet se ferme. Retrouver la recette **à
+l'étape où on l'avait laissée** est la moitié de l'intérêt du mode cuisine.
+Vérifié : après rechargement, l'écran affiche « Étape 3 sur 4 ».
+
+**Les minuteurs comptent sur des horodatages absolus, pas sur un compteur
+décrémenté.** Un onglet en arrière-plan voit ses `setInterval` ralentis à une
+fois par minute : un compte à rebours décrémenté dériverait de plusieurs minutes
+pendant qu'on regarde ailleurs — précisément le moment où l'on compte sur lui.
+Même raison pour la sonnerie, déclenchée par comparaison d'horodatages et non
+par un `setTimeout`.
+
+**Les durées sont déduites du texte des étapes**, sans annotation ajoutée aux 53
+recettes : une recette écrite demain aura ses minuteurs sans rien de plus. Les
+bornes (30 s à 3 h) écartent les faux positifs, et les unités de conservation
+— jour, semaine, mois — sont exclues : « se garde 3 mois au congélateur » n'est
+pas un temps de cuisson. Contrôlé sur tout le catalogue : 59 étapes sur 170
+portent une durée, aucun faux positif sur les grammes, les degrés ou les watts.
+
+**Une étape porte parfois plusieurs durées** (« 6 minutes par face », « puis
+2 minutes ») : on les propose toutes plutôt que de deviner laquelle compte.
+Deviner mal ferait rater une cuisson ; deux boutons ne coûtent qu'un regard.
+
+**Rien ne se déclenche tout seul.** Ce qui est déduit d'une phrase peut se
+tromper : l'écran propose le minuteur, la personne le lance.
+
+**Les étapes ne sont pas entrelacées entre recettes**, et c'est une décision. Le
+catalogue ne dit pas quelles étapes sont actives (couper, remuer) et lesquelles
+sont passives (cuire, refroidir) ; un entrelacement déduit d'une phrase
+enverrait remuer une poêle qui n'est pas encore sur le feu. Ce qui est calculable
+sans risque, c'est **l'ordre de démarrage** : la plus longue d'abord, parce que sa
+cuisson libère du temps pour les autres. Chaque recette garde son étape courante,
+et on passe de l'une à l'autre par les onglets.
+
+**L'absence de `Screen Wake Lock` est silencieuse.** Là où l'API n'existe pas,
+l'écran s'éteindra comme d'habitude : prévenir d'une limite que l'utilisateur ne
+peut pas lever ne servirait qu'à l'inquiéter. Le verrou est réacquis sur
+`visibilitychange`, sans quoi l'écran s'éteindrait au premier coup d'œil à une
+notification.
+
+**Le bip est synthétisé, pas téléchargé** : un fichier son ne serait pas dans le
+cache hors ligne au premier usage — exactement le cas de la cuisine sans réseau.
+
+### Vérifié à l'écran avant livraison
+
+Au pilote Playwright, sur le build de production en mode démo, 390 px et
+1280 px, clair et sombre, aucune erreur console : lancement depuis une fiche,
+absence du gabarit sur `/app/mode-cuisine`, minuteur déduit du texte (« 20
+minutes ») et décompte réel constaté, étape enregistrée puis retrouvée après
+rechargement, bandeau de reprise, fin de séance qui remet l'état à `null`, batch
+de trois recettes avec onglets et **étapes indépendantes** (une recette à
+l'étape 2 pendant qu'une autre est à l'étape 1), et l'ordre de démarrage. Les
+parcours C2, C3 et C4 ont été rejoués en entier.
+
+**Un défaut corrigé à ce moment-là** : la carte du minuteur, en `sticky` séparé,
+recouvrait le bouton « Étape suivante » en 390 px. Les minuteurs vivent
+désormais dans la barre du bas.
 
 **Piège du banc d'essai** : injecter des données dans le `localStorage` d'une
 page ouverte ne sert à rien — `AppContext` vide son debounce sur `pagehide` et

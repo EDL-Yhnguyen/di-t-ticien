@@ -18,6 +18,7 @@ import type {
   PlanSemaine,
   Profil,
   ScoreJeu,
+  SeanceCuisine,
   SeanceSport,
 } from './types'
 
@@ -54,6 +55,11 @@ export interface EtatUtilisateur {
   plans: PlanSemaine[]
   /** Semaines mises de côté pour être reposées telles quelles. */
   modeles: ModeleSemaine[]
+  /**
+   * La séance de cuisine en cours, ou `null`. Enregistrée pour pouvoir
+   * reprendre une recette à l’étape où on l’a laissée — voir `SeanceCuisine`.
+   */
+  cuisine: SeanceCuisine | null
   /** Le contenu du frigo, des placards et du congélateur. */
   stocks: ArticleStock[]
   /**
@@ -129,6 +135,7 @@ export function etatInitial(u: Utilisateur): EtatUtilisateur {
     seances: [],
     plans: [],
     modeles: [],
+    cuisine: null,
     stocks: [],
     courses: [],
     favoris: [],
@@ -236,6 +243,7 @@ function fusionner(
     // effacerait un plan que quelqu'un vient peut-être de composer.
     plans: partiel.plans ?? (partiel.menus ? [partiel.menus] : []),
     modeles: partiel.modeles ?? [],
+    cuisine: partiel.cuisine ?? null,
     stocks: partiel.stocks ?? [],
     courses: partiel.courses ?? [],
     favoris: partiel.favoris ?? [],
@@ -303,5 +311,6 @@ export type {
   PlanSemaine,
   Profil,
   ScoreJeu,
+  SeanceCuisine,
   SeanceSport,
 }

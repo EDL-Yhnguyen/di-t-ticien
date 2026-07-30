@@ -300,6 +300,26 @@ export interface PlanSemaine {
  * recalculer à chaque pose, et la première erreur de décalage passerait
  * inaperçue.
  */
+/**
+ * Une séance de cuisine en cours.
+ *
+ * Enregistrée, et non gardée dans l'écran : on cuisine en posant son téléphone,
+ * on répond au téléphone, l'onglet se ferme. Retrouver la recette **à l'étape
+ * où on l'avait laissée** est la moitié de l'intérêt du mode cuisine.
+ *
+ * Une seule structure pour une recette et pour le batch cooking : cuisiner deux
+ * plats en parallèle n'est pas un mode à part, c'est la même séance avec deux
+ * recettes.
+ */
+export interface SeanceCuisine {
+  recettes: string[]
+  /** Index dans `recettes` de celle qu'on regarde. */
+  courante: number
+  /** L'étape atteinte dans chaque recette, dans le même ordre que `recettes`. */
+  etapes: number[]
+  demarreLe: string
+}
+
 export interface ModeleSemaine {
   id: string
   nom: string

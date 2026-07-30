@@ -7,6 +7,7 @@ import {
   Flame,
   Heart,
   Refrigerator,
+  ChefHat,
   Search,
   ShoppingBasket,
   SlidersHorizontal,
@@ -57,13 +58,15 @@ import {
   propositionsDeRecettes,
   verser,
 } from '../lib/courses'
+import { seanceDeCuisine } from '../lib/cuisson'
 import { cibleDuRepas } from '../lib/journal'
 import { entreeDeLaRecette } from '../lib/journalRecette'
 import { LIBELLE_BANDE, bandePour } from '../lib/nutriscore'
 import type { Bande } from '../lib/nutriscore'
 import { objectifCalorique } from '../lib/nutrition'
 import { LIBELLE_CATEGORIE, TEINTE_MOMENT } from '../lib/plan'
-import { Lien } from '../lib/router'
+import { Lien, useRoutage } from '../lib/router'
+import { BandeauCuisineEnCours } from './ModeCuisine'
 import { poidsLePlusRecent } from '../lib/store'
 import { LIBELLE_MOMENT, MOMENTS } from '../lib/types'
 import { classes, entier, jourISO } from '../lib/utils'
@@ -89,6 +92,7 @@ const CONVIVES = [1, 2, 4]
 
 export function Cuisine() {
   const { etat, modifier } = useSession()
+  const { aller } = useRoutage()
   const [onglet, setOnglet] = useState<'recettes' | 'courses'>('recettes')
   const [ouverte, setOuverte] = useState<Recette | null>(null)
   const [panier, setPanier] = useState<string[]>([])
@@ -145,6 +149,14 @@ export function Cuisine() {
     })
   }
 
+  /** Ouvre le mode cuisine sur une ou plusieurs recettes. */
+  function enCuisine(ids: string[]) {
+    modifier((brouillon) => {
+      brouillon.cuisine = seanceDeCuisine(ids)
+    })
+    aller('/app/mode-cuisine')
+  }
+
   function toutEffacer() {
     setCriteres({})
     setBande(null)
@@ -161,6 +173,8 @@ export function Cuisine() {
           ou par envie.
         </p>
       </header>
+
+      <BandeauCuisineEnCours />
 
       {/* Choisir plat par plat est le geste de celui qui sait déjà quoi manger.
           Pour les autres, la semaine composée d'avance est la vraie réponse —
@@ -325,7 +339,7 @@ export function Cuisine() {
           )}
         </div>
       ) : (
-        <ApercuCourses panier={panier} />
+        <ApercuCourses panier={panier} onCuisiner={() => enCuisine(panier)} />
       )}
 
       {/* ── Affiner ── */}
@@ -345,6 +359,7 @@ export function Cuisine() {
         {ouverte && (
           <FicheRecette
             recette={ouverte}
+            onCuisiner={() => enCuisine([ouverte.id])}
             bande={bandes.get(ouverte.id) ?? 'bleu'}
             favori={favoris.includes(ouverte.id)}
             onFavori={() => basculerFavori(ouverte.id)}
@@ -668,12 +683,14 @@ function FicheRecette({
   favori,
   onFavori,
   onAuJournal,
+  onCuisiner,
 }: {
   recette: Recette
   bande: Bande
   favori: boolean
   onFavori: () => void
   onAuJournal: (quantiteG: number) => void
+  onCuisiner: () => void
 }) {
   const { etat, modifier } = useSession()
   const [convives, setConvives] = useState(1)
@@ -709,6 +726,13 @@ function FicheRecette({
   return (
     <div className="space-y-6">
       <Vignette recette={recette} taille="grande" />
+
+      {/* Le premier geste de la fiche : cuisiner. Il vient avant les chiffres —
+          on ouvre une recette pour la faire, pas pour l'étudier. */}
+      <Bouton pleineLargeur onClick={onCuisiner}>
+        <ChefHat size={18} aria-hidden="true" />
+        Cuisiner maintenant
+      </Bouton>
 
       <div className="flex flex-wrap items-center gap-2">
         <EtiquetteBande bande={bande} />
@@ -929,7 +953,13 @@ function FicheRecette({
  * contrediraient. D'où le bouton de versement, qui fait passer ce brouillon
  * dans la vraie liste.
  */
-function ApercuCourses({ panier }: { panier: string[] }) {
+function ApercuCourses({
+  panier,
+  onCuisiner,
+}: {
+  panier: string[]
+  onCuisiner: () => void
+}) {
   const { etat, modifier } = useSession()
   const [pris, setPris] = useState<string[]>([])
   const [verse, setVerse] = useState(0)
@@ -980,6 +1010,13 @@ function ApercuCourses({ panier }: { panier: string[] }) {
           </p>
 
           <Carte className="space-y-3 px-5 py-4">
+            {/* Le panier sert à grouper des recettes : c'est exactement ce qu'est
+                une séance de batch cooking. Les cuisiner ensemble se propose donc
+                ici, à côté du versement en courses. */}
+            <Bouton ton="accent" pleineLargeur onClick={onCuisiner}>
+              <ChefHat size={17} aria-hidden="true" />
+              Cuisiner {panier.length > 1 ? `ces ${panier.length} recettes` : 'cette recette'}
+            </Bouton>
             <Bouton pleineLargeur onClick={verserDansMaListe}>
               <ShoppingBasket size={17} aria-hidden="true" />
               Verser dans ma liste de courses

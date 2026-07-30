@@ -3,6 +3,7 @@ import {
   BookmarkPlus,
   CalendarDays,
   CalendarRange,
+  ChefHat,
   Check,
   ChevronLeft,
   ChevronRight,
@@ -36,6 +37,7 @@ import {
   poserPlan,
   totalDuJour,
 } from '../lib/menu'
+import { seanceDeCuisine } from '../lib/cuisson'
 import { telechargerICS } from '../lib/ics'
 import { listesEnCours, nouvelleListe, propositionsDuPlan, verser } from '../lib/courses'
 import { objectifCalorique } from '../lib/nutrition'
@@ -43,7 +45,7 @@ import { LIBELLE_TAG, RAYONS, recetteParId } from '../lib/recettes'
 import type { Recette, Tag } from '../lib/recettes'
 import { entreeDeLaRecette } from '../lib/journalRecette'
 import { AuJournal } from '../components/AuJournal'
-import { Lien } from '../lib/router'
+import { Lien, useRoutage } from '../lib/router'
 import { poidsLePlusRecent } from '../lib/store'
 import type { JourMenu, ModeleSemaine, Moment, PlanSemaine } from '../lib/types'
 import { LIBELLE_MOMENT, MOMENTS } from '../lib/types'
@@ -65,6 +67,7 @@ interface Creneau {
 
 export function Menus() {
   const { etat, modifier } = useSession()
+  const { aller } = useRoutage()
   const aujourdhui = jourISO()
 
   const [vue, setVue] = useState<Vue>('semaine')
@@ -364,6 +367,12 @@ export function Menus() {
           onDeplacer={() => {
             setADeplacer(ouvert)
             setOuvert(null)
+          }}
+          onCuisiner={(recetteId) => {
+            modifier((brouillon) => {
+              brouillon.cuisine = seanceDeCuisine([recetteId])
+            })
+            aller('/app/mode-cuisine')
           }}
         />
       )}
@@ -790,6 +799,7 @@ function FeuilleRepas({
   onAuJournal,
   onChanger,
   onDeplacer,
+  onCuisiner,
 }: {
   cible: Creneau
   recetteId: string | null
@@ -797,6 +807,7 @@ function FeuilleRepas({
   onAuJournal: (recette: Recette, quantiteG: number) => void
   onChanger: () => void
   onDeplacer: () => void
+  onCuisiner: (recetteId: string) => void
 }) {
   const recette = recetteId ? recetteParId(recetteId) : undefined
 
@@ -814,6 +825,12 @@ function FeuilleRepas({
               {recette.kcal} kcal · {recette.minutes} min
             </p>
           </div>
+
+          {/* Cuisiner vient avant de noter : on note après avoir mangé. */}
+          <Bouton pleineLargeur onClick={() => onCuisiner(recette.id)}>
+            <ChefHat size={17} aria-hidden="true" />
+            Cuisiner ce plat
+          </Bouton>
 
           <AuJournal recette={recette} onAjouter={(q) => onAuJournal(recette, q)} />
 
