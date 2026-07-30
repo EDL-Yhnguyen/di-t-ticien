@@ -77,6 +77,144 @@ export const LIBELLE_CUISINE: Record<Cuisine, string> = {
   americaine: 'Américaine',
 }
 
+/**
+ * La région d'origine d'un plat — le terroir, sous le pays.
+ *
+ * `Cuisine` répond à « de quel pays » et `Region` à « d'où exactement ». Les deux
+ * cohabitent parce qu'elles ne servent pas la même recherche : « je veux manger
+ * italien » et « je veux la carbonade de ma belle-mère » ne se cherchent pas au
+ * même endroit. Une carbonade est `cuisine: 'francaise'` **et** `region: 'nord'`
+ * — le plat est flamand des deux côtés de la frontière, et la trancher n'aurait
+ * fait plaisir à personne.
+ *
+ * Les noms sont **culinaires et non administratifs** : « Nord » plutôt que
+ * « Hauts-de-France », « Lyonnais » plutôt que « Auvergne-Rhône-Alpes ». Un
+ * découpage régional a changé trois fois en trente ans ; la cuisine, non, et
+ * c'est elle qu'on cherche.
+ */
+export type Region =
+  | 'nord'
+  | 'belgique'
+  | 'bretagne'
+  | 'normandie'
+  | 'alsace'
+  | 'lorraine'
+  | 'bourgogne'
+  | 'lyonnais'
+  | 'savoie'
+  | 'auvergne'
+  | 'provence'
+  | 'sud-ouest'
+  | 'pays-basque'
+  | 'languedoc'
+  | 'corse'
+  | 'val-de-loire'
+  | 'antilles'
+  | 'reunion'
+
+export const LIBELLE_REGION: Record<Region, string> = {
+  nord: 'Nord et Flandre',
+  belgique: 'Belgique',
+  bretagne: 'Bretagne',
+  normandie: 'Normandie',
+  alsace: 'Alsace',
+  lorraine: 'Lorraine',
+  bourgogne: 'Bourgogne',
+  lyonnais: 'Lyonnais',
+  savoie: 'Savoie',
+  auvergne: 'Auvergne',
+  provence: 'Provence',
+  'sud-ouest': 'Sud-Ouest',
+  'pays-basque': 'Pays basque',
+  languedoc: 'Languedoc',
+  corse: 'Corse',
+  'val-de-loire': 'Val de Loire',
+  antilles: 'Antilles',
+  reunion: 'La Réunion',
+}
+
+/**
+ * Le profil de goût dominant.
+ *
+ * C'est la question qu'on se pose vraiment devant une carte — « j'ai envie de
+ * quelque chose de relevé ce soir » — et à laquelle ni le pays ni les ingrédients
+ * ne répondent : un tajine et un curry sont deux cuisines et le même sucré-salé.
+ *
+ * **`epice` et `releve` ne sont pas la même chose**, et les confondre trompe :
+ * `epice` dit qu'il y a des épices (cumin, cannelle, ras el-hanout), `releve` dit
+ * que ça pique. Un tajine aux abricots est épicé sans être relevé, et quelqu'un
+ * qui fuit le piment doit pouvoir le commander sans crainte.
+ *
+ * Plusieurs goûts par recette : un plat sucré-salé peut être épicé aussi.
+ */
+export type Gout = 'sucre-sale' | 'epice' | 'releve' | 'doux' | 'acidule' | 'fume' | 'herbace'
+
+export const LIBELLE_GOUT: Record<Gout, string> = {
+  'sucre-sale': 'Sucré-salé',
+  epice: 'Épicé',
+  releve: 'Relevé, ça pique',
+  doux: 'Doux',
+  acidule: 'Acidulé',
+  fume: 'Fumé',
+  herbace: 'Herbes fraîches',
+}
+
+/**
+ * La forme du plat — ce qu'on voit en le posant sur la table.
+ *
+ * Sert autant à chercher (« un gratin, ce soir ») qu'à varier une semaine de
+ * menus : trois mijotés d'affilée, ce n'est pas la même monotonie que trois plats
+ * du même pays, et le planificateur ne pouvait pas le voir.
+ */
+export type TypePlat =
+  | 'mijote'
+  | 'roti'
+  | 'gratin'
+  | 'soupe'
+  | 'salade'
+  | 'tarte'
+  | 'grillade'
+  | 'poelee'
+  | 'papillote'
+  | 'bowl'
+  | 'farci'
+  | 'sandwich'
+
+export const LIBELLE_TYPE_PLAT: Record<TypePlat, string> = {
+  mijote: 'Mijoté',
+  roti: 'Rôti au four',
+  gratin: 'Gratin',
+  soupe: 'Soupe',
+  salade: 'Salade',
+  tarte: 'Tarte et quiche',
+  grillade: 'Grillade',
+  poelee: 'Poêlée',
+  papillote: 'Papillote',
+  bowl: 'Bowl',
+  farci: 'Farci',
+  sandwich: 'Sandwich et wrap',
+}
+
+/**
+ * Quand on sert ce plat.
+ *
+ * L'axe le plus subjectif des quatre, et le plus utile : c'est celui qui répond à
+ * « on reçoit samedi » ou « il fait froid et j'ai besoin de réconfort », deux
+ * demandes qu'aucun filtre nutritionnel ne couvre. Il est facultatif et le reste :
+ * la plupart des plats ne sont d'aucune occasion particulière, et prétendre le
+ * contraire viderait l'étiquette de son sens.
+ */
+export type Occasion = 'semaine' | 'dimanche' | 'reconfort' | 'reception' | 'pique-nique' | 'fete'
+
+export const LIBELLE_OCCASION: Record<Occasion, string> = {
+  semaine: 'Repas de semaine',
+  dimanche: 'Repas du dimanche',
+  reconfort: 'Réconfortant',
+  reception: 'Quand on reçoit',
+  'pique-nique': 'Pique-nique',
+  fete: 'Jour de fête',
+}
+
 export type Difficulte = 'facile' | 'intermediaire' | 'technique'
 
 export const LIBELLE_DIFFICULTE: Record<Difficulte, string> = {
@@ -145,6 +283,24 @@ export interface Recette {
 
   /** Origine culinaire. Absente = pas de rattachement revendiqué. */
   cuisine?: Cuisine
+
+  /* ── Axes de classement ajoutés le 30/07/2026 ── */
+
+  /**
+   * Le terroir, sous le pays. Absent = le plat n'en revendique aucun, ce qui est
+   * le cas de tout le catalogue composé sauf ses styles régionaux.
+   */
+  region?: Region
+  /**
+   * Profils de goût dominants. Absents, `goutsDe()` les déduit du style et des
+   * ingrédients — une déduction sans risque, contrairement à celle des régimes :
+   * se tromper propose un plat de trop, ça ne rend personne malade.
+   */
+  gouts?: Gout[]
+  /** Forme du plat. Absente, `typePlatDe()` la lit dans le titre et les étapes. */
+  typePlat?: TypePlat
+  /** Occasions où on le sert. Facultatif, et le reste — voir `Occasion`. */
+  occasions?: Occasion[]
   /**
    * Absente, elle se déduit du nombre d'étapes et du temps (`difficulteDe`).
    * À renseigner seulement quand la déduction se trompe : un plat de trois

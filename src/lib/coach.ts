@@ -1,4 +1,4 @@
-import { BASE_ALIMENTS } from './aliments'
+import { ALIMENTS_A_CONSEILLER } from './aliments/conseil'
 import { apportDe, bilanParRepas, cibleDuRepas, objectifsMacros, totalDuJour } from './journal'
 import type { Apport, BilanRepas } from './journal'
 import { valeurNutri } from './nutriscore'
@@ -167,7 +167,10 @@ function suggestionsPour(resteKcal: number, manques: string[], moment: Moment): 
   const veutProteines = manques.includes('protéines')
   const veutFibres = manques.includes('fibres')
 
-  return BASE_ALIMENTS.filter((a) => a.famille !== 'boisson')
+  // `ALIMENTS_A_CONSEILLER` et non toute la base : le coach propose de lui-même,
+  // et la base contient désormais des ingrédients (épices, farines) et des
+  // alcools qu'on doit pouvoir noter sans qu'ils soient jamais recommandés.
+  return ALIMENTS_A_CONSEILLER.filter((a) => a.famille !== 'boisson')
     .map((aliment) => {
       const portion = aliment.portionG ?? 100
       const kcal = (aliment.valeurs.kcal * portion) / 100
@@ -226,7 +229,7 @@ export function alternativesPour(entree: EntreeJournal, limite = 3): Alternative
   const apport = apportDe(entree)
   const noteActuelle = valeurNutri(entree.aliment.nutriScore)
 
-  return BASE_ALIMENTS.filter(
+  return ALIMENTS_A_CONSEILLER.filter(
     (a) => a.id !== entree.aliment.id && roleDe(a) === role,
   )
     .map((aliment) => {

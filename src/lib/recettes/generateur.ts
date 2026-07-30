@@ -14,7 +14,7 @@ import {
   vaAvec,
 } from './briques'
 import type { Aromate, Brique, Technique } from './briques'
-import type { Cuisine, Ingredient, Recette, Tag } from './types'
+import type { Cuisine, Gout, Ingredient, Recette, Region, Tag, TypePlat } from './types'
 
 /**
  * Le catalogue composé : plusieurs milliers de recettes, assemblées à partir des
@@ -53,8 +53,17 @@ interface Format {
   id: string
   moment: Moment
   technique: Technique
+  /** La forme du plat, posée sur la recette plutôt que devinée du titre. */
+  typePlat: TypePlat
+  /**
+   * Le plat se mange froid : il prend la tournure froide du style.
+   *
+   * Sans cette distinction, une salade héritait de « sauté au wok » et le
+   * catalogue affichait « Salade de riz, thon et jeunes pousses sauté au wok ».
+   */
+  froid?: boolean
   /** Comment nommer le plat. Reçoit les noms courts des briques. */
-  titre: (p: { proteine: string; feculent: string; legume: string; style: Cuisine }) => string
+  titre: (p: { proteine: string; feculent: string; legume: string; style: string }) => string
   /** Les étapes, écrites depuis les briques et leurs temps réels. */
   etapes: (p: Composition) => string[]
   tags: Tag[]
@@ -77,13 +86,57 @@ interface Format {
   styles?: Cuisine[]
 }
 
+/**
+ * Un style de composition : ce qui donne son caractère à un assemblage.
+ *
+ * Un style **n'est pas une cuisine**, et c'est ce qui a permis d'ajouter les
+ * régions sans casser le catalogue existant. `cuisine` sert à filtrer les briques
+ * — une brique déclare avec quelles cuisines elle va, et personne n'allait
+ * réécrire cette table pour dix régions de plus — pendant que `id`, `region` et
+ * les tournures portent l'identité régionale.
+ *
+ * **`id` entre dans l'identifiant de la recette.** Les styles historiques gardent
+ * donc exactement l'identifiant de leur cuisine (`francaise`, `italienne`, …) :
+ * un favori ou un plan de menus enregistré avant cette version continue de
+ * résoudre. Les styles régionaux sont de nouvelles valeurs, ils ne peuvent entrer
+ * en collision avec rien.
+ */
+interface Style {
+  id: string
+  cuisine: Cuisine
+  region?: Region
+  /** « façon bistrot », « à la provençale » — pour un plat chaud. */
+  tournure: string
+  /** La même chose pour un plat froid : une salade ne se « sauté au wok » pas. */
+  tournureFroide: string
+  /**
+   * Aromates imposés. Absents, ils sont tirés d'`AROMATES` selon la cuisine.
+   *
+   * Les styles régionaux les portent en dur : c'est le romarin et l'ail qui font
+   * la provençale, et la table d'aromates générale, indexée par cuisine, ne
+   * saurait pas les distinguer de ceux d'une méditerranéenne quelconque.
+   */
+  aromates?: Aromate[]
+  gouts?: Gout[]
+  /**
+   * Fraction du plafond de chaque format, pour ce style.
+   *
+   * Les régions valent 35 % : à plein régime, dix styles de plus doublaient le
+   * catalogue composé pour un gain de variété qui, lui, ne double pas — les mêmes
+   * briques y reviennent sous une tournure différente. Un tiers suffit à ce que
+   * chaque région soit représentée dans un filtre sans gonfler la mémoire d'un
+   * téléphone.
+   */
+  part?: number
+}
+
 interface Composition {
   proteine: Brique
   feculent: Brique
   legume: Brique
   gras: Brique
   aromates: Aromate[]
-  style: Cuisine
+  style: Style
   minutes: number
 }
 
@@ -145,13 +198,14 @@ const FORMATS: Format[] = [
     id: 'poele',
     moment: 'dejeuner',
     technique: 'poele',
+    typePlat: 'poelee',
     plafond: 115,
     tags: ['une-casserole'],
     // Tournure nominale (« Poêlée de ») et non participe accordé (« poêlé ») :
     // « Crevettes décortiquées poêlé » demandait un accord que le générateur
     // n'a pas les moyens de faire juste à tous les coups.
     titre: ({ proteine, legume, feculent, style }) =>
-      `Poêlée de ${proteine}, ${legume} et ${feculent} ${TOURNURE[style]}`,
+      `Poêlée de ${proteine}, ${legume} et ${feculent} ${style}`,
     etapes: (c) => [
       `Faites cuire ${avecArticle(c.feculent)} selon les indications du paquet, ${c.feculent.cuisson?.bouilli ?? 10} minutes.`,
       `Chauffez ${c.gras.defini ?? c.gras.nom.toLowerCase()} dans une grande poêle et parfumez avec ${listeAromates(c.aromates)}.`,
@@ -164,12 +218,13 @@ const FORMATS: Format[] = [
     id: 'four',
     moment: 'diner',
     technique: 'four',
+    typePlat: 'roti',
     plafond: 105,
     tags: ['une-casserole', 'batch'],
     conservation: '2 jours au réfrigérateur',
     rechauffage: '10 min à 180 °C, à couvert pour ne pas dessécher.',
     titre: ({ proteine, legume, feculent, style }) =>
-      `${majuscule(proteine)} au four, ${legume} et ${feculent} ${TOURNURE[style]}`,
+      `${majuscule(proteine)} au four, ${legume} et ${feculent} ${style}`,
     etapes: (c) => [
       'Préchauffez le four à 200 °C.',
       `Disposez ${avecArticle(c.legume)} ${c.legume.taille ?? 'en morceaux'} et ${avecArticle(c.feculent)} dans un plat, arrosez ${c.gras.partitif ?? de(c.gras.nom)}.`,
@@ -182,10 +237,12 @@ const FORMATS: Format[] = [
     id: 'papillote',
     moment: 'diner',
     technique: 'papillote',
+    typePlat: 'papillote',
+    froid: true,
     plafond: 40,
     tags: ['une-casserole'],
     titre: ({ proteine, legume, feculent, style }) =>
-      `Papillote de ${proteine}, ${legume} et ${feculent} ${TOURNURE_FROIDE[style]}`,
+      `Papillote de ${proteine}, ${legume} et ${feculent} ${style}`,
     etapes: (c) => [
       'Préchauffez le four à 190 °C.',
       `Faites cuire ${avecArticle(c.feculent)} à part, ${c.feculent.cuisson?.bouilli ?? c.feculent.cuisson?.vapeur ?? 12} minutes.`,
@@ -198,12 +255,13 @@ const FORMATS: Format[] = [
     id: 'mijote',
     moment: 'diner',
     technique: 'mijote',
+    typePlat: 'mijote',
     plafond: 95,
     tags: ['batch', 'une-casserole', 'economique'],
     conservation: '4 jours au réfrigérateur, 3 mois au congélateur',
     rechauffage: 'À la casserole à feu doux avec deux cuillères d’eau. Meilleur le lendemain.',
     titre: ({ proteine, legume, feculent, style }) =>
-      `Mijoté de ${proteine}, ${legume} et ${feculent} ${TOURNURE[style]}`,
+      `Mijoté de ${proteine}, ${legume} et ${feculent} ${style}`,
     etapes: (c) => [
       `Chauffez ${c.gras.defini ?? c.gras.nom.toLowerCase()} dans une cocotte et faites-y colorer ${avecArticle(c.proteine)} ${c.proteine.taille ?? ''} 5 minutes.`,
       `Parfumez avec ${listeAromates(c.aromates)} et laissez le parfum monter, 1 minute.`,
@@ -216,6 +274,8 @@ const FORMATS: Format[] = [
     id: 'salade',
     moment: 'dejeuner',
     technique: 'cru',
+    typePlat: 'salade',
+    froid: true,
     plafond: 80,
     tags: ['sans-cuisson', 'nomade', 'batch'],
     conservation: '2 jours au réfrigérateur, sauce à part',
@@ -226,7 +286,7 @@ const FORMATS: Format[] = [
     feculents: (b) => ['riz', 'riz-complet', 'quinoa', 'boulgour', 'semoule', 'pates', 'pomme-terre', 'patate-douce', 'haricot-blanc'].includes(b.id),
     gras: (b) => b.froid === true,
     titre: ({ proteine, feculent, legume, style }) =>
-      `Salade de ${feculent}, ${proteine} et ${legume} ${TOURNURE_FROIDE[style]}`,
+      `Salade de ${feculent}, ${proteine} et ${legume} ${style}`,
     etapes: (c) => [
       `Faites cuire ${avecArticle(c.feculent)} puis laissez refroidir complètement : encore tiède, cela ramollirait le reste.`,
       `Coupez ${avecArticle(c.legume)} ${c.legume.taille ?? 'en morceaux'} et ${avecArticle(c.proteine)} ${c.proteine.taille ?? ''}.`,
@@ -238,12 +298,14 @@ const FORMATS: Format[] = [
     id: 'bowl',
     moment: 'dejeuner',
     technique: 'vapeur',
+    typePlat: 'bowl',
+    froid: true,
     plafond: 75,
     tags: ['nomade', 'batch'],
     gras: (b) => b.froid === true,
     conservation: '2 jours au réfrigérateur',
     titre: ({ proteine, legume, feculent, style }) =>
-      `Bowl ${proteine}, ${legume} et ${feculent} ${TOURNURE_FROIDE[style]}`,
+      `Bowl ${proteine}, ${legume} et ${feculent} ${style}`,
     etapes: (c) => [
       `Faites cuire ${avecArticle(c.feculent)}, ${c.feculent.cuisson?.bouilli ?? 12} minutes.`,
       `Cuisez ${avecArticle(c.legume)} à la vapeur ${c.legume.cuisson?.vapeur ?? c.legume.cuisson?.poele ?? 10} minutes : la cuisson doit rester juste, sans jamais s’attendrir complètement.`,
@@ -255,13 +317,14 @@ const FORMATS: Format[] = [
     id: 'soupe',
     moment: 'diner',
     technique: 'mijote',
+    typePlat: 'soupe',
     plafond: 35,
     tags: ['batch', 'une-casserole', 'economique'],
     conservation: '4 jours au réfrigérateur, 3 mois au congélateur',
     rechauffage: 'À la casserole en remuant. Au micro-ondes en une fois, le centre reste froid.',
     feculents: (b) => ['lentille-primaire', 'pois-casse', 'pomme-terre', 'patate-douce', 'riz', 'haricot-blanc'].includes(b.id),
     titre: ({ legume, feculent, proteine, style }) =>
-      `Soupe de ${legume}, ${feculent} et ${proteine} ${TOURNURE[style]}`,
+      `Soupe de ${legume}, ${feculent} et ${proteine} ${style}`,
     etapes: (c) => [
       `Faites suer ${listeAromates(c.aromates)} dans ${c.gras.defini ?? c.gras.nom.toLowerCase()}, 3 minutes.`,
       `Ajoutez ${avecArticle(c.legume)} ${c.legume.taille ?? 'en morceaux'} et ${avecArticle(c.feculent)}.`,
@@ -274,6 +337,8 @@ const FORMATS: Format[] = [
     id: 'gratin',
     moment: 'diner',
     technique: 'four',
+    typePlat: 'gratin',
+    froid: true,
     plafond: 30,
     tags: ['batch', 'plaisir'],
     conservation: '3 jours au réfrigérateur',
@@ -281,7 +346,7 @@ const FORMATS: Format[] = [
     feculents: (b) => ['pomme-terre', 'patate-douce', 'pates', 'polenta'].includes(b.id),
     gras: (b) => ['creme-legere', 'beurre'].includes(b.id),
     titre: ({ legume, proteine, feculent, style }) =>
-      `Gratin de ${legume}, ${proteine} et ${feculent} ${TOURNURE_FROIDE[style]}`,
+      `Gratin de ${legume}, ${proteine} et ${feculent} ${style}`,
     etapes: (c) => [
       'Préchauffez le four à 180 °C.',
       `Faites précuire ${avecArticle(c.legume)} ${c.legume.taille ?? ''} ${c.legume.cuisson?.vapeur ?? 12} minutes à la vapeur.`,
@@ -294,6 +359,7 @@ const FORMATS: Format[] = [
     id: 'wok',
     moment: 'dejeuner',
     technique: 'poele',
+    typePlat: 'poelee',
     plafond: 40,
     tags: ['rapide', 'une-casserole'],
     styles: ['asiatique'],
@@ -311,11 +377,13 @@ const FORMATS: Format[] = [
     id: 'wrap',
     moment: 'dejeuner',
     technique: 'cru',
+    typePlat: 'sandwich',
+    froid: true,
     plafond: 25,
     tags: ['rapide', 'nomade', 'sans-cuisson'],
     feculents: (b) => b.id === 'galette-ble',
     gras: (b) => b.froid === true,
-    titre: ({ proteine, legume, style }) => `Wrap ${proteine} et ${legume} ${TOURNURE_FROIDE[style]}`,
+    titre: ({ proteine, legume, style }) => `Wrap ${proteine} et ${legume} ${style}`,
     etapes: (c) => [
       `Râpez ou émincez ${avecArticle(c.legume)} finement.`,
       `Étalez ${c.gras.defini ?? c.gras.nom.toLowerCase()} sur ${avecArticle(c.feculent)}, ajoutez ${listeAromates(c.aromates)}.`,
@@ -549,7 +617,7 @@ function categoriesDe(briques: Brique[]): Categorie[] {
   return [...categories]
 }
 
-const STYLES: Cuisine[] = [
+const CUISINES_COMPOSEES: Cuisine[] = [
   'francaise',
   'mediterraneenne',
   'italienne',
@@ -560,9 +628,155 @@ const STYLES: Cuisine[] = [
   'nordique',
 ]
 
+/**
+ * Les styles historiques, dérivés des cuisines.
+ *
+ * Leur `id` **est** le nom de la cuisine, à l'identique de ce qui existait avant
+ * l'arrivée des styles régionaux : c'est ce qui garantit que les identifiants de
+ * recettes déjà enregistrés dans un favori ou un plan de menus résolvent encore.
+ */
+const STYLES_CUISINE: Style[] = CUISINES_COMPOSEES.map((cuisine) => ({
+  id: cuisine,
+  cuisine,
+  tournure: TOURNURE[cuisine],
+  tournureFroide: TOURNURE_FROIDE[cuisine],
+}))
+
+/** Un aromate régional, écrit en clair — mêmes champs que ceux de `briques.ts`. */
+function aromate(nom: string, quantite: string): Aromate {
+  return { nom, quantite, rayon: nom === 'Ail' || nom.includes('frais') ? 'Fruits et légumes' : 'Épicerie' }
+}
+
+/**
+ * Les styles régionaux français.
+ *
+ * Ils portent `cuisine: 'francaise'` — c'est cette valeur qui filtre les briques,
+ * et aucune brique n'a eu besoin d'être réécrite — mais leur propre `region`,
+ * leurs aromates et leurs tournures. Un « poulet à la provençale » et un « poulet
+ * façon bistrot » partent des mêmes ingrédients et n'ont ni le même parfum ni le
+ * même nom, ce qui est exactement ce qu'on voulait offrir au filtre par terroir.
+ *
+ * Ce ne sont **pas** des plats nommés : la basquaise composée ici n'est pas la
+ * recette du poulet basquaise, qui est écrite à la main dans `terroir/sud.ts`.
+ * Une combinatoire donne des variations correctes, jamais un plat emblématique.
+ */
+const STYLES_REGIONAUX: Style[] = [
+  {
+    id: 'provencale',
+    cuisine: 'francaise',
+    region: 'provence',
+    tournure: 'à la provençale',
+    tournureFroide: 'à l’huile d’olive et au basilic',
+    gouts: ['herbace'],
+    part: 0.35,
+    aromates: [aromate('Ail', '2 gousses'), aromate('Thym', '1 branche'), aromate('Herbes de Provence', '1 CàC')],
+  },
+  {
+    id: 'basquaise',
+    cuisine: 'francaise',
+    region: 'pays-basque',
+    tournure: 'à la basquaise',
+    tournureFroide: 'au piment d’Espelette',
+    gouts: ['epice'],
+    part: 0.35,
+    aromates: [aromate('Piment d’Espelette', '1 pincée'), aromate('Ail', '1 gousse'), aromate('Paprika', '1 CàC')],
+  },
+  {
+    id: 'normande',
+    cuisine: 'francaise',
+    region: 'normandie',
+    tournure: 'à la normande',
+    tournureFroide: 'à la crème et aux pommes',
+    gouts: ['doux', 'acidule'],
+    part: 0.35,
+    aromates: [aromate('Cidre brut', '5 cl'), aromate('Estragon', 'quelques feuilles')],
+  },
+  {
+    id: 'savoyarde',
+    cuisine: 'francaise',
+    region: 'savoie',
+    tournure: 'à la savoyarde',
+    tournureFroide: 'aux noix et au comté',
+    gouts: ['doux'],
+    part: 0.35,
+    aromates: [aromate('Ail', '1 gousse'), aromate('Noix de muscade', '1 pincée')],
+  },
+  {
+    id: 'flamande',
+    cuisine: 'francaise',
+    region: 'nord',
+    tournure: 'à la flamande',
+    tournureFroide: 'à la moutarde et aux cornichons',
+    gouts: ['sucre-sale'],
+    part: 0.35,
+    aromates: [aromate('Moutarde', '1 CàS'), aromate('Laurier', '1 feuille'), aromate('Cassonade', '1 CàC')],
+  },
+  {
+    id: 'lyonnaise',
+    cuisine: 'francaise',
+    region: 'lyonnais',
+    tournure: 'à la lyonnaise',
+    tournureFroide: 'à l’échalote et au vinaigre',
+    gouts: ['acidule'],
+    part: 0.35,
+    aromates: [aromate('Échalotes', '2'), aromate('Persil', 'quelques brins')],
+  },
+  {
+    id: 'alsacienne',
+    cuisine: 'francaise',
+    region: 'alsace',
+    tournure: 'à l’alsacienne',
+    tournureFroide: 'au cumin et à la crème',
+    gouts: ['fume'],
+    part: 0.35,
+    aromates: [aromate('Cumin', '1 CàC'), aromate('Baies de genièvre', '4'), aromate('Laurier', '1 feuille')],
+  },
+  {
+    id: 'bretonne',
+    cuisine: 'francaise',
+    region: 'bretagne',
+    tournure: 'à la bretonne',
+    tournureFroide: 'au beurre demi-sel',
+    gouts: ['doux'],
+    part: 0.35,
+    aromates: [aromate('Ciboulette', 'quelques brins'), aromate('Échalotes', '2')],
+  },
+  {
+    id: 'perigourdine',
+    cuisine: 'francaise',
+    region: 'sud-ouest',
+    tournure: 'à la périgourdine',
+    tournureFroide: 'aux noix et au persil',
+    gouts: ['doux'],
+    part: 0.35,
+    aromates: [aromate('Ail', '2 gousses'), aromate('Persil', '1 petit bouquet')],
+  },
+  {
+    id: 'auvergnate',
+    cuisine: 'francaise',
+    region: 'auvergne',
+    tournure: 'à l’auvergnate',
+    tournureFroide: 'au bleu et aux noix',
+    gouts: ['doux'],
+    part: 0.35,
+    aromates: [aromate('Thym', '1 branche'), aromate('Ail', '1 gousse')],
+  },
+]
+
+/**
+ * L'ordre n'est pas indifférent : les styles régionaux viennent **après** les
+ * historiques. La graine de sélection des aromates avance au fil des styles, et
+ * les insérer avant aurait décalé les aromates de tout le catalogue existant —
+ * les identifiants seraient restés valides, mais le contenu des recettes déjà
+ * mises en favori aurait changé sous les yeux de leur propriétaire.
+ */
+const STYLES: Style[] = [...STYLES_CUISINE, ...STYLES_REGIONAUX]
+
 /** Les aromates d'un style, plafonnés : au-delà de trois, c'est un placard. */
-function aromatesDe(style: Cuisine, graine: number): Aromate[] {
-  const candidats = AROMATES.filter((a) => a.styles?.includes(style))
+function aromatesDe(style: Style, graine: number): Aromate[] {
+  if (style.aromates) return style.aromates
+
+  const candidats = AROMATES.filter((a) => a.styles?.includes(style.cuisine))
   const communs = AROMATES.filter((a) => a.styles === undefined)
   const choisis: Aromate[] = []
 
@@ -582,28 +796,35 @@ function composerPlats(): Recette[] {
   for (const format of FORMATS) {
     let graine = 0
 
-    for (const style of format.styles ?? STYLES) {
+    // Un format restreint à des cuisines (le wok est asiatique) ne prend que les
+    // styles qui en relèvent : un « wok à la normande » n'existe pas.
+    const stylesDuFormat = format.styles
+      ? STYLES.filter((s) => format.styles?.includes(s.cuisine))
+      : STYLES
+
+    for (const style of stylesDuFormat) {
       // Le plafond se remet à zéro à chaque style : global, il remplissait tout
       // le quota avec la première cuisine énumérée et le catalogue n'avait plus
       // qu'un seul pays.
       let produites = 0
+      const plafond = Math.round(format.plafond * (style.part ?? 1))
 
       const proteines = PROTEINES.filter(
-        (p) => vaAvec(p, style) && p.cuisson?.[format.technique] !== undefined,
+        (p) => vaAvec(p, style.cuisine) && p.cuisson?.[format.technique] !== undefined,
       )
       const feculents = FECULENTS.filter(
-        (f) => vaAvec(f, style) && (format.feculents?.(f) ?? true),
+        (f) => vaAvec(f, style.cuisine) && (format.feculents?.(f) ?? true),
       )
       const legumes = LEGUMES.filter(
-        (l) => vaAvec(l, style) && l.cuisson?.[format.technique] !== undefined,
+        (l) => vaAvec(l, style.cuisine) && l.cuisson?.[format.technique] !== undefined,
       )
-      const gras = GRAS.filter((g) => vaAvec(g, style) && (format.gras?.(g) ?? true))
+      const gras = GRAS.filter((g) => vaAvec(g, style.cuisine) && (format.gras?.(g) ?? true))
       if (gras.length === 0 || feculents.length === 0) continue
 
       for (const proteine of proteines) {
         for (const feculent of feculents) {
           for (const legume of legumes) {
-            if (produites >= format.plafond) break
+            if (produites >= plafond) break
             graine++
 
             const matiere = gras[graine % gras.length]
@@ -621,7 +842,7 @@ function composerPlats(): Recette[] {
               proteine: courtDe(proteine),
               feculent: courtDe(feculent),
               legume: courtDe(legume),
-              style,
+              style: format.froid ? style.tournureFroide : style.tournure,
             }
 
             const composition: Composition = {
@@ -642,14 +863,17 @@ function composerPlats(): Recette[] {
             let etapesCalculees: string[] | null = null
 
             recettes.push({
-              id: `c:${format.id}:${proteine.id}:${feculent.id}:${legume.id}:${style}`,
+              id: `c:${format.id}:${proteine.id}:${feculent.id}:${legume.id}:${style.id}`,
               titre: format.titre(noms),
               moment: format.moment,
               minutes,
               kcal,
               couvre: categoriesDe(briques),
               tags: tagsDuPlat(format, minutes),
-              cuisine: style,
+              cuisine: style.cuisine,
+              region: style.region,
+              gouts: style.gouts,
+              typePlat: format.typePlat,
               regimes: regimesCommuns([...briques, ...aromates]),
               ingredients: [
                 ...briques.map(enIngredient),

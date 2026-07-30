@@ -1,0 +1,150 @@
+import type { Brut } from '../brut'
+
+/**
+ * Viennoiseries, biscuits, chocolats, gâteaux, glaces et snacks salés.
+ *
+ * **C'est la catégorie qui manque le plus dans un journal alimentaire**, et
+ * l'omettre ne la fait pas disparaître de la journée : elle la rend invisible.
+ * Un produit noté sous son vrai nom vaut mieux qu'un « écart » qu'on renonce à
+ * saisir — l'application n'est utile que si on ose y écrire ce qu'on a mangé.
+ *
+ * Aucune de ces entrées ne porte `rare` : elles doivent rester notables d'un
+ * geste. Le coach, lui, ne les proposera pas de toute façon — leur Nutri-Score
+ * les place tout en bas de son classement.
+ */
+export const SUCRE: Brut[] = [
+  /* ── Viennoiseries ── */
+  { id: 'croissant', nom: 'Croissant', v: [406, 8.2, 42, 8, 22, 13, 2.4, 0.9], g: 60, p: '1 croissant' },
+  { id: 'pain-chocolat', nom: 'Pain au chocolat', v: [414, 7.5, 44, 13, 22, 13, 2.8, 0.7], g: 70, p: '1 pain au chocolat', syn: ['chocolatine'] },
+  { id: 'pain-raisin', nom: 'Pain aux raisins', v: [350, 6, 50, 20, 14, 8, 2, 0.6], g: 90, p: '1 pain aux raisins' },
+  { id: 'chausson-pomme', nom: 'Chausson aux pommes', v: [380, 5, 45, 15, 20, 12, 2, 0.5], g: 90, p: '1 chausson' },
+  { id: 'brioche', nom: 'Brioche', v: [370, 8, 50, 12, 15, 9, 2, 0.8], g: 50, p: '1 tranche' },
+  { id: 'chouquette', nom: 'Chouquettes', v: [400, 7, 45, 15, 20, 12, 1.5, 0.7], g: 40, p: '4 chouquettes' },
+  { id: 'beignet', nom: 'Beignet', v: [350, 6, 40, 12, 18, 8, 1.5, 0.6], g: 70, p: '1 beignet' },
+  { id: 'donut', nom: 'Donut', v: [420, 6, 50, 25, 22, 10, 1.5, 0.6], g: 60, p: '1 donut' },
+  { id: 'gaufre', nom: 'Gaufre', v: [320, 6, 40, 12, 15, 8, 1.5, 0.7], g: 80, p: '1 gaufre' },
+  { id: 'crepe-sucree', nom: 'Crêpe sucrée', v: [220, 6, 32, 10, 7, 3.5, 1, 0.4], g: 80, p: '1 crêpe' },
+  { id: 'crepe-nature', nom: 'Crêpe nature', v: [190, 6, 27, 4, 6, 3, 1, 0.4], g: 70, p: '1 crêpe' },
+  { id: 'pancake', nom: 'Pancakes', v: [240, 6, 35, 9, 8, 3, 1.2, 0.6], g: 100, p: '3 pancakes' },
+  { id: 'pain-perdu', nom: 'Pain perdu', v: [250, 7, 32, 12, 10, 4.5, 1, 0.5], g: 100, p: '2 tranches' },
+
+  /* ── Biscuits ── */
+  { id: 'biscuit-sec', nom: 'Biscuits secs', v: [460, 7, 72, 22, 16, 7, 2.5, 0.6], g: 25, p: '3 biscuits' },
+  { id: 'petit-beurre', nom: 'Petits-beurre', v: [440, 7, 74, 22, 13, 6, 2, 0.9], g: 25, p: '3 biscuits' },
+  { id: 'sable', nom: 'Sablés', v: [500, 6, 62, 25, 25, 13, 2, 0.5], g: 25, p: '2 sablés' },
+  { id: 'cookie', nom: 'Cookie', v: [480, 6, 64, 32, 22, 11, 2.5, 0.6], g: 40, p: '1 cookie' },
+  { id: 'madeleine', nom: 'Madeleines', v: [450, 6, 54, 28, 23, 6, 1.5, 0.7], g: 50, p: '2 madeleines' },
+  { id: 'financier', nom: 'Financier', v: [460, 8, 48, 32, 26, 8, 2, 0.4], g: 40, p: '1 financier' },
+  { id: 'speculoos', nom: 'Spéculoos', v: [470, 6, 70, 38, 19, 8, 2, 0.8], g: 25, p: '3 biscuits' },
+  { id: 'biscuit-chocolat', nom: 'Biscuits nappés de chocolat', v: [500, 6, 62, 38, 25, 14, 3, 0.5], g: 30, p: '2 biscuits' },
+  { id: 'gaufrette', nom: 'Gaufrettes fourrées', v: [500, 5, 65, 35, 24, 15, 2, 0.4], g: 30, p: '2 gaufrettes' },
+  { id: 'barre-chocolatee', nom: 'Barre chocolatée', v: [480, 6, 60, 50, 24, 14, 2, 0.3], g: 45, p: '1 barre' },
+  { id: 'barre-cerealiere', nom: 'Barre de céréales', v: [400, 6, 65, 25, 12, 5, 5, 0.4], g: 25, p: '1 barre' },
+
+  /* ── Chocolats et confiseries ── */
+  { id: 'chocolat-noir', nom: 'Chocolat noir 70 %', v: [598, 7.8, 46, 24, 43, 24, 11, 0], g: 20, p: '4 carrés' },
+  { id: 'chocolat-lait', nom: 'Chocolat au lait', v: [535, 7.6, 59, 52, 30, 18, 3.4, 0.2], g: 20, p: '4 carrés' },
+  { id: 'chocolat-blanc', nom: 'Chocolat blanc', v: [560, 6, 58, 57, 32, 19, 0.5, 0.2], g: 20, p: '4 carrés' },
+  { id: 'chocolat-praline', nom: 'Chocolat praliné', v: [550, 7, 54, 50, 34, 17, 3, 0.2], g: 20, p: '4 carrés' },
+  { id: 'bonbon-chocolat', nom: 'Bonbons de chocolat', v: [520, 5, 58, 55, 29, 17, 2, 0.1], g: 25, p: '2 bonbons' },
+  { id: 'truffe-chocolat', nom: 'Truffes au chocolat', v: [570, 5, 45, 42, 42, 26, 4, 0.1], g: 25, p: '3 truffes' },
+  { id: 'bonbon-gelifie', nom: 'Bonbons gélifiés', v: [340, 5, 78, 60, 0.2, 0, 0, 0.2], g: 30, p: '1 poignée' },
+  { id: 'sucette', nom: 'Sucette', v: [390, 0, 97, 70, 0, 0, 0, 0], g: 15, p: '1 sucette' },
+  { id: 'guimauve', nom: 'Guimauves', v: [330, 4, 80, 60, 0, 0, 0, 0.2], g: 25, p: '3 guimauves' },
+  { id: 'reglisse', nom: 'Réglisse', v: [340, 3, 80, 55, 0.5, 0.2, 1, 0.3], g: 25, p: '1 poignée' },
+  { id: 'nougat', nom: 'Nougat', v: [400, 5, 70, 60, 12, 2, 2, 0.1], g: 30, p: '1 morceau' },
+  { id: 'pate-fruit', nom: 'Pâtes de fruits', v: [330, 0.5, 82, 70, 0.1, 0, 1.5, 0], g: 25, p: '2 pièces' },
+  { id: 'chewing-gum', nom: 'Chewing-gum sans sucres', v: [160, 0, 65, 0, 0.5, 0.1, 0, 0], g: 3, p: '1 tablette' },
+
+  /* ── Gâteaux et pâtisseries ── */
+  { id: 'gateau-chocolat', nom: 'Gâteau au chocolat', v: [400, 6, 45, 30, 21, 12, 3, 0.4], g: 80, p: '1 part' },
+  { id: 'fondant-chocolat', nom: 'Fondant au chocolat', v: [430, 6, 45, 33, 25, 15, 3, 0.3], g: 90, p: '1 part' },
+  { id: 'quatre-quarts', nom: 'Quatre-quarts', v: [420, 6, 50, 28, 22, 13, 1, 0.5], g: 60, p: '1 tranche' },
+  { id: 'cake-fruits', nom: 'Cake aux fruits', v: [380, 5, 55, 32, 15, 8, 2, 0.5], g: 60, p: '1 tranche' },
+  { id: 'tarte-pomme', nom: 'Tarte aux pommes', v: [240, 3, 33, 16, 10, 5, 1.5, 0.3], g: 120, p: '1 part', fl: 35 },
+  { id: 'tarte-citron', nom: 'Tarte au citron', v: [320, 4, 40, 25, 16, 8, 1, 0.3], g: 110, p: '1 part' },
+  { id: 'tarte-fraise', nom: 'Tarte aux fraises', v: [230, 3, 32, 18, 10, 5, 1.5, 0.2], g: 120, p: '1 part', fl: 35 },
+  { id: 'eclair-chocolat', nom: 'Éclair au chocolat', v: [320, 6, 35, 20, 17, 10, 1, 0.3], g: 90, p: '1 éclair' },
+  { id: 'religieuse', nom: 'Religieuse', v: [330, 6, 34, 20, 19, 11, 1, 0.3], g: 100, p: '1 religieuse' },
+  { id: 'mille-feuille', nom: 'Mille-feuille', v: [350, 5, 40, 20, 19, 12, 1, 0.4], g: 100, p: '1 part' },
+  { id: 'paris-brest', nom: 'Paris-Brest', v: [400, 7, 32, 18, 27, 14, 1.5, 0.3], g: 100, p: '1 part' },
+  { id: 'profiterole', nom: 'Profiteroles', v: [300, 5, 30, 22, 18, 11, 1, 0.3], g: 120, p: '1 portion' },
+  { id: 'tiramisu', nom: 'Tiramisu', v: [280, 5, 28, 22, 16, 9, 0.5, 0.2], g: 120, p: '1 part' },
+  { id: 'cheesecake', nom: 'Cheesecake', v: [320, 5, 32, 24, 19, 11, 0.5, 0.4], g: 110, p: '1 part' },
+  { id: 'crumble', nom: 'Crumble aux fruits', v: [280, 3, 38, 20, 13, 7, 2, 0.3], g: 130, p: '1 part', fl: 40 },
+  { id: 'clafoutis', nom: 'Clafoutis', v: [180, 4, 25, 18, 6, 3, 1, 0.2], g: 130, p: '1 part', fl: 40 },
+  { id: 'far-breton', nom: 'Far breton', v: [200, 5, 32, 20, 5, 3, 0.8, 0.2], g: 120, p: '1 part' },
+  { id: 'kouign-amann', nom: 'Kouign-amann', v: [480, 5, 50, 25, 29, 19, 1.5, 0.7], g: 90, p: '1 part' },
+  { id: 'galette-rois', nom: 'Galette des rois', v: [420, 6, 40, 18, 26, 14, 2, 0.5], g: 100, p: '1 part' },
+  { id: 'macaron', nom: 'Macarons', v: [400, 6, 55, 45, 17, 3, 2, 0.1], g: 30, p: '2 macarons' },
+  { id: 'meringue', nom: 'Meringue', v: [380, 4, 94, 94, 0, 0, 0, 0.1], g: 20, p: '1 meringue' },
+  { id: 'baba-rhum', nom: 'Baba au rhum', v: [280, 5, 45, 30, 8, 4, 1, 0.4], g: 100, p: '1 baba' },
+  { id: 'charlotte', nom: 'Charlotte aux fruits', v: [200, 4, 30, 22, 7, 4, 1, 0.2], g: 120, p: '1 part', fl: 30 },
+  { id: 'buche-noel', nom: 'Bûche de Noël', v: [350, 5, 38, 28, 20, 12, 1.5, 0.3], g: 100, p: '1 part' },
+
+  /* ── Glaces ── */
+  { id: 'glace-vanille', nom: 'Glace à la vanille', v: [207, 3.5, 24, 22, 11, 7, 0.7, 0.1], g: 100, p: '2 boules' },
+  { id: 'glace-chocolat', nom: 'Glace au chocolat', v: [220, 4, 26, 24, 11, 7, 1.5, 0.2], g: 100, p: '2 boules' },
+  { id: 'sorbet', nom: 'Sorbet aux fruits', v: [130, 0.5, 32, 28, 0.2, 0, 0.5, 0], g: 100, p: '2 boules', fl: 35 },
+  { id: 'cornet-glace', nom: 'Cornet glacé', v: [250, 4, 30, 25, 12, 8, 1, 0.2], g: 100, p: '1 cornet' },
+  { id: 'batonnet-glace', nom: 'Bâtonnet glacé enrobé', v: [300, 3.5, 28, 25, 20, 14, 1, 0.1], g: 70, p: '1 bâtonnet' },
+  { id: 'glace-italienne', nom: 'Glace à l’italienne', v: [180, 4, 26, 24, 6, 4, 0.3, 0.2], g: 120, p: '1 cornet' },
+
+  /* ── Snacks salés ── */
+  { id: 'chips', nom: 'Chips', v: [536, 6.6, 50, 0.6, 34, 3.1, 4.4, 1.3], g: 30, p: '1 poignée' },
+  { id: 'chips-allegees', nom: 'Chips allégées', v: [460, 6, 58, 1, 22, 2, 5, 1.2], g: 30, p: '1 poignée' },
+  { id: 'tortilla-chips', nom: 'Chips de maïs', v: [490, 7, 60, 2, 24, 3, 5, 1], g: 30, p: '1 poignée', syn: ['nachos', 'tortilla chips'] },
+  { id: 'pop-corn-sale', nom: 'Pop-corn salé', v: [480, 9, 58, 1, 22, 3, 9, 1.5], g: 30, p: '1 bol' },
+  { id: 'pop-corn-sucre', nom: 'Pop-corn sucré', v: [430, 6, 72, 30, 13, 6, 7, 0.4], g: 30, p: '1 bol' },
+  { id: 'biscuit-aperitif', nom: 'Biscuits apéritifs', v: [490, 8, 58, 3, 25, 10, 3, 2.5], g: 30, p: '1 poignée' },
+  { id: 'cracker', nom: 'Crackers', v: [450, 9, 65, 5, 16, 6, 3, 2], g: 25, p: '5 crackers' },
+  { id: 'bretzel', nom: 'Bretzels', v: [380, 10, 72, 2, 4, 1, 3, 3], g: 30, p: '1 poignée' },
+  { id: 'gressin', nom: 'Gressins', v: [400, 12, 70, 2, 8, 1.5, 3.5, 2], g: 20, p: '3 gressins' },
+
+  /* ── Compléments ── */
+  { id: 'brownie', nom: 'Brownie', v: [450, 6, 50, 38, 25, 13, 3, 0.4], g: 60, p: '1 part' },
+  { id: 'muffin', nom: 'Muffin', v: [400, 6, 50, 28, 19, 8, 1.5, 0.6], g: 80, p: '1 muffin' },
+  { id: 'cupcake', nom: 'Cupcake', v: [420, 5, 55, 40, 21, 10, 1, 0.5], g: 70, p: '1 cupcake' },
+  { id: 'moelleux-chocolat', nom: 'Moelleux au chocolat', v: [410, 6, 48, 32, 22, 12, 2.5, 0.4], g: 70, p: '1 part' },
+  { id: 'gateau-yaourt', nom: 'Gâteau au yaourt', v: [340, 6, 48, 25, 13, 6, 1, 0.4], g: 70, p: '1 part' },
+  { id: 'marbre', nom: 'Gâteau marbré', v: [420, 6, 52, 30, 21, 11, 1.5, 0.5], g: 50, p: '1 tranche' },
+  { id: 'tarte-poire-chocolat', nom: 'Tarte poire-chocolat', v: [300, 4, 36, 22, 15, 8, 2, 0.3], g: 110, p: '1 part' },
+  { id: 'tarte-tatin', nom: 'Tarte Tatin', v: [265, 3, 36, 22, 12, 7, 1.6, 0.3], g: 120, p: '1 part', fl: 35 },
+  { id: 'flan-patissier', nom: 'Flan pâtissier', v: [230, 5, 32, 20, 8, 4.5, 0.5, 0.3], g: 120, p: '1 part' },
+  { id: 'chausson-abricot', nom: 'Chausson à l’abricot', v: [370, 5, 44, 16, 19, 11, 2, 0.5], g: 90, p: '1 chausson' },
+  { id: 'palmier', nom: 'Palmier', v: [470, 6, 55, 22, 25, 14, 1.8, 0.6], g: 40, p: '1 palmier' },
+  { id: 'tuile-amande', nom: 'Tuiles aux amandes', v: [470, 8, 55, 40, 24, 5, 3, 0.2], g: 25, p: '3 tuiles' },
+  { id: 'langue-chat', nom: 'Langues de chat', v: [450, 6, 68, 35, 17, 9, 1.5, 0.4], g: 25, p: '4 biscuits' },
+  { id: 'boudoir', nom: 'Boudoirs', v: [390, 8, 76, 35, 5, 1.5, 1.5, 0.3], g: 25, p: '3 boudoirs' },
+  { id: 'biscuit-cuillere', nom: 'Biscuits à la cuillère', v: [385, 8, 74, 33, 5, 1.4, 1.5, 0.3], g: 25, p: '3 biscuits' },
+  { id: 'crepe-chocolat', nom: 'Crêpe au chocolat', v: [300, 6, 40, 22, 13, 6, 2, 0.4], g: 100, p: '1 crêpe' },
+  { id: 'gaufre-chocolat', nom: 'Gaufre au chocolat', v: [390, 6, 46, 24, 20, 11, 2, 0.6], g: 100, p: '1 gaufre' },
+  { id: 'churros', nom: 'Churros', v: [420, 5, 45, 12, 25, 5, 1.5, 0.7], g: 80, p: '1 portion' },
+  { id: 'beignet-confiture', nom: 'Beignet à la confiture', v: [370, 5, 46, 20, 18, 8, 1.5, 0.5], g: 80, p: '1 beignet' },
+  { id: 'pain-au-lait', nom: 'Pain au lait', v: [340, 9, 50, 12, 11, 6, 2, 0.8], g: 40, p: '1 pain au lait' },
+  { id: 'brioche-sucre', nom: 'Brioche au sucre', v: [385, 7, 55, 18, 15, 9, 1.8, 0.7], g: 60, p: '1 part' },
+  { id: 'chinois', nom: 'Brioche à la crème', v: [365, 7, 52, 20, 14, 8, 1.5, 0.6], g: 80, p: '1 part' },
+  { id: 'cannele', nom: 'Cannelé', v: [330, 6, 55, 35, 9, 5, 0.6, 0.3], g: 50, p: '1 cannelé' },
+  { id: 'chouquette-creme', nom: 'Chou à la crème', v: [340, 6, 32, 18, 21, 12, 1, 0.3], g: 70, p: '1 chou' },
+  { id: 'saint-honore', nom: 'Saint-Honoré', v: [360, 5, 38, 24, 21, 13, 1, 0.3], g: 100, p: '1 part' },
+  { id: 'opera', nom: 'Opéra', v: [400, 6, 42, 32, 23, 13, 2, 0.2], g: 90, p: '1 part' },
+  { id: 'forêt-noire', nom: 'Forêt-Noire', v: [330, 5, 34, 26, 19, 12, 1.5, 0.2], g: 110, p: '1 part' },
+  { id: 'gateau-basque', nom: 'Gâteau basque', v: [390, 6, 48, 24, 19, 11, 1.5, 0.4], g: 80, p: '1 part' },
+  { id: 'chocolat-noir-90', nom: 'Chocolat noir 90 %', v: [620, 10, 22, 8, 55, 32, 15, 0], g: 20, p: '4 carrés' },
+  { id: 'chocolat-noisette', nom: 'Chocolat aux noisettes', v: [560, 9, 50, 45, 35, 16, 5, 0.1], g: 20, p: '4 carrés' },
+  { id: 'chocolat-fourre', nom: 'Chocolat fourré', v: [520, 5, 60, 55, 28, 15, 2, 0.2], g: 20, p: '4 carrés' },
+  { id: 'caramel-beurre-sale', nom: 'Caramels au beurre salé', v: [420, 2, 72, 60, 14, 9, 0, 0.6], g: 25, p: '3 caramels' },
+  { id: 'praline', nom: 'Pralines', v: [530, 8, 50, 45, 32, 6, 4, 0.1], g: 25, p: '1 poignée' },
+  { id: 'calisson', nom: 'Calissons', v: [420, 6, 65, 60, 15, 1.5, 3, 0.1], g: 25, p: '3 calissons', rare: true },
+  { id: 'dragee', nom: 'Dragées', v: [450, 8, 62, 58, 19, 2, 3, 0.1], g: 25, p: '1 poignée', rare: true },
+  { id: 'pate-amande', nom: 'Pâte d’amande', v: [450, 8, 55, 50, 22, 2, 4, 0.1], g: 30, p: '1 portion' },
+  { id: 'sorbet-citron', nom: 'Sorbet au citron', v: [125, 0.3, 31, 28, 0.1, 0, 0.3, 0], g: 100, p: '2 boules', fl: 25 },
+  { id: 'glace-pistache', nom: 'Glace à la pistache', v: [225, 4.5, 24, 22, 12, 6.5, 1, 0.1], g: 100, p: '2 boules' },
+  { id: 'glace-caramel', nom: 'Glace au caramel', v: [215, 3.5, 28, 26, 10, 6.5, 0.3, 0.2], g: 100, p: '2 boules' },
+  { id: 'coupe-glacee', nom: 'Coupe glacée', v: [230, 3.5, 27, 24, 12, 7, 0.8, 0.1], g: 150, p: '1 coupe' },
+  { id: 'granite', nom: 'Granité', v: [95, 0.2, 23, 22, 0, 0, 0.2, 0], g: 150, p: '1 portion' },
+  { id: 'chips-legumes', nom: 'Chips de légumes', v: [480, 5, 52, 8, 27, 3, 8, 1.2], g: 30, p: '1 poignée', fl: 60 },
+  { id: 'chips-crevette', nom: 'Chips de crevette', v: [520, 4, 60, 2, 29, 12, 1, 1.4], g: 25, p: '1 poignée' },
+  { id: 'cacahuete-enrobee', nom: 'Cacahuètes enrobées', v: [520, 15, 45, 20, 30, 5, 5, 1.2], g: 30, p: '1 poignée' },
+  { id: 'mikado', nom: 'Bâtonnets au chocolat', v: [480, 7, 65, 38, 21, 12, 2.5, 0.5], g: 25, p: '1 poignée' },
+]

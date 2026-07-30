@@ -1,7 +1,18 @@
 import { multiplierQuantite } from './ingredients'
 import { portionDeLaRecette, valeursDeLaRecette } from './journalRecette'
 import { catalogue } from './recettes'
-import type { Cuisine, Difficulte, Ingredient, Recette, Regime, Tag } from './recettes'
+import type {
+  Cuisine,
+  Difficulte,
+  Gout,
+  Ingredient,
+  Occasion,
+  Recette,
+  Region,
+  Regime,
+  Tag,
+  TypePlat,
+} from './recettes'
 import type { Moment } from './types'
 
 /**
@@ -77,6 +88,93 @@ export function regimesAAfficher(recette: Recette): Regime[] {
 export function respecte(recette: Recette, regime: Regime): boolean {
   return regimesDe(recette).includes(regime)
 }
+
+/* ─────────────────── Forme du plat, goûts, occasions ─────────────────── */
+
+/**
+ * Ces trois lectures suivent la règle déjà posée pour la difficulté : **le champ
+ * écrit à la main prime toujours**, et la déduction ne sert qu'à son absence.
+ *
+ * La déduction est légitime ici et ne l'était pas pour les régimes, pour une
+ * raison qui n'a rien d'un détail : se tromper de forme de plat propose un gratin
+ * à quelqu'un qui cherchait une poêlée, se tromper de régime envoie du gluten à
+ * une personne cœliaque. Le premier est une contrariété, le second un risque
+ * sanitaire — voir le commentaire du type `Regime`.
+ *
+ * Sans déduction, les filtres ne montreraient que les recettes écrites à la main
+ * et laisseraient les cinq mille composées invisibles : un filtre qui cache
+ * l'essentiel du catalogue est pire que pas de filtre.
+ */
+
+/** Ce qui se lit dans un titre — l'ordre compte, le premier motif trouvé gagne. */
+const FORMES: [RegExp, TypePlat][] = [
+  [/^soupe|velouté|bouillon|potage/i, 'soupe'],
+  [/^salade|^bowl/i, 'salade'],
+  [/gratin|tartiflette|parmigiana|lasagne|moussaka|brandade/i, 'gratin'],
+  [/mijoté|carbonade|bourguignon|daube|blanquette|civet|tajine|colombo|cari|rougail|goulash|cassoulet|navarin|potée|baeckeoffe|waterzooï|garbure|axoa|curry|dahl|osso-buco|choucroute|risotto|marinière/i, 'mijote'],
+  [/papillote/i, 'papillote'],
+  [/tarte|quiche|flamiche|pissaladière|flambée/i, 'tarte'],
+  [/wrap|sandwich|tartine|burrito|galette complète|bagel|panini/i, 'sandwich'],
+  [/farci/i, 'farci'],
+  [/grill|brochette|barbecue/i, 'grillade'],
+  [/au four|rôti|nems/i, 'roti'],
+  [/bowl/i, 'bowl'],
+  [/poêlée|wok|sauté|omelette|pipérade|truffade|chakchouka|tortilla|gyoza|pad thaï|fricassée|meurette|risotto/i, 'poelee'],
+]
+
+/**
+ * La forme d'un plat.
+ *
+ * Lue dans le titre, jamais dans les ingrédients : le titre dit ce qu'est le plat
+ * (« Gratin de courgettes »), les ingrédients ne disent que sa matière. C'est la
+ * même leçon que celle des pictogrammes d'illustration, où piocher dans les
+ * ingrédients avait donné un poisson à un chili végétarien.
+ */
+export function typePlatDe(recette: Recette): TypePlat | null {
+  if (recette.typePlat) return recette.typePlat
+  return FORMES.find(([motif]) => motif.test(recette.titre))?.[1] ?? null
+}
+
+/** Les styles portent un profil de goût, et c'est la déduction la plus sûre. */
+const GOUTS_DU_STYLE: Partial<Record<Cuisine, Gout[]>> = {
+  indienne: ['epice'],
+  orientale: ['epice'],
+  mexicaine: ['releve', 'epice'],
+  asiatique: ['sucre-sale'],
+  mediterraneenne: ['herbace'],
+  italienne: ['herbace'],
+  nordique: ['acidule'],
+}
+
+export function goutsDe(recette: Recette): Gout[] {
+  if (recette.gouts?.length) return recette.gouts
+  return GOUTS_DU_STYLE[recette.cuisine ?? 'francaise'] ?? []
+}
+
+/**
+ * Les occasions d'un plat.
+ *
+ * Les deux seules déductions qu'on s'autorise sont celles qui se lisent sur des
+ * étiquettes déjà écrites à la main : ce qui se transporte fait un pique-nique,
+ * ce qui est rapide fait un repas de semaine. Tout le reste — le dimanche, la
+ * fête, le réconfort — relève du jugement et reste renseigné à la main. Le
+ * deviner remplirait l'étiquette partout et la viderait de son sens.
+ */
+export function occasionsDe(recette: Recette): Occasion[] {
+  const occasions = new Set<Occasion>(recette.occasions ?? [])
+  if (recette.tags.includes('nomade')) occasions.add('pique-nique')
+  if (recette.tags.includes('rapide')) occasions.add('semaine')
+  return ORDRE_OCCASIONS.filter((o) => occasions.has(o))
+}
+
+const ORDRE_OCCASIONS: Occasion[] = [
+  'semaine',
+  'dimanche',
+  'reconfort',
+  'reception',
+  'pique-nique',
+  'fete',
+]
 
 /* ────────────────────────── Cuisiner pour plusieurs ────────────────────────── */
 
@@ -266,6 +364,11 @@ export interface Criteres {
   difficulte?: Difficulte | null
   tags?: Tag[]
   regimes?: Regime[]
+  region?: Region | null
+  typePlat?: TypePlat | null
+  /** Cumulatifs comme le reste : deux goûts demandent les deux à la fois. */
+  gouts?: Gout[]
+  occasions?: Occasion[]
   /** Borne haute du temps de préparation, en minutes. */
   minutesMax?: number | null
   /** Restreint aux identifiants donnés — sert au filtre « mes favoris ». */
@@ -331,10 +434,24 @@ export function rechercher(criteres: Criteres, recettes: Recette[] = catalogue()
     if (criteres.parmi && !criteres.parmi.includes(recette.id)) return false
     if (criteres.moment && recette.moment !== criteres.moment) return false
     if (criteres.cuisine && recette.cuisine !== criteres.cuisine) return false
+    if (criteres.region && recette.region !== criteres.region) return false
     if (criteres.difficulte && difficulteDe(recette) !== criteres.difficulte) return false
     if (criteres.minutesMax && recette.minutes > criteres.minutesMax) return false
     if (criteres.tags?.some((tag) => !recette.tags.includes(tag))) return false
     if (criteres.regimes?.some((regime) => !respecte(recette, regime))) return false
+
+    // Les trois axes déduits passent après les égalités simples et avant la
+    // recherche texte : ils coûtent une expression régulière sur le titre, moins
+    // qu'un balayage du texte cherchable, mais plus qu'une comparaison.
+    if (criteres.typePlat && typePlatDe(recette) !== criteres.typePlat) return false
+    if (criteres.gouts?.length) {
+      const gouts = goutsDe(recette)
+      if (criteres.gouts.some((g) => !gouts.includes(g))) return false
+    }
+    if (criteres.occasions?.length) {
+      const occasions = occasionsDe(recette)
+      if (criteres.occasions.some((o) => !occasions.includes(o))) return false
+    }
 
     if (texte && !texteCherchable(recette).includes(texte)) return false
 
@@ -351,8 +468,12 @@ export function nombreDeCriteres(criteres: Criteres): number {
     (criteres.difficulte ? 1 : 0) +
     (criteres.minutesMax ? 1 : 0) +
     (criteres.parmi ? 1 : 0) +
+    (criteres.region ? 1 : 0) +
+    (criteres.typePlat ? 1 : 0) +
     (criteres.tags?.length ?? 0) +
-    (criteres.regimes?.length ?? 0)
+    (criteres.regimes?.length ?? 0) +
+    (criteres.gouts?.length ?? 0) +
+    (criteres.occasions?.length ?? 0)
   )
 }
 
@@ -362,3 +483,24 @@ export function cuisinesDuCatalogue(recettes: Recette[] = catalogue()): Cuisine[
   for (const r of recettes) if (r.cuisine) vues.add(r.cuisine)
   return [...vues]
 }
+
+/**
+ * Les régions réellement représentées, mémoïsées.
+ *
+ * Un filtre ne doit proposer que des cases qui donnent un résultat : une liste de
+ * dix-huit régions dont quinze vides fait tomber l'utilisateur sur « aucune
+ * recette » trois fois sur quatre, et lui apprend à ne plus s'en servir.
+ *
+ * Le balayage porte sur cinq mille recettes ; sans mémoïsation il se referait à
+ * chaque ouverture du panneau de filtres.
+ */
+export function regionsDuCatalogue(recettes: Recette[] = catalogue()): Region[] {
+  if (regionsMemoisees === null) {
+    const vues = new Set<Region>()
+    for (const r of recettes) if (r.region) vues.add(r.region)
+    regionsMemoisees = [...vues]
+  }
+  return regionsMemoisees
+}
+
+let regionsMemoisees: Region[] | null = null

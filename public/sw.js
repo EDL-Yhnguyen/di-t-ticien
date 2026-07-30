@@ -106,6 +106,31 @@ self.addEventListener('fetch', (evenement) => {
     return
   }
 
+  // Les photos de plats : le cache d'abord, mais **jamais préchargées**.
+  //
+  // Les soixante-neuf images pèsent une douzaine de mégaoctets au total. Les
+  // ajouter à la liste d'installation ferait payer ce prix à quelqu'un qui
+  // n'ouvrira jamais la carbonade ; les mettre en cache au fil des consultations
+  // ne coûte que ce qu'on regarde, et rend la fiche déjà vue disponible hors
+  // connexion — devant un rayon, c'est précisément là qu'on la rouvre.
+  //
+  // Leur contenu ne change qu'avec une exécution d'`outils/photos.mjs`, donc le
+  // renouvellement passe par `VERSION`, comme le reste.
+  if (url.origin === self.location.origin && url.pathname.startsWith('/plats/')) {
+    evenement.respondWith(
+      caches.match(requete).then(
+        (cache) =>
+          cache ??
+          fetch(requete).then((reponse) => {
+            const copie = reponse.clone()
+            caches.open(RESSOURCES).then((c) => c.put(requete, copie))
+            return reponse
+          }),
+      ),
+    )
+    return
+  }
+
   // Polices Google : servies depuis le cache, rafraîchies en arrière-plan.
   if (url.hostname.endsWith('gstatic.com') || url.hostname.endsWith('googleapis.com')) {
     evenement.respondWith(

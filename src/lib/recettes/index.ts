@@ -5,9 +5,11 @@ import { DEJEUNERS } from './dejeuner'
 import { DINERS } from './diner'
 import { recettesComposees } from './generateur'
 import { PETITS_DEJEUNERS } from './petit-dejeuner'
+import { TERROIR } from './terroir'
 import { RAYONS, type Ingredient, type Rayon, type Recette } from './types'
 
 export * from './types'
+export { PHOTOS, type PhotoPlat } from './photos'
 
 /**
  * Le catalogue, assemblé depuis un fichier par moment de repas. Un seul
@@ -22,6 +24,7 @@ export const RECETTES: Recette[] = [
   ...DEJEUNERS,
   ...COLLATIONS,
   ...DINERS,
+  ...TERROIR,
 ]
 
 /**

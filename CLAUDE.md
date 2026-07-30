@@ -152,7 +152,7 @@ src/
     ── journal alimentaire ──
     journal.ts          apports, totaux, bilan par repas, top/flop, cibles
     nutriscore.ts       barème 2023, indice Équilibre, bandes vert/bleu/orange
-    aliments.ts         base d'aliments courants embarquée + recherche locale
+    aliments/           base de 2 041 aliments embarquée + recherche (voir « La base d'aliments »)
     openfoodfacts.ts    recherche et code-barres (API publique, sans clé)
     decodeur.ts         BarcodeDetector, avec repli WebAssembly pour iOS
     photo.ts            préparation de l'image + appel de /api
@@ -386,6 +386,32 @@ quantité en grammes, une date et un `Moment`. Tout le reste se dérive :
 
 **`Moment` compte désormais `collation`.** Toute table `Record<Moment, …>`
 doit avoir ses quatre clés, sinon le typecheck échoue — c'est voulu.
+
+### La base d'aliments — `src/lib/aliments/`
+
+**2 041 aliments depuis le 31/07/2026**, répartis par famille dans `donnees/`.
+Les valeurs sont des moyennes de l'ordre de grandeur de Ciqual, pas des étiquettes
+de marque : ce sont des repères, et le code-barres reste la bonne porte pour un
+produit précis.
+
+- **La recherche travaille par jetons** (`recherche.ts`), pas par `includes()`.
+  C'est ce qui a corrigé le défaut d'origine : la base contenait « Pommes de terre
+  cuites » et « pomme de terre » ne trouvait rien. Un mot correspond **par
+  préfixe dans les deux sens**, ce qui absorbe les pluriels sans table de
+  conjugaison et répond pendant la frappe.
+- **Les diacritiques se suppriment avant la ponctuation.** Les balayer ensemble
+  coupait « pâtes » en « p a tes » — invisible tant que la requête porte le même
+  accent, fatal sur « pates completes » tapé sans accent.
+- **`conseil.ts` est séparé d'`index.ts`, et ce n'est pas cosmétique.** Le coach
+  est appelé depuis l'écran d'accueil, qui n'est pas chargé à la demande : tout ce
+  qu'il importe part dans le premier téléchargement. La base complète y pesait
+  52 Ko compressés dont l'accueil n'avait besoin d'aucun. **Ne pas réexporter
+  `ALIMENTS_A_CONSEILLER` depuis `lib/aliments`** — un seul import ramènerait les
+  deux mille entrées sur le chemin critique.
+- **Le champ `rare` retire de la suggestion, jamais de la recherche.** Le safran,
+  la vodka et la farine doivent se noter sans que le coach les propose.
+- Un identifiant en double est signalé en console en développement. Les
+  identifiants des 72 aliments d'origine sont **tous conservés**.
 
 ### Nutri-Score : d'où vient la note
 
@@ -663,10 +689,12 @@ règles à ne pas contourner, détaillées dans `CUISINE.md` :
   Cuisiner pour plusieurs est un calcul d'affichage (`ingredientsPour`).
 - **Le coût n'est pas un montant** : aucune source de prix n'existe, l'étiquette
   « économique » tient ce rôle.
-- **`photo` n'est jamais renseigné** et l'absence d'image dégrade vers une
-  illustration générée dont **le pictogramme se lit dans le contenu du plat**.
-  Ne pas le tirer au hasard : un chili végétarien illustré par un poisson est
-  faux, et une vignette fausse est pire que pas de vignette.
+- **`photo` n'est renseigné que sur les plats emblématiques**, et seulement depuis
+  des images **sous licence libre de Wikimedia Commons** (voir « Les photos »). Le
+  reste du catalogue dégrade vers une illustration générée dont **le pictogramme
+  se lit dans le contenu du plat**. Ne pas le tirer au hasard : un chili
+  végétarien illustré par un poisson est faux, et une vignette fausse est pire que
+  pas de vignette.
 
 **Le catalogue compte 5 522 recettes depuis le 30/07/2026** : les 53 écrites à la
 main (15 petits déjeuners, 14 déjeuners, 10 collations, 14 dîners) **puis** 5 469
@@ -691,6 +719,57 @@ de recettes par moment.
 Ajouter une recette : la mettre dans le fichier de son moment, rien d'autre.
 `index.ts` la récupère. L'ordre des `...` dans `RECETTES` suit la journée, ce
 dont héritent les écrans qui listent sans regrouper.
+
+### Le terroir et les quatre axes de classement (31/07/2026)
+
+**Le catalogue compte 7 608 recettes** : 129 écrites à la main — dont **76 plats
+emblématiques** dans `recettes/terroir/` — et le reste composé.
+
+- **Le générateur ne produira jamais de carbonade flamande.** Une carbonade n'est
+  pas un bœuf mijoté à la bière, c'est une suite de gestes précis, et personne ne
+  cherche « mijoté de bœuf façon bistrot » : on cherche une carbonade, par son nom.
+  D'où `terroir/`, écrit à la main. Aucun texte n'est recopié — le plat appartient
+  à tout le monde, le texte d'une recette non.
+- **Quatre axes s'ajoutent à `cuisine`** : `region` (le terroir sous le pays),
+  `gouts`, `typePlat`, `occasions`. Les trois derniers se **déduisent** quand ils
+  ne sont pas écrits (`typePlatDe`, `goutsDe`, `occasionsDe` dans `catalogue.ts`) :
+  sans déduction, les filtres ne montreraient que les 129 recettes manuelles et
+  cacheraient l'essentiel du catalogue. Cette déduction est légitime là où celle
+  des régimes ne l'est pas — se tromper de forme de plat contrarie, se tromper de
+  régime rend malade.
+- **`epice` et `releve` ne sont pas la même chose** : le premier dit qu'il y a des
+  épices, le second que ça pique. Un tajine aux abricots est épicé sans être relevé.
+- **Le générateur connaît dix styles régionaux** (`STYLES_REGIONAUX`). Un style
+  n'est pas une cuisine : `cuisine` filtre les briques — aucune n'a eu à être
+  réécrite — pendant que `id`, `region` et les tournures portent l'identité.
+  **Les styles historiques gardent l'identifiant de leur cuisine**, donc les
+  favoris et les plans enregistrés résolvent encore ; les régionaux viennent
+  **après** eux dans `STYLES`, parce que la graine des aromates avance au fil des
+  styles et que les insérer avant aurait changé le contenu de recettes déjà mises
+  en favori.
+
+### Les photos — `outils/photos.mjs` et `public/plats/`
+
+**57 photos, toutes sous licence libre de Wikimedia Commons**, récupérées par
+`node outils/photos.mjs`. Ce qui a changé par rapport à la règle « jamais de
+photo », c'est la source : Commons n'héberge que du réutilisable. La contrepartie
+n'est pas négociable — **l'attribution doit rester affichée** (`CreditPhoto` dans
+`Cuisine.tsx`). La retirer ferait passer le projet de l'usage libre à la
+contrefaçon.
+
+- **Deux tailles par plat** : 640 px pour la fiche, 320 px dans `mini/` pour la
+  liste. Servir la grande dans un carré de 48 px téléchargeait 180 Ko par ligne,
+  soit quatre mégaoctets pour un écran de résultats.
+- **Le script écarte les titres de préparation** (« ingredients », « bereiding »).
+  Sans ce filtre, la carbonade s'était vu attribuer une photo d'oignons crus et
+  d'une bouteille de bière : le titre correspondait, l'image promettait un plat
+  qu'on n'obtiendrait jamais.
+- **Les crédits existants sont relus avant d'être réécrits.** Une exécution
+  interrompue — un 429 de Wikimedia — laissait sinon des images sur le disque dont
+  l'attribution venait de disparaître du code.
+- **Rien n'est préchargé** : le service worker met `/plats/` en cache au fil des
+  consultations. Les ajouter à l'installation ferait payer douze mégaoctets à
+  quelqu'un qui n'ouvrira jamais la carbonade.
 
 ---
 
@@ -840,6 +919,44 @@ Vérification manuelle attendue :
 ---
 
 ## Historique du projet
+
+### 31 juillet 2026 — La base d'aliments, le terroir et les photos
+
+Parti d'un signalement de Yann : sa femme cherchait « pomme de terre » et
+l'application ne trouvait rien.
+
+**Ce n'était pas une base vide, c'était un bug de recherche.** L'aliment existait
+sous le nom « Pommes de terre cuites », et `chercherDansLaBase` comparait des
+chaînes brutes : le pluriel du nom suffisait à faire échouer la requête au
+singulier. Un utilisateur devait deviner le pluriel, la qualification et l'ordre
+des mots du rédacteur de la base. La recherche travaille désormais par jetons,
+avec correspondance par préfixe dans les deux sens.
+
+Un second défaut du même ordre a été trouvé **en écrivant le banc d'essai**, pas
+en relisant : la normalisation transformait les accents en espaces, donc « pâtes »
+devenait « p a tes ». Invisible tant que la requête porte le même accent que le
+nom — les deux se déforment pareil — et fatal sur « pates completes » tapé sans
+accent, c'est-à-dire exactement la requête qu'on voulait faire aboutir.
+
+- **La base passe de 72 à 2 041 aliments**, avec les plats emblématiques que Yann
+  cherchait. Les 72 identifiants d'origine sont conservés.
+- **`conseil.ts` sort la base du chemin critique** : le chunk principal retombe de
+  141 à 107 Ko compressés. Le coach n'a jamais eu besoin que d'aliments simples.
+- **Le catalogue de recettes passe à 7 608**, dont 76 plats du terroir écrits à la
+  main — la carbonade flamande en tête — et dix styles régionaux dans le générateur.
+- **Quatre axes de filtre** : terroir, type de plat, profil de goût, occasion.
+- **57 photos sous licence libre**, en deux tailles, créditées à l'écran.
+
+**Vérifié** en mode démo sur un compte créé pour l'occasion, 390 px, clair et
+sombre : « pomme de terre », « patate », « chocolatine », « pâtes complètes » et
+« carbonade » répondent dans l'application réelle ; les filtres se cumulent
+(7 608 → 207 pour le Nord → 35 en mijoté → 34 en sucré-salé) ; aucune erreur
+console ; `npm audit` reste à zéro.
+
+**Trois défauts corrigés en vérifiant**, tous invisibles au typecheck : les
+accents mangés par la normalisation, une vignette de 960 px servie dans un carré
+de 48 px, et une photo d'ingrédients crus attribuée à la carbonade parce que son
+titre contenait le bon mot.
 
 ### 30 juillet 2026 — Tickets de caisse et historique de prix
 

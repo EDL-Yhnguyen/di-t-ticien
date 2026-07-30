@@ -28,27 +28,39 @@ import {
 import {
   LIBELLE_CUISINE,
   LIBELLE_DIFFICULTE,
+  LIBELLE_GOUT,
+  LIBELLE_OCCASION,
   LIBELLE_REGIME,
+  LIBELLE_REGION,
   LIBELLE_TAG,
+  LIBELLE_TYPE_PLAT,
+  PHOTOS,
   PLACARD,
   RAYONS,
   catalogue,
   listeDeCourses,
   recetteParId,
   type Difficulte,
+  type Gout,
+  type Occasion,
   type Recette,
   type Regime,
   type Tag,
+  type TypePlat,
 } from '../lib/recettes'
 import {
   cuisinesDuCatalogue,
   difficulteDe,
+  goutsDe,
   illustrationDe,
   ingredientsPour,
   macrosPortion,
   nombreDeCriteres,
+  occasionsDe,
   rechercher,
   regimesAAfficher,
+  regionsDuCatalogue,
+  typePlatDe,
   type Criteres,
 } from '../lib/catalogue'
 import {
@@ -99,6 +111,36 @@ const TAGS_FILTRABLES: Tag[] = ['rapide', 'vegetarien', 'batch', 'nomade', 'une-
 const REGIMES_FILTRABLES: Regime[] = ['vegetarien', 'vegan', 'sans-gluten', 'sans-lactose']
 
 const DIFFICULTES: Difficulte[] = ['facile', 'intermediaire', 'technique']
+
+/**
+ * Les formes de plat proposées au filtre, dans l'ordre où on les cherche.
+ *
+ * Pas toutes celles que le type permet : « farci » et « grillade » ne comptent
+ * qu'une poignée de recettes, et une case de filtre qui rend deux résultats
+ * apprend à se méfier du panneau entier. Elles restent lisibles sur la fiche.
+ */
+const FORMES_FILTRABLES: TypePlat[] = [
+  'mijote',
+  'roti',
+  'gratin',
+  'poelee',
+  'soupe',
+  'salade',
+  'bowl',
+  'papillote',
+  'sandwich',
+]
+
+const GOUTS_FILTRABLES: Gout[] = ['sucre-sale', 'epice', 'releve', 'doux', 'acidule', 'fume', 'herbace']
+
+const OCCASIONS_FILTRABLES: Occasion[] = [
+  'semaine',
+  'dimanche',
+  'reconfort',
+  'reception',
+  'pique-nique',
+  'fete',
+]
 
 /** Les bornes de temps qui correspondent à une vraie situation, pas une échelle. */
 const TEMPS = [10, 20, 30]
@@ -472,8 +514,14 @@ function LigneRecette({
               {recette.minutes} min
             </span>
             <span className="text-xs font-semibold text-ink-soft tnum">{recette.kcal} kcal</span>
-            {recette.cuisine && (
-              <span className="text-xs text-ink-faint">{LIBELLE_CUISINE[recette.cuisine]}</span>
+            {/* Le terroir prime sur le pays quand il existe : « Nord et Flandre »
+                situe un plat que « Française » ne distingue pas des mille autres. */}
+            {recette.region ? (
+              <span className="text-xs text-ink-faint">{LIBELLE_REGION[recette.region]}</span>
+            ) : (
+              recette.cuisine && (
+                <span className="text-xs text-ink-faint">{LIBELLE_CUISINE[recette.cuisine]}</span>
+              )
             )}
           </span>
         </span>
@@ -529,19 +577,80 @@ function LigneRecette({
  * donne une vignette reconnaissable, stable d'un affichage à l'autre, sans rien
  * prétendre.
  */
+/**
+ * La vignette d'une recette : sa photo si elle en a une, son illustration sinon.
+ *
+ * L'illustration générée n'est pas un repli honteux, c'est le cas majoritaire :
+ * seules les recettes emblématiques ont une photo, parce qu'aucune image ne
+ * correspond à un assemblage composé. Les deux formes ont donc exactement la même
+ * empreinte à l'écran, pour qu'une liste mixte ne ressemble pas à un catalogue à
+ * moitié rempli.
+ *
+ * `loading="lazy"` et les dimensions explicites ne sont pas décoratifs : sans les
+ * secondes, l'image qui arrive pousse le texte vers le bas au moment où on le lit.
+ */
 function Vignette({ recette, taille }: { recette: Recette; taille: 'petite' | 'grande' }) {
   const { emoji, fond } = illustrationDe(recette)
+  const petite = taille === 'petite'
+  const cadre = petite ? 'size-12 text-xl' : 'h-40 w-full text-5xl'
+
+  if (recette.photo) {
+    // La liste prend la vignette de 320 px, la fiche l'image de 640. Servir la
+    // grande dans un carré de 48 px téléchargeait cent quatre-vingts kilo-octets
+    // par ligne — quatre mégaoctets pour un écran de résultats.
+    const source = (petite ? PHOTOS[recette.id]?.mini : undefined) ?? recette.photo
+    return (
+      <img
+        src={source}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        width={petite ? 320 : 640}
+        height={petite ? 320 : 400}
+        className={classes('shrink-0 rounded-tile object-cover', cadre)}
+      />
+    )
+  }
+
   return (
     <span
       aria-hidden="true"
-      className={classes(
-        'grid shrink-0 place-items-center rounded-tile',
-        fond,
-        taille === 'petite' ? 'size-12 text-xl' : 'h-24 w-full text-5xl',
-      )}
+      className={classes('grid shrink-0 place-items-center rounded-tile', fond, cadre)}
     >
       {emoji}
     </span>
+  )
+}
+
+/**
+ * L'attribution d'une photo.
+ *
+ * **Ce composant n'est pas optionnel.** Les images viennent de Wikimedia Commons
+ * sous licences CC BY et CC BY-SA, qui autorisent l'usage commercial et la
+ * modification à une seule condition : créditer l'auteur et nommer la licence. Le
+ * retirer pour gagner deux lignes ferait passer le projet de l'usage libre à la
+ * contrefaçon.
+ *
+ * Le texte est discret et c'est permis — la licence demande une attribution
+ * « raisonnable au regard du support », pas une vignette de la taille de l'image.
+ */
+function CreditPhoto({ recette }: { recette: Recette }) {
+  const photo = PHOTOS[recette.id]
+  if (!photo) return null
+
+  return (
+    <p className="text-xs text-ink-faint">
+      Photo :{' '}
+      <a
+        href={photo.source}
+        target="_blank"
+        rel="noreferrer"
+        className="underline underline-offset-2"
+      >
+        {photo.auteur}
+      </a>{' '}
+      — {photo.licence}, via Wikimedia Commons
+    </p>
   )
 }
 
@@ -563,6 +672,7 @@ function FeuilleAffiner({
   resultats: number
 }) {
   const cuisines = useMemo(() => cuisinesDuCatalogue(), [])
+  const regions = useMemo(() => regionsDuCatalogue(), [])
 
   function basculerListe<T>(liste: T[] | undefined, valeur: T): T[] | undefined {
     const actuels = liste ?? []
@@ -647,6 +757,62 @@ function FeuilleAffiner({
             onClick={() => onCriteres({ ...criteres, cuisine: criteres.cuisine === c ? null : c })}
           >
             {LIBELLE_CUISINE[c]}
+          </Puce>
+        ))}
+      </GroupeFiltre>
+
+      <GroupeFiltre
+        legende="Terroir"
+        aide="Le pays dit d’où vient la cuisine, le terroir dit d’où vient le plat. Les deux se cumulent."
+      >
+        {regions.map((r) => (
+          <Puce
+            key={r}
+            actif={criteres.region === r}
+            onClick={() => onCriteres({ ...criteres, region: criteres.region === r ? null : r })}
+          >
+            {LIBELLE_REGION[r]}
+          </Puce>
+        ))}
+      </GroupeFiltre>
+
+      <GroupeFiltre legende="Type de plat">
+        {FORMES_FILTRABLES.map((f) => (
+          <Puce
+            key={f}
+            actif={criteres.typePlat === f}
+            onClick={() => onCriteres({ ...criteres, typePlat: criteres.typePlat === f ? null : f })}
+          >
+            {LIBELLE_TYPE_PLAT[f]}
+          </Puce>
+        ))}
+      </GroupeFiltre>
+
+      <GroupeFiltre
+        legende="Profil de goût"
+        aide="« Épicé » veut dire qu’il y a des épices, « relevé » que ça pique. Un tajine aux abricots est le premier sans être le second."
+      >
+        {GOUTS_FILTRABLES.map((g) => (
+          <Puce
+            key={g}
+            actif={criteres.gouts?.includes(g) ?? false}
+            onClick={() => onCriteres({ ...criteres, gouts: basculerListe(criteres.gouts, g) })}
+          >
+            {LIBELLE_GOUT[g]}
+          </Puce>
+        ))}
+      </GroupeFiltre>
+
+      <GroupeFiltre legende="Occasion">
+        {OCCASIONS_FILTRABLES.map((o) => (
+          <Puce
+            key={o}
+            actif={criteres.occasions?.includes(o) ?? false}
+            onClick={() =>
+              onCriteres({ ...criteres, occasions: basculerListe(criteres.occasions, o) })
+            }
+          >
+            {LIBELLE_OCCASION[o]}
           </Puce>
         ))}
       </GroupeFiltre>
@@ -757,6 +923,9 @@ function FicheRecette({
   const macros = macrosPortion(recette)
   const regimes = regimesAAfficher(recette)
   const difficulte = difficulteDe(recette)
+  const forme = typePlatDe(recette)
+  const gouts = goutsDe(recette)
+  const occasions = occasionsDe(recette)
 
   /** Les ingrédients de la fiche, aux quantités affichées, versés sur la liste. */
   function auxCourses() {
@@ -782,7 +951,10 @@ function FicheRecette({
 
   return (
     <div className="space-y-6">
-      <Vignette recette={recette} taille="grande" />
+      <div className="space-y-1.5">
+        <Vignette recette={recette} taille="grande" />
+        <CreditPhoto recette={recette} />
+      </div>
 
       {/* Le premier geste de la fiche : cuisiner. Il vient avant les chiffres —
           on ouvre une recette pour la faire, pas pour l'étudier. */}
@@ -796,6 +968,18 @@ function FicheRecette({
         <Etiquette ton="neutre">{recette.minutes} min</Etiquette>
         <Etiquette ton="neutre">{LIBELLE_DIFFICULTE[difficulte]}</Etiquette>
         {recette.cuisine && <Etiquette ton="accent">{LIBELLE_CUISINE[recette.cuisine]}</Etiquette>}
+        {recette.region && <Etiquette ton="accent">{LIBELLE_REGION[recette.region]}</Etiquette>}
+        {forme && <Etiquette ton="neutre">{LIBELLE_TYPE_PLAT[forme]}</Etiquette>}
+        {gouts.map((g) => (
+          <Etiquette key={g} ton="primaire">
+            {LIBELLE_GOUT[g]}
+          </Etiquette>
+        ))}
+        {occasions.map((o) => (
+          <Etiquette key={o} ton="neutre">
+            {LIBELLE_OCCASION[o]}
+          </Etiquette>
+        ))}
         {recette.tags.includes('economique') && <Etiquette ton="reussite">Petit budget</Etiquette>}
         <button
           type="button"
