@@ -29,16 +29,31 @@ prescrit » d'origine (cocher les composants d'une ordonnance) subsiste en
 parallèle sur `/app/plan`, pour les personnes suivies par une diététicienne.
 
 Dépôt : `EDL-Yhnguyen/mamakilo` (public)
-Production : https://di-t-ticien.vercel.app — **encore l'ancienne adresse**
+Production : **https://mamakilo.vercel.app**
 Dossier local : `C:\Users\YHN\Documents\Git\mamakilo`
+Supabase : projet `Mamakilo`, ref `vdnfqijjmuxdrimbyyrv`, région `eu-west-1`
 
-**Renommés le 30/07/2026** : le dossier local (`diététicien` → `mamakilo`) et le
-dépôt GitHub (`di-t-ticien` → `mamakilo`). Le lien avec Vercel a survécu — il est
-indexé sur l'identifiant du dépôt, pas sur son nom — mais **le domaine de
-production n'a pas suivi** et reste `di-t-ticien.vercel.app` tant que le projet
-Vercel n'est pas renommé dans son tableau de bord. Ce n'est pas une incohérence à
-corriger dans le code. Le nom `di-t-ticien` est maintenant libre sur GitHub : la
-redirection tient tant que personne ne le réserve.
+### Le renommage du 30 juillet 2026
+
+Tout porte enfin le même nom : dossier local, dépôt GitHub, projet Vercel,
+projet Supabase. Quatre points à connaître, parce qu'aucun ne se devine :
+
+- **`di-t-ticien.vercel.app` reste attaché au projet, exprès.** Les deux
+  adresses servent la même application. Le retirer casserait les PWA déjà
+  installées, et surtout **`localStorage` est cloisonné par origine** : un
+  compte en mode démo créé sur l'ancienne adresse n'existe pas sur la nouvelle.
+  En production l'application est en mode synchronisé, donc les données vivent
+  dans Supabase et se retrouvent après une reconnexion — mais la session, elle,
+  ne suit pas. Ne pas détacher l'ancien domaine sans y avoir réfléchi.
+- **Le lien Vercel ↔ GitHub a survécu au renommage du dépôt** : Vercel indexe
+  sur `githubRepoId`, pas sur le nom. Aucune reconfiguration n'a été nécessaire.
+- **`di-t-ticien` est maintenant libre sur GitHub.** La redirection 301 tient
+  tant que personne ne réserve l'ancien nom.
+- **La référence du projet Supabase est immuable** : le renommage n'a changé que
+  l'étiquette du tableau de bord, `VITE_SUPABASE_URL` est inchangée.
+
+Les clés internes gardent le préfixe `equilibre` — voir plus haut, c'est une
+autre question et elle ne se rouvre pas.
 
 **Cible : le grand public.** Le dossier d'Élodie (71 kg → 61 kg, ordonnance de
 Julie Bertolotto) a servi de cas d'école pour construire le socle ; il reste
