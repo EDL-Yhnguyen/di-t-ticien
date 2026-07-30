@@ -16,7 +16,7 @@ pour ne pas redécouvrir les mêmes murs à chaque reprise.
 |---|---|---|---|---|
 | **C1** | Garde-manger | Frigo / placards / congélateur, DLC et DDM, tableau de bord des dates, « Que puis-je cuisiner ? » | 8, 9, 10, 11, 12, 16 | **Livré** le 29/07/2026 |
 | **C2** | Courses | Liste par rayon depuis le plan **et** ajouts libres, cochage persistant, plusieurs listes, historique, retour de courses → garde-manger | 6 | **Livré** le 30/07/2026 |
-| **C3** | Recettes premium | Schéma étendu (cuisine du monde, difficulté, coût, portions, régimes, nutriments, substitutions, conservation, réchauffage, variantes d'appareils), fiche détaillée, recherche multicritère, favoris | 1, 2, 3, 19 | À faire |
+| **C3** | Recettes premium | Schéma étendu (cuisine du monde, difficulté, coût, portions, régimes, nutriments, substitutions, conservation, réchauffage, variantes d'appareils), fiche détaillée, recherche multicritère, favoris | 1, 2, 3, 19 | **Livré** le 30/07/2026 |
 | **C4** | Planification | Calendrier jour / semaine / mois, glisser-déposer, copier un jour ou une semaine, modèles, semaines préconstruites, génération multi-semaines, export `.ics` | 4, 5 | À faire |
 | **C5** | Mode Cuisine | Plein écran, étapes une à une, minuteurs, écran maintenu allumé, batch cooking et ordre des cuissons | 17, 18 | À faire |
 | **C6** | Ports d'IA et passage à l'échelle | `src/lib/ia/` : interfaces et bouchons documentés, sans aucun appel réel ; schéma Supabase du catalogue et du partage familial | 7, 13, 14, 15, 21 | À faire |
@@ -203,6 +203,88 @@ pluriel en « -x ». « 1 rouleau » et « 2 rouleaux » ne se reconnaissaient p
 `memeUnite` ne défaisait que le « -s » — et donnaient « 1 rouleau + 2 rouleaux »
 au rayon au lieu de « 3 rouleaux ». `accorder` avait le défaut symétrique et
 aurait écrit « 3 rouleaus ».
+
+---
+
+## C3 — Les recettes premium (livré le 30/07/2026)
+
+### Ce qui est en place
+
+- Schéma étendu dans `lib/recettes/types.ts` : `cuisine`, `difficulte`,
+  `regimes`, `substitutions`, `rechauffage`, `appareils`, `photo`. Tous
+  facultatifs, tous renseignés à la main pour les 53 recettes en ce qui concerne
+  la cuisine et les régimes.
+- `lib/catalogue.ts` : ce qui se **déduit** d'une recette — difficulté, régimes,
+  macros d'une part, illustration, quantités pour plusieurs — et la recherche
+  multicritère. Rien n'y est stocké.
+- `/app/cuisine` refondu : recherche texte (titre **et** ingrédients), feuille
+  « Affiner » (moment, charge, temps, difficulté, cuisine du monde, régime,
+  étiquettes), favoris, et une fiche détaillée.
+- `EtatUtilisateur.favoris` : des identifiants, pas des recettes.
+
+### Les décisions à ne pas défaire
+
+**Aucun régime ne se déduit d'une liste d'ingrédients.** « Sans gluten » annoncé
+à tort n'est pas une imprécision, c'est un risque sanitaire pour une personne
+cœliaque — et la sauce soja, la moutarde ou une charcuterie en contiennent sans
+le dire dans leur nom. Seul le champ `regimes`, écrit à la main, fait foi ; la
+seule déduction tolérée est « végétarien », lu sur le tag qui existait déjà,
+parce que s'y tromper ne fait que proposer un plat de trop. La fiche ajoute une
+mise en garde sur les produits transformés : la recette ne parle que de ses
+ingrédients, pas du contenu du bocal acheté.
+
+**Le filtre régime cache ce qu'il ne peut pas garantir.** L'absence
+d'information n'est pas une réponse négative, mais elle se traite comme telle :
+mieux vaut cacher un plat qui aurait convenu que d'en proposer un qui ne
+convient pas.
+
+**Il n'y a pas de champ `portions`, et c'est délibéré.** `kcal` et les quantités
+sont écrits pour une personne, et tout le produit le lit ainsi : le
+planificateur vise la cible d'un repas, les bandes comparent à l'objectif d'une
+journée, le journal enregistre une portion. Déclarer qu'une recette « couvre
+quatre personnes » sans toucher à `kcal` rendrait ces trois lectures fausses
+d'un facteur quatre, silencieusement. Cuisiner pour plusieurs est donc un calcul
+d'affichage (`ingredientsPour`), et l'écran dit « par personne » pour que le
+chiffre garde son sens.
+
+**La difficulté se déduit du nombre de gestes *et* du temps**, pas du temps
+seul : « facile » veut dire peu de gestes, pas rapide. Un riz au lait est facile
+et lent — d'où l'override `difficulte` sur cette recette-là.
+
+**Le coût n'est pas un montant.** Aucune source de prix n'existe dans le projet,
+et afficher « 2,40 € la portion » serait une invention. Le budget passe par
+l'étiquette « économique » qui existait déjà, affichée « Petit budget ».
+
+**Les nutriments d'une part réemploient la répartition de `journalRecette.ts`.**
+Écrire un second jeu de chiffres à côté aurait produit deux estimations
+contradictoires pour le même plat. Aucun Nutri-Score n'en est tiré, pour la
+raison déjà posée là-bas.
+
+**L'illustration se lit dans le contenu du plat, jamais tirée au sort.** Le
+premier jet piochait au hasard dans la catégorie « protéine » : le chili
+végétarien s'est affiché avec un poisson, les œufs brouillés avec un steak. Une
+vignette fausse est pire que pas de vignette. Le pictogramme vient donc du titre
+puis des ingrédients, dans cet ordre ; seule la couleur de fond est tirée de
+l'identifiant, parce qu'une couleur ne prétend rien.
+
+### Vérifié à l'écran avant livraison
+
+Au pilote Playwright, sur le build de production en mode démo, 390 px et
+1280 px, clair et sombre, aucune erreur console : recherche « oeuf » (11
+recettes, la ligature passe) et « poêlée » (1, l'accent aussi), filtres cumulés
+(sans gluten 26 → + végétalien 6 → sans gluten + indienne 1), favoris contrôlés
+**dans le document** et après rechargement, fiche complète (cuisine, régime,
+substitution, variante d'appareil, macros et leur mention d'estimation),
+passage à quatre personnes (« 120 g » → « 480 g » pendant que l'énergie reste
+« 470 kcal par personne »), et versement des ingrédients de la fiche dans la
+liste de courses aux quantités affichées. Le parcours C2 a été rejoué en entier
+pour vérifier l'absence de régression.
+
+**Trois défauts corrigés à ce moment-là**, dont deux invisibles au typecheck :
+l'illustration tirée au hasard (ci-dessus), le dégradé entre deux lavis qui
+donnait un vert-brun boueux en thème sombre — remplacé par un lavis uni —, et un
+« Papillote de dinde aux poireaux » illustré par un poisson parce que la table
+des pictogrammes cherchait dans le titre et les ingrédients d'un seul bloc.
 
 **Piège du banc d'essai** : injecter des données dans le `localStorage` d'une
 page ouverte ne sert à rien — `AppContext` vide son debounce sur `pagehide` et

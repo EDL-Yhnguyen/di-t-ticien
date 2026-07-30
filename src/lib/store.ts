@@ -54,6 +54,14 @@ export interface EtatUtilisateur {
    * dans le caddie.
    */
   courses: ListeCourses[]
+  /**
+   * Identifiants des recettes mises de côté.
+   *
+   * Un tableau d'identifiants et non de recettes : le catalogue évolue, et
+   * recopier une recette dans le document figerait la version du jour où elle a
+   * été aimée — y compris ses erreurs.
+   */
+  favoris: string[]
   /** La conversation avec le coach, conservée d'une session à l'autre. */
   conversation: MessageCoach[]
   /**
@@ -113,6 +121,7 @@ export function etatInitial(u: Utilisateur): EtatUtilisateur {
     menus: null,
     stocks: [],
     courses: [],
+    favoris: [],
     conversation: [],
     consentementCoach: null,
     eau: [],
@@ -202,6 +211,7 @@ function fusionner(u: Utilisateur, partiel: Partial<EtatUtilisateur>): EtatUtili
     menus: partiel.menus ?? null,
     stocks: partiel.stocks ?? [],
     courses: partiel.courses ?? [],
+    favoris: partiel.favoris ?? [],
     conversation: partiel.conversation ?? [],
     consentementCoach: partiel.consentementCoach ?? null,
     eau: partiel.eau ?? [],

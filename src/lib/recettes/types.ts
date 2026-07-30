@@ -45,6 +45,79 @@ export const LIBELLE_TAG: Record<Tag, string> = {
   plaisir: 'Repas plaisir',
 }
 
+/**
+ * D'où vient le plat — la « cuisine du monde » du brief.
+ *
+ * C'est une origine culinaire, pas une nationalité : « méditerranéenne » couvre
+ * ce qui se cuisine autour du bassin sans appartenir à un pays précis, et rien
+ * n'oblige une recette à en porter une.
+ */
+export type Cuisine =
+  | 'francaise'
+  | 'italienne'
+  | 'mediterraneenne'
+  | 'orientale'
+  | 'asiatique'
+  | 'indienne'
+  | 'mexicaine'
+  | 'nordique'
+  | 'britannique'
+  | 'americaine'
+
+export const LIBELLE_CUISINE: Record<Cuisine, string> = {
+  francaise: 'Française',
+  italienne: 'Italienne',
+  mediterraneenne: 'Méditerranéenne',
+  orientale: 'Orientale',
+  asiatique: 'Asiatique',
+  indienne: 'Indienne',
+  mexicaine: 'Mexicaine',
+  nordique: 'Nordique',
+  britannique: 'Britannique',
+  americaine: 'Américaine',
+}
+
+export type Difficulte = 'facile' | 'intermediaire' | 'technique'
+
+export const LIBELLE_DIFFICULTE: Record<Difficulte, string> = {
+  facile: 'Facile',
+  intermediaire: 'Un peu de technique',
+  technique: 'Pour cuisiner tranquille',
+}
+
+/**
+ * Régimes qu'une recette respecte.
+ *
+ * **Un régime n'est jamais déduit d'une liste d'ingrédients.** « Sans gluten »
+ * annoncé à tort n'est pas une imprécision, c'est un risque sanitaire pour une
+ * personne cœliaque — et la sauce soja, la moutarde ou une charcuterie en
+ * contiennent sans le dire dans leur nom. Seul `regimes`, renseigné à la main,
+ * fait foi ; « végétarien » est la seule exception, il se lit sur le tag qui
+ * existait déjà.
+ */
+export type Regime = 'vegetarien' | 'vegan' | 'sans-gluten' | 'sans-lactose'
+
+export const LIBELLE_REGIME: Record<Regime, string> = {
+  vegetarien: 'Végétarien',
+  vegan: 'Végétalien',
+  'sans-gluten': 'Sans gluten',
+  'sans-lactose': 'Sans lactose',
+}
+
+/** Remplacer un ingrédient : ce qu'on met à la place, et ce que ça change. */
+export interface Substitution {
+  ingredient: string
+  par: string
+  /** Ce que le remplacement change vraiment — goût, texture, temps de cuisson. */
+  effet?: string
+}
+
+/** La même recette avec l'appareil qu'on a sous la main. */
+export interface VarianteAppareil {
+  appareil: string
+  instructions: string
+}
+
 export interface Ingredient {
   nom: string
   quantite: string
@@ -67,4 +140,41 @@ export interface Recette {
   conservation?: string
   /** Absent = disponible toute l'année. */
   saisons?: Saison[]
+
+  /* ── Champs du sprint C3 ── */
+
+  /** Origine culinaire. Absente = pas de rattachement revendiqué. */
+  cuisine?: Cuisine
+  /**
+   * Absente, elle se déduit du nombre d'étapes et du temps (`difficulteDe`).
+   * À renseigner seulement quand la déduction se trompe : un plat de trois
+   * étapes peut demander un tour de main.
+   */
+  difficulte?: Difficulte
+  /**
+   * Pas de champ `portions` — et c'est une décision, pas un oubli.
+   *
+   * `kcal` et les quantités sont écrits **pour une personne**, et tout le reste
+   * du produit le lit ainsi : le planificateur vise la cible calorique d'un
+   * repas, les bandes vert/bleu/orange comparent à l'objectif d'une journée, le
+   * journal enregistre une portion. Déclarer qu'une recette « couvre quatre
+   * personnes » sans toucher à `kcal` rendrait ces trois lectures fausses d'un
+   * facteur quatre, silencieusement.
+   *
+   * Cuisiner pour plusieurs est donc un calcul d'affichage — `ingredientsPour()`
+   * multiplie les quantités —, jamais une donnée du catalogue.
+   */
+  /** Régimes garantis, renseignés à la main. Voir `Regime`. */
+  regimes?: Regime[]
+  substitutions?: Substitution[]
+  /** Comment le remettre chaud sans l'abîmer — pour ce qui se prépare à l'avance. */
+  rechauffage?: string
+  appareils?: VarianteAppareil[]
+  /**
+   * **Jamais renseigné.** Aucune banque d'images libre ne couvre ce catalogue, et
+   * une photo d'emprunt mentirait sur ce qu'on va obtenir. Le champ existe pour
+   * le jour où des photos seront prises ; en son absence, l'écran dégrade vers
+   * une illustration générée — jamais vers un cadre vide.
+   */
+  photo?: string
 }

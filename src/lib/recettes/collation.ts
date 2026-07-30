@@ -15,6 +15,8 @@ export const COLLATIONS: Recette[] = [
     kcal: 120,
     couvre: ['laitier', 'fruit'],
     tags: ['rapide', 'sans-cuisson', 'vegetarien'],
+    cuisine: 'francaise',
+    regimes: ['sans-gluten'],
     ingredients: [
       { nom: 'Fromage blanc 3 %', quantite: '150 g', rayon: 'Crèmerie' },
       { nom: 'Fruits rouges', quantite: '80 g', rayon: 'Surgelés' },
@@ -33,6 +35,8 @@ export const COLLATIONS: Recette[] = [
     kcal: 175,
     couvre: ['fruit', 'matiere-grasse'],
     tags: ['rapide', 'sans-cuisson', 'nomade', 'vegetarien'],
+    cuisine: 'francaise',
+    regimes: ['vegan', 'sans-gluten', 'sans-lactose'],
     ingredients: [
       { nom: 'Pomme', quantite: '1', rayon: 'Fruits et légumes' },
       { nom: 'Amandes non salées', quantite: '15 g (une douzaine)', rayon: 'Épicerie' },
@@ -51,6 +55,15 @@ export const COLLATIONS: Recette[] = [
     kcal: 190,
     couvre: ['feculent', 'legume', 'proteine'],
     tags: ['rapide', 'sans-cuisson', 'vegetarien', 'economique'],
+    cuisine: 'orientale',
+    regimes: ['vegan', 'sans-lactose'],
+    substitutions: [
+      {
+        ingredient: 'Pain complet',
+        par: 'bâtonnets de concombre',
+        effet: 'sans gluten, plus léger de 70 kcal',
+      },
+    ],
     ingredients: [
       { nom: 'Pain complet', quantite: '1 tranche', rayon: 'Boulangerie' },
       { nom: 'Houmous', quantite: '2 CàS', rayon: 'Crèmerie' },
@@ -69,6 +82,8 @@ export const COLLATIONS: Recette[] = [
     kcal: 145,
     couvre: ['laitier', 'fruit'],
     tags: ['rapide', 'sans-cuisson', 'vegetarien', 'economique'],
+    cuisine: 'francaise',
+    regimes: ['sans-gluten'],
     ingredients: [
       { nom: 'Yaourt nature', quantite: '1', rayon: 'Crèmerie' },
       { nom: 'Poire', quantite: '1', rayon: 'Fruits et légumes' },
@@ -89,6 +104,8 @@ export const COLLATIONS: Recette[] = [
     kcal: 170,
     couvre: ['laitier', 'matiere-grasse'],
     tags: ['rapide', 'sans-cuisson', 'vegetarien'],
+    cuisine: 'mediterraneenne',
+    regimes: ['sans-gluten'],
     ingredients: [
       { nom: 'Yaourt à la grecque', quantite: '1 pot', rayon: 'Crèmerie' },
       { nom: 'Cerneaux de noix', quantite: '15 g', rayon: 'Épicerie' },
@@ -104,6 +121,8 @@ export const COLLATIONS: Recette[] = [
     kcal: 185,
     couvre: ['fruit', 'matiere-grasse'],
     tags: ['rapide', 'sans-cuisson', 'nomade', 'vegetarien', 'plaisir'],
+    cuisine: 'americaine',
+    regimes: ['vegan', 'sans-gluten', 'sans-lactose'],
     ingredients: [
       { nom: 'Banane', quantite: '1', rayon: 'Fruits et légumes' },
       { nom: 'Purée de cacahuète', quantite: '1 CàS', rayon: 'Épicerie' },
@@ -123,6 +142,7 @@ export const COLLATIONS: Recette[] = [
     kcal: 140,
     couvre: ['feculent', 'laitier', 'legume'],
     tags: ['rapide', 'sans-cuisson', 'vegetarien', 'economique'],
+    cuisine: 'francaise',
     ingredients: [
       { nom: 'Pain complet', quantite: '1 tranche', rayon: 'Boulangerie' },
       { nom: 'Fromage frais', quantite: '30 g', rayon: 'Crèmerie' },
@@ -144,6 +164,8 @@ export const COLLATIONS: Recette[] = [
     kcal: 150,
     couvre: ['fruit'],
     tags: ['rapide', 'sans-cuisson', 'nomade', 'vegetarien', 'plaisir'],
+    cuisine: 'francaise',
+    regimes: ['sans-gluten'],
     ingredients: [
       { nom: 'Poire', quantite: '1', rayon: 'Fruits et légumes' },
       { nom: 'Chocolat noir 70 %', quantite: '2 carrés', rayon: 'Épicerie' },
@@ -163,6 +185,9 @@ export const COLLATIONS: Recette[] = [
     kcal: 120,
     couvre: ['proteine', 'legume'],
     tags: ['batch', 'nomade', 'vegetarien', 'economique'],
+    cuisine: 'francaise',
+    regimes: ['sans-gluten', 'sans-lactose'],
+    rechauffage: 'Rien à réchauffer : l’œuf dur se mange froid, écalé au dernier moment.',
     ingredients: [
       { nom: 'Œuf', quantite: '1', rayon: 'Crèmerie' },
       { nom: 'Céleri branche', quantite: '2 branches', rayon: 'Fruits et légumes' },
@@ -182,6 +207,8 @@ export const COLLATIONS: Recette[] = [
     kcal: 160,
     couvre: ['fruit', 'matiere-grasse'],
     tags: ['rapide', 'sans-cuisson', 'nomade', 'vegetarien'],
+    cuisine: 'francaise',
+    regimes: ['vegan', 'sans-gluten', 'sans-lactose'],
     ingredients: [
       { nom: 'Compote sans sucre ajouté', quantite: '1 pot', rayon: 'Épicerie' },
       { nom: 'Amandes non salées', quantite: '15 g', rayon: 'Épicerie' },

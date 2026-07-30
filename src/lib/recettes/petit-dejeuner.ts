@@ -14,6 +14,20 @@ export const PETITS_DEJEUNERS: Recette[] = [
     kcal: 330,
     couvre: ['feculent', 'laitier', 'fruit'],
     tags: ['rapide', 'vegetarien', 'economique'],
+    cuisine: 'britannique',
+    substitutions: [
+      {
+        ingredient: 'Lait demi-écrémé',
+        par: 'boisson d’avoine ou de soja',
+        effet: 'sans lactose, un peu plus sucré',
+      },
+    ],
+    appareils: [
+      {
+        appareil: 'Micro-ondes',
+        instructions: 'Flocons et lait dans un grand bol, 2 min à 900 W, remuez à mi-cuisson pour éviter le débordement.',
+      },
+    ],
     ingredients: [
       { nom: 'Flocons d’avoine', quantite: '40 g', rayon: 'Épicerie' },
       { nom: 'Lait demi-écrémé', quantite: '200 ml', rayon: 'Crèmerie' },
@@ -34,6 +48,7 @@ export const PETITS_DEJEUNERS: Recette[] = [
     kcal: 330,
     couvre: ['feculent', 'matiere-grasse', 'laitier', 'fruit'],
     tags: ['rapide', 'vegetarien', 'sans-cuisson', 'economique'],
+    cuisine: 'francaise',
     ingredients: [
       { nom: 'Pain spécial de boulangerie', quantite: '2 tranches (50 g)', rayon: 'Boulangerie' },
       { nom: 'Beurre à 60 %', quantite: 'une fine couche', rayon: 'Crèmerie' },
@@ -54,6 +69,20 @@ export const PETITS_DEJEUNERS: Recette[] = [
     kcal: 375,
     couvre: ['proteine', 'feculent', 'matiere-grasse'],
     tags: ['rapide', 'vegetarien'],
+    cuisine: 'francaise',
+    substitutions: [
+      {
+        ingredient: 'Ciboulette',
+        par: 'persil ou aneth',
+        effet: 'plus anisé avec l’aneth',
+      },
+    ],
+    appareils: [
+      {
+        appareil: 'Micro-ondes',
+        instructions: 'Œufs battus dans un bol beurré, 40 s à 700 W, fouettez, puis 20 s de plus. Ils finissent de prendre hors du four.',
+      },
+    ],
     ingredients: [
       { nom: 'Œufs', quantite: '2', rayon: 'Crèmerie' },
       { nom: 'Pain spécial de boulangerie', quantite: '2 tranches', rayon: 'Boulangerie' },
@@ -76,6 +105,7 @@ export const PETITS_DEJEUNERS: Recette[] = [
     kcal: 335,
     couvre: ['laitier', 'feculent', 'fruit'],
     tags: ['rapide', 'vegetarien', 'sans-cuisson'],
+    cuisine: 'nordique',
     ingredients: [
       { nom: 'Fromage blanc 3 %', quantite: '150 g', rayon: 'Crèmerie' },
       { nom: 'Muesli sans sucre ajouté', quantite: '40 g', rayon: 'Épicerie' },
@@ -97,6 +127,14 @@ export const PETITS_DEJEUNERS: Recette[] = [
     kcal: 345,
     couvre: ['feculent', 'laitier', 'proteine', 'matiere-grasse'],
     tags: ['vegetarien', 'economique'],
+    cuisine: 'francaise',
+    substitutions: [
+      {
+        ingredient: 'Pain spécial rassis',
+        par: 'brioche rassise',
+        effet: 'plus riche, comptez 60 kcal de plus',
+      },
+    ],
     ingredients: [
       { nom: 'Pain spécial rassis', quantite: '2 tranches', rayon: 'Boulangerie' },
       { nom: 'Lait demi-écrémé', quantite: '100 ml', rayon: 'Crèmerie' },
@@ -119,6 +157,15 @@ export const PETITS_DEJEUNERS: Recette[] = [
     kcal: 325,
     couvre: ['feculent', 'laitier', 'fruit'],
     tags: ['rapide', 'batch', 'vegetarien', 'sans-cuisson', 'nomade'],
+    cuisine: 'americaine',
+    substitutions: [
+      {
+        ingredient: 'Yaourt nature',
+        par: 'yaourt de soja',
+        effet: 'sans lactose, texture plus fluide',
+      },
+    ],
+    rechauffage: 'Se mange froid, sorti du réfrigérateur. Passé 30 s au micro-ondes il redevient un porridge tiède.',
     conservation: '3 jours au réfrigérateur',
     ingredients: [
       { nom: 'Flocons d’avoine', quantite: '40 g', rayon: 'Épicerie' },
@@ -142,6 +189,20 @@ export const PETITS_DEJEUNERS: Recette[] = [
     kcal: 330,
     couvre: ['fruit', 'laitier', 'feculent'],
     tags: ['rapide', 'vegetarien', 'sans-cuisson'],
+    cuisine: 'americaine',
+    substitutions: [
+      {
+        ingredient: 'Fraises',
+        par: 'fruits rouges surgelés',
+        effet: 'plus épais et glacé, disponible toute l’année',
+      },
+    ],
+    appareils: [
+      {
+        appareil: 'Blender',
+        instructions: 'Tout ensemble 30 s. Sans blender, écrasez la banane à la fourchette et coupez les fraises : la texture est plus rustique, le goût identique.',
+      },
+    ],
     ingredients: [
       { nom: 'Banane', quantite: '1 petite', rayon: 'Fruits et légumes' },
       { nom: 'Fraises', quantite: '100 g', rayon: 'Fruits et légumes' },
@@ -163,6 +224,8 @@ export const PETITS_DEJEUNERS: Recette[] = [
     kcal: 380,
     couvre: ['feculent', 'matiere-grasse', 'proteine', 'legume'],
     tags: ['vegetarien'],
+    cuisine: 'americaine',
+    regimes: ['sans-lactose'],
     ingredients: [
       { nom: 'Pain spécial de boulangerie', quantite: '2 tranches', rayon: 'Boulangerie' },
       { nom: 'Avocat', quantite: '½', rayon: 'Fruits et légumes' },
@@ -186,6 +249,7 @@ export const PETITS_DEJEUNERS: Recette[] = [
     kcal: 340,
     couvre: ['laitier', 'fruit', 'matiere-grasse', 'feculent'],
     tags: ['rapide', 'vegetarien', 'sans-cuisson'],
+    cuisine: 'mediterraneenne',
     ingredients: [
       { nom: 'Yaourt à la grecque', quantite: '1 pot', rayon: 'Crèmerie' },
       { nom: 'Poire', quantite: '1', rayon: 'Fruits et légumes' },
@@ -207,6 +271,14 @@ export const PETITS_DEJEUNERS: Recette[] = [
     kcal: 340,
     couvre: ['feculent', 'laitier', 'proteine', 'fruit'],
     tags: ['batch', 'vegetarien', 'economique'],
+    cuisine: 'francaise',
+    rechauffage: 'À la poêle sèche, 1 min par face. Au micro-ondes elles ramollissent.',
+    appareils: [
+      {
+        appareil: 'Crêpière électrique',
+        instructions: 'Deux crêpes à la fois, 2 min par face à feu moyen. La pâte d’avoine dore plus vite que la pâte à froment.',
+      },
+    ],
     conservation: '2 jours au réfrigérateur, se réchauffent à la poêle',
     ingredients: [
       { nom: 'Flocons d’avoine', quantite: '40 g', rayon: 'Épicerie' },
@@ -231,6 +303,10 @@ export const PETITS_DEJEUNERS: Recette[] = [
     kcal: 335,
     couvre: ['feculent', 'laitier', 'fruit'],
     tags: ['batch', 'vegetarien', 'economique', 'une-casserole'],
+    cuisine: 'francaise',
+    difficulte: 'facile',
+    regimes: ['sans-gluten'],
+    rechauffage: 'Une cuillère de lait froid dans le bol, puis 1 min au micro-ondes : sans le lait il devient compact.',
     conservation: '3 jours au réfrigérateur',
     ingredients: [
       { nom: 'Riz rond', quantite: '40 g', rayon: 'Épicerie' },
@@ -253,6 +329,7 @@ export const PETITS_DEJEUNERS: Recette[] = [
     kcal: 330,
     couvre: ['feculent', 'laitier', 'fruit'],
     tags: ['rapide', 'vegetarien', 'sans-cuisson'],
+    cuisine: 'italienne',
     ingredients: [
       { nom: 'Pain spécial de boulangerie', quantite: '2 tranches', rayon: 'Boulangerie' },
       { nom: 'Ricotta', quantite: '80 g', rayon: 'Crèmerie' },
@@ -273,6 +350,8 @@ export const PETITS_DEJEUNERS: Recette[] = [
     kcal: 340,
     couvre: ['feculent', 'laitier', 'fruit', 'matiere-grasse'],
     tags: ['batch', 'vegetarien', 'economique'],
+    cuisine: 'nordique',
+    rechauffage: 'Rien à réchauffer. S’il a pris l’humidité, 5 min à 150 °C lui rendent son croquant.',
     conservation: '3 semaines dans un bocal hermétique',
     ingredients: [
       { nom: 'Flocons d’avoine', quantite: '250 g (pour le bocal)', rayon: 'Épicerie' },
@@ -298,6 +377,7 @@ export const PETITS_DEJEUNERS: Recette[] = [
     kcal: 355,
     couvre: ['feculent', 'proteine', 'laitier'],
     tags: ['rapide'],
+    cuisine: 'francaise',
     ingredients: [
       { nom: 'Galette de sarrasin', quantite: '1', rayon: 'Crèmerie' },
       { nom: 'Jambon blanc découenné', quantite: '1 tranche', rayon: 'Boucherie, poissonnerie' },
@@ -320,6 +400,7 @@ export const PETITS_DEJEUNERS: Recette[] = [
     kcal: 320,
     couvre: ['feculent', 'laitier', 'fruit'],
     tags: ['rapide', 'sans-cuisson', 'nomade', 'economique'],
+    cuisine: 'francaise',
     ingredients: [
       { nom: 'Pain spécial de boulangerie', quantite: '2 tranches', rayon: 'Boulangerie' },
       { nom: 'Portion de fromage', quantite: '1', rayon: 'Crèmerie' },

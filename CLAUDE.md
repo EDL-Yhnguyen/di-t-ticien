@@ -142,6 +142,7 @@ src/
     journalRecette.ts   conversion d'une recette en entrée de journal
     stocks.ts           garde-manger : échéances, urgences, recettes réalisables
     courses.ts          listes de courses enregistrées : cumul, versement, retour au stock
+    catalogue.ts        lectures du catalogue : difficulté, régimes, macros, illustration, recherche
     ingredients.ts      rapprochement des noms de produits (stock ↔ recettes ↔ courses)
   components/
     Mosaique.tsx        treemap « squarified » : aire = kcal, couleur = Nutri
@@ -547,6 +548,23 @@ Une recette porte davantage qu'un titre et des étapes : `couvre` (des
 végétarien, nomade…), `conservation` et `saisons`. `Cuisine.tsx` filtre sur
 les bandes **et** sur les étiquettes, en cumulant les critères.
 
+**Depuis le sprint C3 (30/07/2026)**, une recette porte aussi `cuisine`,
+`regimes`, `substitutions`, `rechauffage` et `appareils` — tous facultatifs. Les
+règles à ne pas contourner, détaillées dans `CUISINE.md` :
+
+- **Aucun régime ne se déduit des ingrédients.** Un « sans gluten » faux est un
+  risque sanitaire, pas une imprécision. Seul le champ `regimes` fait foi ;
+  « végétarien » est la seule déduction tolérée, sur le tag existant.
+- **Pas de champ `portions`** : `kcal` et les quantités sont écrits pour une
+  personne, et le planificateur, les bandes et le journal le lisent ainsi.
+  Cuisiner pour plusieurs est un calcul d'affichage (`ingredientsPour`).
+- **Le coût n'est pas un montant** : aucune source de prix n'existe, l'étiquette
+  « économique » tient ce rôle.
+- **`photo` n'est jamais renseigné** et l'absence d'image dégrade vers une
+  illustration générée dont **le pictogramme se lit dans le contenu du plat**.
+  Ne pas le tirer au hasard : un chili végétarien illustré par un poisson est
+  faux, et une vignette fausse est pire que pas de vignette.
+
 **53 recettes au 29/07/2026** : 15 petits déjeuners, 14 déjeuners, 10
 collations, 14 dîners. Le déséquilibre d'origine (6 déjeuners, 5 dîners) faisait
 revenir les mêmes plats deux ou trois fois dans une semaine générée — le
@@ -697,6 +715,40 @@ Vérification manuelle attendue :
 ---
 
 ## Historique du projet
+
+### 30 juillet 2026 — Les recettes premium (module Cuisine, sprint C3)
+
+Le catalogue cesse d'être une liste de plats pour devenir consultable. Décisions
+détaillées dans `CUISINE.md`, section C3.
+
+- **Schéma étendu** : cuisine du monde, difficulté, régimes, substitutions,
+  réchauffage, variantes d'appareils. Renseigné pour les 53 recettes.
+- **`lib/catalogue.ts`** : tout ce qui se déduit d'une recette plutôt que d'être
+  ressaisi — difficulté (gestes *et* temps), régimes, macros d'une part
+  (réemploi de `journalRecette.ts`), illustration, quantités pour plusieurs.
+- **Recherche multicritère** : texte sur le titre et les ingrédients, moment,
+  charge, temps, difficulté, cuisine, régime, étiquettes. Les critères se
+  cumulent, et le compte de résultats s'affiche dans la feuille pour dire si le
+  filtre suivant va vider l'écran.
+- **Favoris** (`EtatUtilisateur.favoris`), des identifiants et non des recettes :
+  le catalogue évolue, et recopier une recette figerait la version du jour.
+- **Fiche détaillée** : illustration, régimes et leur mise en garde, « je cuisine
+  pour » 1/2/4 personnes avec quantités recalculées, macros estimées, ingrédients
+  versables dans la liste de courses, substitutions, variantes d'appareils,
+  conservation et réchauffage.
+
+**Vérifié au pilote Playwright** sur le build de production en mode démo, 390 px
+et 1280 px, clair et sombre : recherche accentuée et ligaturée, filtres cumulés,
+favoris contrôlés dans le document et après rechargement, passage à quatre
+personnes (« 120 g » → « 480 g » sans que l'énergie par personne bouge), et
+versement de la fiche vers les courses. Le parcours C2 a été rejoué en entier,
+sans régression.
+
+**Trois défauts corrigés en vérifiant** : l'illustration tirée au hasard dans la
+catégorie « protéine » — le chili végétarien s'affichait avec un poisson —, un
+dégradé entre deux lavis qui tournait au vert-brun en thème sombre, et une
+papillote de dinde illustrée par un poisson parce que la table des pictogrammes
+lisait titre et ingrédients d'un seul bloc.
 
 ### 30 juillet 2026 — Les courses (module Cuisine, sprint C2)
 

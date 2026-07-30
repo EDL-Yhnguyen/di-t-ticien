@@ -14,6 +14,18 @@ export const DINERS: Recette[] = [
     kcal: 430,
     couvre: ['proteine', 'feculent', 'legume', 'matiere-grasse'],
     tags: ['une-casserole'],
+    cuisine: 'francaise',
+    regimes: ['sans-gluten', 'sans-lactose'],
+    appareils: [
+      {
+        appareil: 'Air fryer',
+        instructions: 'Papillote fermée, 15 min à 180 °C. Le papier ne doit pas toucher la résistance.',
+      },
+      {
+        appareil: 'Four',
+        instructions: '20 min à 200 °C, papillote posée sur une plaque froide.',
+      },
+    ],
     ingredients: [
       { nom: 'Dos de cabillaud', quantite: '130 g', rayon: 'Boucherie, poissonnerie' },
       { nom: 'Riz basmati', quantite: '50 g cru', rayon: 'Épicerie' },
@@ -39,6 +51,15 @@ export const DINERS: Recette[] = [
     kcal: 390,
     couvre: ['proteine', 'legume', 'feculent', 'matiere-grasse'],
     tags: ['rapide', 'vegetarien', 'economique'],
+    cuisine: 'francaise',
+    regimes: ['sans-lactose'],
+    substitutions: [
+      {
+        ingredient: 'Champignons de Paris',
+        par: 'poêlée de champignons surgelée',
+        effet: 'aucun épluchage, égouttez bien avant de saler',
+      },
+    ],
     ingredients: [
       { nom: 'Œufs', quantite: '2', rayon: 'Crèmerie' },
       { nom: 'Champignons de Paris', quantite: '150 g', rayon: 'Fruits et légumes' },
@@ -65,6 +86,8 @@ export const DINERS: Recette[] = [
     kcal: 510,
     couvre: ['proteine', 'feculent', 'legume', 'matiere-grasse'],
     tags: ['une-casserole', 'plaisir'],
+    cuisine: 'nordique',
+    regimes: ['sans-gluten', 'sans-lactose'],
     ingredients: [
       { nom: 'Pavé de saumon', quantite: '110 g', rayon: 'Boucherie, poissonnerie' },
       { nom: 'Pommes de terre', quantite: '2 moyennes', rayon: 'Fruits et légumes' },
@@ -87,6 +110,15 @@ export const DINERS: Recette[] = [
     kcal: 375,
     couvre: ['legume', 'proteine', 'feculent', 'matiere-grasse'],
     tags: ['batch', 'vegetarien', 'une-casserole', 'economique'],
+    cuisine: 'francaise',
+    regimes: ['vegan', 'sans-gluten', 'sans-lactose'],
+    rechauffage: 'À la casserole, jamais au micro-ondes en une fois : le centre reste froid. Congelée, décongélation la veille au réfrigérateur.',
+    appareils: [
+      {
+        appareil: 'Autocuiseur',
+        instructions: '8 min sous pression après le sifflement, puis mixez. Les lentilles corail n’ont pas besoin de plus.',
+      },
+    ],
     ingredients: [
       { nom: 'Lentilles corail', quantite: '60 g crues', rayon: 'Épicerie' },
       { nom: 'Carottes', quantite: '2', rayon: 'Fruits et légumes' },
@@ -113,6 +145,9 @@ export const DINERS: Recette[] = [
     kcal: 420,
     couvre: ['proteine', 'legume', 'laitier', 'matiere-grasse'],
     tags: ['batch', 'plaisir'],
+    cuisine: 'francaise',
+    regimes: ['sans-gluten'],
+    rechauffage: '15 min à 180 °C au four, à couvert. Au micro-ondes le gratin rend son eau et le dessus ramollit.',
     ingredients: [
       { nom: 'Courgettes', quantite: '2', rayon: 'Fruits et légumes' },
       { nom: 'Jambon blanc', quantite: '1 tranche épaisse', rayon: 'Boucherie, poissonnerie' },
@@ -140,6 +175,9 @@ export const DINERS: Recette[] = [
     kcal: 400,
     couvre: ['proteine', 'legume', 'matiere-grasse'],
     tags: ['vegetarien', 'batch', 'economique', 'une-casserole'],
+    cuisine: 'orientale',
+    regimes: ['vegan', 'sans-lactose'],
+    rechauffage: 'À la casserole à feu doux, en remuant : la courge attache vite.',
     ingredients: [
       { nom: 'Courge butternut', quantite: '400 g', rayon: 'Fruits et légumes' },
       { nom: 'Lentilles corail', quantite: '60 g crues', rayon: 'Épicerie' },
@@ -166,6 +204,8 @@ export const DINERS: Recette[] = [
     kcal: 440,
     couvre: ['proteine', 'feculent', 'legume', 'matiere-grasse'],
     tags: ['rapide', 'une-casserole'],
+    cuisine: 'mediterraneenne',
+    regimes: ['sans-lactose'],
     ingredients: [
       { nom: 'Crevettes décortiquées', quantite: '150 g', rayon: 'Surgelés' },
       { nom: 'Boulgour', quantite: '50 g cru', rayon: 'Épicerie' },
@@ -191,6 +231,20 @@ export const DINERS: Recette[] = [
     kcal: 420,
     couvre: ['proteine', 'legume', 'feculent', 'matiere-grasse'],
     tags: ['rapide', 'vegetarien', 'economique'],
+    cuisine: 'francaise',
+    substitutions: [
+      {
+        ingredient: 'Crème légère',
+        par: 'fromage blanc',
+        effet: 'plus acide, 30 kcal de moins',
+      },
+    ],
+    appareils: [
+      {
+        appareil: 'Micro-ondes',
+        instructions: 'Ramequin couvert, 1 min 30 à 700 W. Percez le jaune avant, sinon il éclate.',
+      },
+    ],
     ingredients: [
       { nom: 'Œufs', quantite: '2', rayon: 'Crèmerie' },
       { nom: 'Épinards', quantite: '200 g', rayon: 'Surgelés' },
@@ -214,6 +268,8 @@ export const DINERS: Recette[] = [
     kcal: 430,
     couvre: ['proteine', 'legume', 'matiere-grasse'],
     tags: ['une-casserole'],
+    cuisine: 'francaise',
+    regimes: ['sans-gluten', 'sans-lactose'],
     ingredients: [
       { nom: 'Filet de merlan', quantite: '150 g', rayon: 'Boucherie, poissonnerie' },
       { nom: 'Céleri-rave', quantite: '300 g', rayon: 'Fruits et légumes' },
@@ -238,6 +294,9 @@ export const DINERS: Recette[] = [
     kcal: 450,
     couvre: ['proteine', 'legume', 'laitier'],
     tags: ['batch', 'economique'],
+    cuisine: 'francaise',
+    regimes: ['sans-gluten'],
+    rechauffage: '15 min à 180 °C, à couvert.',
     ingredients: [
       { nom: 'Chou-fleur', quantite: '500 g', rayon: 'Fruits et légumes' },
       { nom: 'Jambon blanc découenné', quantite: '2 tranches', rayon: 'Boucherie, poissonnerie' },
@@ -263,6 +322,8 @@ export const DINERS: Recette[] = [
     kcal: 470,
     couvre: ['proteine', 'feculent', 'legume', 'matiere-grasse'],
     tags: ['economique', 'nomade'],
+    cuisine: 'nordique',
+    regimes: ['sans-gluten', 'sans-lactose'],
     ingredients: [
       { nom: 'Filets de maquereau', quantite: '1 boîte', rayon: 'Épicerie' },
       { nom: 'Pommes de terre', quantite: '2 moyennes', rayon: 'Fruits et légumes' },
@@ -287,6 +348,21 @@ export const DINERS: Recette[] = [
     kcal: 460,
     couvre: ['proteine', 'feculent', 'legume', 'matiere-grasse'],
     tags: ['rapide', 'vegetarien', 'une-casserole'],
+    cuisine: 'asiatique',
+    regimes: ['vegan', 'sans-lactose'],
+    substitutions: [
+      {
+        ingredient: 'Sauce soja',
+        par: 'tamari',
+        effet: 'sans gluten, goût plus rond',
+      },
+    ],
+    appareils: [
+      {
+        appareil: 'Wok',
+        instructions: 'Tofu d’abord à feu vif sans le remuer 2 min, pour qu’il dore au lieu de s’effriter.',
+      },
+    ],
     ingredients: [
       { nom: 'Tofu ferme', quantite: '150 g', rayon: 'Crèmerie' },
       { nom: 'Nouilles complètes', quantite: '50 g crues', rayon: 'Épicerie' },
@@ -311,6 +387,15 @@ export const DINERS: Recette[] = [
     kcal: 470,
     couvre: ['proteine', 'feculent', 'legume', 'matiere-grasse'],
     tags: ['vegetarien', 'batch', 'economique', 'une-casserole'],
+    cuisine: 'mexicaine',
+    regimes: ['vegan', 'sans-gluten', 'sans-lactose'],
+    rechauffage: 'Meilleur le lendemain. À la casserole avec un fond d’eau, 5 min.',
+    appareils: [
+      {
+        appareil: 'Cocotte-minute',
+        instructions: '10 min sous pression au lieu de 35, les haricots étant déjà cuits.',
+      },
+    ],
     ingredients: [
       { nom: 'Haricots rouges cuits', quantite: '200 g égouttés', rayon: 'Épicerie' },
       { nom: 'Tomates concassées', quantite: '200 g', rayon: 'Épicerie' },
@@ -336,6 +421,8 @@ export const DINERS: Recette[] = [
     kcal: 440,
     couvre: ['proteine', 'feculent', 'legume', 'matiere-grasse'],
     tags: ['une-casserole'],
+    cuisine: 'francaise',
+    regimes: ['sans-gluten', 'sans-lactose'],
     ingredients: [
       { nom: 'Escalope de dinde', quantite: '130 g', rayon: 'Boucherie, poissonnerie' },
       { nom: 'Poireau', quantite: '2', rayon: 'Fruits et légumes' },

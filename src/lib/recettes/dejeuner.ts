@@ -14,6 +14,25 @@ export const DEJEUNERS: Recette[] = [
     kcal: 470,
     couvre: ['proteine', 'feculent', 'legume', 'matiere-grasse'],
     tags: ['une-casserole', 'economique'],
+    cuisine: 'mediterraneenne',
+    regimes: ['sans-gluten', 'sans-lactose'],
+    substitutions: [
+      {
+        ingredient: 'Filet de poulet',
+        par: 'escalope de dinde',
+        effet: 'un peu plus sec, baissez de 1 min par face',
+      },
+    ],
+    appareils: [
+      {
+        appareil: 'Air fryer',
+        instructions: 'Pommes de terre en cubes 18 min à 190 °C, poulet ajouté à mi-parcours. Les haricots restent à la vapeur.',
+      },
+      {
+        appareil: 'Cocotte',
+        instructions: 'Tout ensemble à couvert, 25 min à feu doux. Le poulet ne dore pas mais reste plus moelleux.',
+      },
+    ],
     ingredients: [
       { nom: 'Filet de poulet', quantite: '120 g', rayon: 'Boucherie, poissonnerie' },
       { nom: 'Pommes de terre', quantite: '2 moyennes', rayon: 'Fruits et légumes' },
@@ -37,6 +56,15 @@ export const DEJEUNERS: Recette[] = [
     kcal: 490,
     couvre: ['proteine', 'feculent', 'legume', 'matiere-grasse'],
     tags: ['une-casserole'],
+    cuisine: 'orientale',
+    regimes: ['sans-lactose'],
+    substitutions: [
+      {
+        ingredient: 'Bavette de bœuf',
+        par: 'blanc de poulet',
+        effet: '40 kcal de moins, 2 min de cuisson en plus',
+      },
+    ],
     ingredients: [
       { nom: 'Bavette de bœuf', quantite: '110 g', rayon: 'Boucherie, poissonnerie' },
       { nom: 'Boulgour', quantite: '50 g cru', rayon: 'Épicerie' },
@@ -60,6 +88,15 @@ export const DEJEUNERS: Recette[] = [
     kcal: 465,
     couvre: ['proteine', 'feculent', 'legume', 'matiere-grasse'],
     tags: ['rapide', 'economique', 'une-casserole'],
+    cuisine: 'italienne',
+    regimes: ['sans-lactose'],
+    substitutions: [
+      {
+        ingredient: 'Pâtes complètes',
+        par: 'pâtes de légumineuses',
+        effet: 'plus de protéines et de fibres, cuisson plus courte',
+      },
+    ],
     ingredients: [
       { nom: 'Thon au naturel', quantite: '1 boîte', rayon: 'Épicerie' },
       { nom: 'Pâtes complètes', quantite: '60 g crues', rayon: 'Épicerie' },
@@ -85,6 +122,16 @@ export const DEJEUNERS: Recette[] = [
     kcal: 455,
     couvre: ['proteine', 'feculent', 'legume', 'matiere-grasse'],
     tags: ['vegetarien', 'batch', 'economique', 'une-casserole'],
+    cuisine: 'indienne',
+    regimes: ['vegan', 'sans-gluten', 'sans-lactose'],
+    substitutions: [
+      {
+        ingredient: 'Lait de coco léger',
+        par: 'yaourt nature hors du feu',
+        effet: 'plus acide, moins gras — mais plus sans lactose',
+      },
+    ],
+    rechauffage: 'À la casserole à feu doux avec deux cuillères d’eau. Le riz se réchauffe à part, couvert, au micro-ondes.',
     ingredients: [
       { nom: 'Pois chiches cuits', quantite: '150 g égouttés', rayon: 'Épicerie' },
       { nom: 'Riz basmati', quantite: '50 g cru', rayon: 'Épicerie' },
@@ -111,6 +158,7 @@ export const DEJEUNERS: Recette[] = [
     kcal: 440,
     couvre: ['proteine', 'feculent', 'legume', 'matiere-grasse'],
     tags: ['rapide', 'nomade', 'sans-cuisson'],
+    cuisine: 'mexicaine',
     ingredients: [
       { nom: 'Galette de blé complet', quantite: '1', rayon: 'Boulangerie' },
       { nom: 'Filet de poulet', quantite: '100 g', rayon: 'Boucherie, poissonnerie' },
@@ -135,6 +183,21 @@ export const DEJEUNERS: Recette[] = [
     kcal: 450,
     couvre: ['proteine', 'feculent', 'legume', 'matiere-grasse'],
     tags: ['rapide', 'vegetarien', 'economique', 'une-casserole'],
+    cuisine: 'asiatique',
+    regimes: ['sans-lactose'],
+    substitutions: [
+      {
+        ingredient: 'Sauce soja',
+        par: 'tamari',
+        effet: 'sans gluten, goût plus rond',
+      },
+    ],
+    appareils: [
+      {
+        appareil: 'Wok',
+        instructions: 'Feu vif, riz de la veille bien froid : c’est ce qui l’empêche de coller. 4 min suffisent.',
+      },
+    ],
     ingredients: [
       { nom: 'Riz basmati', quantite: '60 g cru', rayon: 'Épicerie' },
       { nom: 'Œufs', quantite: '2', rayon: 'Crèmerie' },
@@ -159,6 +222,8 @@ export const DEJEUNERS: Recette[] = [
     kcal: 500,
     couvre: ['proteine', 'feculent', 'legume', 'matiere-grasse'],
     tags: ['une-casserole'],
+    cuisine: 'mediterraneenne',
+    regimes: ['sans-lactose'],
     ingredients: [
       { nom: 'Pavé de saumon', quantite: '110 g', rayon: 'Boucherie, poissonnerie' },
       { nom: 'Semoule', quantite: '50 g crue', rayon: 'Épicerie' },
@@ -184,6 +249,9 @@ export const DEJEUNERS: Recette[] = [
     kcal: 455,
     couvre: ['proteine', 'feculent', 'legume', 'matiere-grasse'],
     tags: ['sans-cuisson', 'nomade', 'vegetarien', 'batch', 'economique'],
+    cuisine: 'mediterraneenne',
+    regimes: ['sans-gluten'],
+    rechauffage: 'Se mange froide. Sortez-la 10 min avant : au sortir du frigo, la feta n’a aucun goût.',
     ingredients: [
       { nom: 'Lentilles vertes', quantite: '150 g cuites', rayon: 'Épicerie' },
       { nom: 'Feta', quantite: '40 g', rayon: 'Crèmerie' },
@@ -209,6 +277,8 @@ export const DEJEUNERS: Recette[] = [
     kcal: 475,
     couvre: ['proteine', 'feculent', 'legume', 'matiere-grasse'],
     tags: ['une-casserole'],
+    cuisine: 'francaise',
+    regimes: ['sans-gluten', 'sans-lactose'],
     ingredients: [
       { nom: 'Steak haché 5 %', quantite: '120 g', rayon: 'Boucherie, poissonnerie' },
       { nom: 'Patate douce', quantite: '1 moyenne', rayon: 'Fruits et légumes' },
@@ -234,6 +304,9 @@ export const DEJEUNERS: Recette[] = [
     kcal: 480,
     couvre: ['proteine', 'feculent', 'legume', 'matiere-grasse'],
     tags: ['une-casserole', 'batch'],
+    cuisine: 'francaise',
+    regimes: ['sans-gluten'],
+    rechauffage: 'À feu doux sans faire bouillir : la crème légère tranche à l’ébullition.',
     ingredients: [
       { nom: 'Escalope de dinde', quantite: '120 g', rayon: 'Boucherie, poissonnerie' },
       { nom: 'Riz basmati', quantite: '50 g cru', rayon: 'Épicerie' },
@@ -259,6 +332,9 @@ export const DEJEUNERS: Recette[] = [
     kcal: 460,
     couvre: ['proteine', 'feculent', 'legume', 'matiere-grasse'],
     tags: ['batch', 'economique'],
+    cuisine: 'mediterraneenne',
+    regimes: ['sans-lactose'],
+    rechauffage: 'La ratatouille est meilleure réchauffée, 5 min à la poêle. La dinde, elle, se réchauffe 1 min à peine.',
     ingredients: [
       { nom: 'Escalope de dinde', quantite: '120 g', rayon: 'Boucherie, poissonnerie' },
       { nom: 'Semoule', quantite: '50 g crue', rayon: 'Épicerie' },
@@ -285,6 +361,9 @@ export const DEJEUNERS: Recette[] = [
     kcal: 440,
     couvre: ['proteine', 'feculent', 'legume', 'matiere-grasse'],
     tags: ['vegetarien', 'batch', 'economique', 'nomade'],
+    cuisine: 'francaise',
+    regimes: ['sans-gluten'],
+    rechauffage: 'Se mange froid ou tiède. Ne réchauffez pas les œufs durs, ils deviennent caoutchouteux.',
     ingredients: [
       { nom: 'Œufs', quantite: '2', rayon: 'Crèmerie' },
       { nom: 'Lentilles vertes', quantite: '60 g crues', rayon: 'Épicerie' },
@@ -310,6 +389,8 @@ export const DEJEUNERS: Recette[] = [
     kcal: 450,
     couvre: ['proteine', 'feculent', 'legume', 'laitier', 'matiere-grasse'],
     tags: ['rapide', 'vegetarien', 'sans-cuisson', 'nomade'],
+    cuisine: 'orientale',
+    regimes: ['sans-gluten'],
     ingredients: [
       { nom: 'Pois chiches cuits', quantite: '150 g égouttés', rayon: 'Épicerie' },
       { nom: 'Feta', quantite: '40 g', rayon: 'Crèmerie' },
@@ -336,6 +417,9 @@ export const DEJEUNERS: Recette[] = [
     kcal: 465,
     couvre: ['proteine', 'feculent', 'legume', 'matiere-grasse'],
     tags: ['nomade', 'batch'],
+    cuisine: 'nordique',
+    regimes: ['sans-gluten', 'sans-lactose'],
+    rechauffage: 'Se mange froid. Le saumon fumé ne se réchauffe pas.',
     ingredients: [
       { nom: 'Quinoa', quantite: '60 g cru', rayon: 'Épicerie' },
       { nom: 'Saumon fumé', quantite: '80 g', rayon: 'Boucherie, poissonnerie' },

@@ -191,6 +191,27 @@ function ecrireQuantite(q: Quantite): string {
  * menus la juxtaposition seule donnait « 1 + ¼ + 1 + ½ + ½ », illisible au
  * rayon.
  */
+/**
+ * Multiplie une quantité — « 120 g » pour deux personnes fait « 240 g ».
+ *
+ * Ce qui n'est pas un nombre est **rendu tel quel** : « quelques brins » pour
+ * quatre reste « quelques brins », et écrire « 4 quelques brins » serait à la
+ * fois faux et ridicule. Une quantité composée (« 1 CàS + ½ ») voit chacun de
+ * ses termes multiplié.
+ */
+export function multiplierQuantite(quantite: string, facteur: number): string {
+  if (facteur === 1) return quantite
+
+  return quantite
+    .split(' + ')
+    .map((terme) => {
+      const lu = lireQuantite(terme)
+      if (!lu) return terme
+      return ecrireQuantite({ valeur: lu.valeur * facteur, unite: lu.unite })
+    })
+    .join(' + ')
+}
+
 export function cumulerQuantites(existante: string, ajout: string): string {
   // Le terme à grossir se cherche parmi tous, pas seulement le dernier :
   // « 1 moyenne », « 3 », « 1 moyenne » doit donner « 2 moyennes + 3 » et non
