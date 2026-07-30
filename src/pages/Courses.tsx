@@ -8,6 +8,7 @@ import {
   History,
   Package,
   Plus,
+  ReceiptText,
   Refrigerator,
   RotateCcw,
   ShoppingBasket,
@@ -37,9 +38,11 @@ import type { PropositionCourse } from '../lib/courses'
 import { planDeLaDate } from '../lib/menu'
 import { parCodeBarres } from '../lib/openfoodfacts'
 import { Lien } from '../lib/router'
-import type { ArticleCourse, Emplacement, ListeCourses, Rayon } from '../lib/types'
+import type { AgregatPrix, ArticleCourse, Emplacement, ListeCourses, Rayon } from '../lib/types'
 import { EMPLACEMENTS, LIBELLE_EMPLACEMENT, RAYONS } from '../lib/types'
-import { classes, dateCourte } from '../lib/utils'
+import { chiffrerListe, enseignesInteressantes } from '../lib/prix/panier'
+import { enseigneParId } from '../lib/ticket/enseignes'
+import { classes, dateCourte, nombre } from '../lib/utils'
 
 const ICONE_EMPLACEMENT = {
   frigo: Refrigerator,
@@ -203,6 +206,8 @@ export function Courses() {
             </Carte>
           ) : (
             <section className="animate-rise space-y-5" style={{ animationDelay: '120ms' }}>
+              <CoutEstime articles={liste.articles} agregats={etat.prix} />
+
               {bilan!.rayonsRemplis.map((rayon) => {
                 const reste = articlesDuRayon(liste, rayon).filter((a) => !a.pris).length
                 return (
@@ -865,5 +870,89 @@ function FeuilleHistorique({
         ))}
       </ul>
     </div>
+  )
+}
+
+/**
+ * Ce que la liste va coûter, d'après les tickets déjà lus.
+ *
+ * **C'est un plancher, pas une prévision.** Les lignes qu'on ne sait pas
+ * chiffrer sont comptées et annoncées plutôt que devinées : un total à 62 €
+ * qui en fait 90 en caisse fait perdre confiance dans tout le reste, là où
+ * « au moins 45 €, six lignes non chiffrées » reste vrai et se complète tout
+ * seul à mesure qu'on photographie des tickets.
+ */
+function CoutEstime({
+  articles,
+  agregats,
+}: {
+  articles: ArticleCourse[]
+  agregats: AgregatPrix[]
+}) {
+  const bilan = useMemo(() => chiffrerListe(articles, agregats), [articles, agregats])
+  const ailleurs = useMemo(() => enseignesInteressantes(bilan).slice(0, 2), [bilan])
+
+  // Rien de connu : on ne montre pas une carte vide, on explique d'où viendrait
+  // le chiffre. C'est aussi l'endroit où l'on découvre que la lecture de
+  // tickets existe.
+  if (bilan.chiffrees === 0) {
+    return (
+      <Carte className="flex items-start gap-3 p-4">
+        <ReceiptText size={18} className="mt-0.5 shrink-0 text-ink-faint" aria-hidden="true" />
+        <p className="text-sm text-ink-soft">
+          Aucun de ces produits n’est encore dans votre historique.{' '}
+          <Lien vers="/app/ticket" className="font-semibold text-primaire underline underline-offset-2">
+            Photographiez un ticket
+          </Lien>{' '}
+          et cette liste s’affichera chiffrée.
+        </p>
+      </Carte>
+    )
+  }
+
+  return (
+    <Carte ton="accent" className="p-5">
+      <div className="flex items-baseline justify-between gap-4">
+        <span className="text-sm font-medium text-ink-soft">
+          {bilan.nonChiffrees > 0 ? 'Au moins' : 'Coût estimé'}
+        </span>
+        <span className="font-display text-3xl font-semibold text-ink tnum">
+          {nombre(bilan.total, 2)} €
+        </span>
+      </div>
+
+      <p className="mt-2 text-sm text-ink-soft">
+        {bilan.nonChiffrees === 0 ? (
+          <>
+            D’après vos derniers prix, sur <span className="tnum">{bilan.chiffrees}</span> produits.
+          </>
+        ) : (
+          <>
+            <span className="tnum">{bilan.chiffrees}</span> produit
+            {bilan.chiffrees > 1 ? 's' : ''} chiffré{bilan.chiffrees > 1 ? 's' : ''} d’après vos
+            derniers prix. <span className="tnum">{bilan.nonChiffrees}</span> ligne
+            {bilan.nonChiffrees > 1 ? 's' : ''} sans prix connu — le total réel sera plus élevé.
+          </>
+        )}
+      </p>
+
+      {ailleurs.length > 0 && (
+        <div className="mt-4 border-t border-accent/20 pt-3">
+          <p className="text-sm text-ink-soft">
+            Vous avez déjà payé certains de ces produits moins cher :
+          </p>
+          <ul className="mt-2 space-y-1.5">
+            {ailleurs.map(({ enseigne, economie }) => (
+              <li key={enseigne} className="flex items-baseline justify-between gap-3">
+                <span className="font-medium text-ink">{enseigneParId(enseigne)?.nom ?? '—'}</span>
+                <span className="font-semibold text-reussite tnum">
+                  −{nombre(economie, 2)} €
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </Carte>
   )
 }
