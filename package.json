@@ -8,7 +8,8 @@
     "dev": "vite",
     "prebuild": "node outils/ocr.mjs",
     "build": "tsc -b && tsc -p tsconfig.api.json && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "marque": "node outils/marque.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

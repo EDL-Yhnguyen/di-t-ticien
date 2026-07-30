@@ -83,14 +83,18 @@ export function Accueil() {
             <p className="mb-4 text-sm font-bold tracking-[0.16em] text-accent uppercase">
               Bien manger, vivre mieux
             </p>
-            <h1 className="font-display text-[2.6rem] leading-[1.05] font-semibold text-ink sm:text-6xl">
-              Votre assiette,
-              <br />
-              jour après jour.
-            </h1>
+            {/* Le logo à côté du nom, et non au-dessus : la marmite est déjà un
+                personnage, et la mettre en ligne avec le titre lui donne sa
+                présence sans repousser le bouton sous le pli en 390 px. */}
+            <div className="flex items-center gap-4 sm:gap-5">
+              <Marque taille={96} className="size-16 sm:size-24" />
+              <h1 className="font-display text-[2.6rem] leading-[1.05] font-semibold text-ink sm:text-6xl">
+                Mamakilo
+              </h1>
+            </div>
             <p className="mt-5 max-w-md text-lg leading-relaxed text-ink-soft">
-              Une diététicienne ne prescrit pas des grammes. Elle prescrit un beau quart d’assiette
-              de féculents et des légumes à volonté. Cette application parle la même langue.
+              Le petit nom qu’on se donne quand on s’aime et qu’on se charrie un peu. Ici on note ce
+              qu’on mange, on cuisine ce qu’on a, et personne ne fait la leçon à personne.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">

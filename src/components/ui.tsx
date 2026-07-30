@@ -14,14 +14,14 @@ import { classes } from '../lib/utils'
  * Les couleurs sont écrites en dur plutôt que prises aux jetons : c'est un
  * logo, il ne change pas avec le thème.
  */
-export function Marque({ taille = 36 }: { taille?: number }) {
+export function Marque({ taille = 36, className }: { taille?: number; className?: string }) {
   return (
     <svg
       width={taille}
       height={taille}
       viewBox="0 0 512 512"
       aria-hidden="true"
-      className="shrink-0 rounded-xl"
+      className={classes('shrink-0 rounded-xl', className)}
     >
       <rect width="512" height="512" rx="112" fill="#FDF6EE" />
       <path
@@ -29,7 +29,12 @@ export function Marque({ taille = 36 }: { taille?: number }) {
         fill="#4C8A4C"
       />
       <circle cx="262" cy="186" r="46" fill="#E85C46" />
+      <path d="M262 146 l-24 -14 l10 22 l-26 -4 l18 18 Z" fill="#4C8A4C" />
       <path d="M356 132 C376 148 380 186 366 236 L322 226 C328 176 338 144 356 132 Z" fill="#F58A32" />
+      <g stroke="#4C8A4C" strokeWidth="15" fill="none" strokeLinecap="round">
+        <path d="M356 132 L344 96" />
+        <path d="M356 132 L378 104" />
+      </g>
       <g stroke="#F67A5E" strokeWidth="26" fill="none" strokeLinecap="round">
         <path d="M126 288 C92 288 92 340 126 340" />
         <path d="M386 288 C420 288 420 340 386 340" />
