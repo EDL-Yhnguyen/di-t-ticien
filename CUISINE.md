@@ -19,7 +19,7 @@ pour ne pas redécouvrir les mêmes murs à chaque reprise.
 | **C3** | Recettes premium | Schéma étendu (cuisine du monde, difficulté, coût, portions, régimes, nutriments, substitutions, conservation, réchauffage, variantes d'appareils), fiche détaillée, recherche multicritère, favoris | 1, 2, 3, 19 | **Livré** le 30/07/2026 |
 | **C4** | Planification | Calendrier jour / semaine / mois, glisser-déposer, copier un jour ou une semaine, modèles, semaines préconstruites, génération multi-semaines, export `.ics` | 4, 5 | **Livré** le 30/07/2026 |
 | **C5** | Mode Cuisine | Plein écran, étapes une à une, minuteurs, écran maintenu allumé, batch cooking et ordre des cuissons | 17, 18 | **Livré** le 30/07/2026 |
-| **C6** | Ports d'IA et passage à l'échelle | `src/lib/ia/` : interfaces et bouchons documentés, sans aucun appel réel ; schéma Supabase du catalogue et du partage familial | 7, 13, 14, 15, 21 | À faire |
+| **C6** | Ports d'IA et passage à l'échelle | `src/lib/ia/` : interfaces et bouchons documentés, sans aucun appel réel ; schéma Supabase du catalogue et du partage familial | 7, 13, 14, 15, 21 | **Livré** le 30/07/2026 |
 
 **C1 avant tout le reste** : les sections 11, 12 et 16 du brief supposent un
 stock, et C2 s'y adosse aussi (ce qu'on a déjà ne se rachète pas).
@@ -448,6 +448,110 @@ parcours C2, C3 et C4 ont été rejoués en entier.
 **Un défaut corrigé à ce moment-là** : la carte du minuteur, en `sticky` séparé,
 recouvrait le bouton « Étape suivante » en 390 px. Les minuteurs vivent
 désormais dans la barre du bas.
+
+---
+
+## C6 — Ports d'IA et passage à l'échelle (livré le 30/07/2026)
+
+Dernier sprint du programme. Il ne livre **aucun écran** : c'est de
+l'architecture, et son intérêt est de rendre trois décisions futures faciles à
+prendre plutôt que de les prendre à moitié aujourd'hui.
+
+### Ce qui est en place
+
+- **`src/lib/ia/`** : trois ports décrits comme des contrats — écrire une recette
+  depuis ce qu'il reste, lire une photo de frigo, trouver un remplacement — avec
+  leurs bouchons. Aucun appel réel, aucune dépendance ajoutée.
+- **`supabase/catalogue.sql`** : table `recettes` en jsonb, colonnes générées pour
+  ce qui se filtre, recherche plein texte française indexée en GIN, pagination
+  par curseur, RLS séparant le catalogue officiel des recettes privées, et une
+  fonction `chercher_recettes`.
+- **`supabase/foyer.sql`** : foyers, membres, invitations périssables, données
+  partagées, avec les fonctions `creer_foyer`, `creer_invitation` et
+  `rejoindre_foyer`.
+- **`src/lib/recettes/source.ts`** : l'abstraction de source promise au point 2
+  ci-dessus, avec l'implémentation embarquée et la pagination déjà décidée.
+
+### Les décisions à ne pas défaire
+
+**Un bouchon ne fabrique jamais de fausses données.** Il rend un échec explicite
+(`non-configure`) avec un message affichable. Deux recettes plausibles rendues
+par un bouchon passeraient les tests, tromperaient la revue, et finiraient par
+proposer à quelqu'un un plat que personne n'a écrit. Conséquence assumée : un
+écran qui consommera un port devra gérer l'échec **dès son premier jour**, pas
+« plus tard quand ce sera branché ».
+
+**Aucun port ne reprend le travail des règles.** Il n'y a volontairement ni port
+de planification, ni port d'analyse nutritionnelle : `menu.ts`, `nutriscore.ts`
+et `coach.ts` restent des règles lisibles, parce qu'un chiffre affiché sur un
+écran de santé doit pouvoir s'expliquer par une soustraction. Même frontière que
+depuis le sprint du coach conversationnel.
+
+**Chaque port déclare ce qu'il transmettrait** (`donneesTransmises`). Brancher un
+modèle, c'est ajouter un destinataire : la liste vit sur le port pour que l'écran
+d'accord et `DESTINATAIRES` puissent la citer, au lieu d'être enterrée dans le
+code d'un appel.
+
+**Le partage familial ne touche pas aux données de santé.** `public.donnees`
+reste strictement personnelle : journal alimentaire, pesées, mesures d'Apple
+Santé, conversation du coach, envies. Le foyer porte le garde-manger, les
+courses et les menus — ce qui est commun par nature. Personne ne s'attend à ce
+que « partager la liste de courses » signifie « montrer ce que je mange », et le
+conjoint n'a aucun droit d'accès au poids de l'autre.
+
+**Les politiques d'appartenance passent par une fonction `security definer`.**
+Une politique sur `foyer_membres` qui interrogerait `foyer_membres` provoque une
+récursion infinie (42P17). `est_du_foyer()` casse la boucle et ne rend qu'un
+booléen.
+
+**On rejoint un foyer par un code périssable, jamais par une adresse e-mail.**
+Chercher quelqu'un par son adresse supposerait de pouvoir interroger
+`auth.users`, c'est-à-dire de transformer l'application en annuaire. Le code est
+généré par la base, pas par le navigateur, et expire en sept jours.
+
+**La pagination du catalogue est par curseur, pas par `offset`.** `offset 20000`
+fait relire vingt mille lignes pour en jeter dix-neuf mille neuf cent
+quatre-vingts : sur le catalogue promis, la dernière page coûterait cent fois la
+première.
+
+### Ce qui n'est **pas** fait, et pourquoi
+
+- **Le SQL n'a pas été exécuté.** Le connecteur Supabase de Claude Code est en
+  lecture seule : ces deux fichiers sont un copier-coller pour Yann dans le SQL
+  Editor. Seule leur **syntaxe** a été validée, par un parseur Postgres réel
+  (`pgsql-parser`) — 21 et 50 instructions acceptées, le parseur ayant d'abord
+  été confronté à du SQL volontairement cassé pour vérifier qu'il refuse
+  vraiment. La sémantique (comportement effectif des politiques, plans
+  d'exécution) reste à vérifier contre la base.
+- **Le front ne lit pas encore le foyer.** Installé, ce schéma est inerte et ne
+  casse rien. La bascule est un chantier à part : elle demande de sortir
+  `stocks`, `courses` et `plans` du document personnel, donc de toucher à chaque
+  écriture de C1, C2 et C4, et de traiter la fusion de deux garde-mangers
+  existants au moment où deux personnes se rejoignent. À faire seul, pas en fin
+  de sprint.
+- **La source Supabase du catalogue n'est pas écrite** : la table n'a aucun
+  contenu à servir, et une source qui interrogerait une table vide remplacerait
+  cinquante-trois recettes par zéro.
+- **Aucun écran ne consomme les ports.** C'est le périmètre demandé (« interfaces
+  et bouchons, sans aucun appel réel »), mais c'est aussi du code que rien
+  n'importe : vérifié après build, ni `lib/ia/` ni `source.ts` n'entrent dans le
+  paquet livré. Le jour où ils sont branchés, ils y entreront.
+
+### Vérifié avant livraison
+
+Pas d'écran, donc pas de pilote Playwright : ce sprint se vérifie par son
+comportement et par le paquet produit. Les trois bouchons rendent bien
+`ok=false` sans jamais inventer de données. La pagination de la source embarquée
+parcourt les 53 recettes en 8 pages **sans trou ni doublon** (53 identifiants
+distincts), avec le même ordre que celui de `catalogue.sql` — sans quoi changer
+de source ferait sauter ou répéter des recettes. Les parcours C2 à C5 restent
+inchangés, aucun code existant n'ayant été modifié.
+
+**Un défaut corrigé avant livraison**, que seule la relecture a attrapé : la
+colonne générée `recherche` contenait une sous-requête pour déplier les
+ingrédients. Postgres refuse (« cannot use subquery in column generation
+expression ») — le copier-coller aurait échoué à la première instruction. Le
+texte cherchable passe désormais par une fonction `immutable`.
 
 **Piège du banc d'essai** : injecter des données dans le `localStorage` d'une
 page ouverte ne sert à rien — `AppContext` vide son debounce sur `pagehide` et

@@ -146,6 +146,7 @@ src/
     ics.ts              export d’une semaine de menus vers un agenda (.ics)
     cuisson.ts          durées lisibles dans une étape, ordre de démarrage d’un batch
     cuisineEnDirect.ts  minuteurs et maintien de l’écran allumé (effets navigateur)
+    ia/                 ports d’IA : interfaces et bouchons, aucun appel réel
     ingredients.ts      rapprochement des noms de produits (stock ↔ recettes ↔ courses)
   components/
     Mosaique.tsx        treemap « squarified » : aire = kcal, couleur = Nutri
@@ -158,6 +159,8 @@ public/
   icone-*.png           icônes d'installation
 supabase/
   schema.sql            à exécuter une fois dans le SQL Editor
+  catalogue.sql         catalogue de recettes à l’échelle (non appliqué, voir CUISINE.md)
+  foyer.sql             partage familial (non appliqué, schéma inerte tant que le front ne le lit pas)
 api/
   analyser-assiette.ts  fonction Vercel Node : photo → aliments estimés
   coach.ts              fonction Vercel Node : question + contexte → réponse
@@ -633,6 +636,15 @@ de fuseau, pas elle).
 projet créé avant le 29/07/2026 doit le rejouer, sinon la suppression de
 compte reste partielle (voir « Données personnelles » plus haut).
 
+**Deux fichiers SQL supplémentaires depuis le 30/07/2026, ni appliqués ni
+requis** : `catalogue.sql` (catalogue de recettes à l'échelle) et `foyer.sql`
+(partage familial). L'application n'en dépend pas et fonctionne sans eux ; les
+installer ne casse rien, mais rien ne les lit encore. Ils s'exécutent **après**
+`schema.sql`, dont ils réemploient le trigger `marquer_maj()`. Leur syntaxe a été
+validée par un parseur Postgres, **pas leur sémantique** — voir `CUISINE.md`,
+section C6, pour ce qui reste à vérifier et pour la règle qui protège les données
+de santé dans un foyer.
+
 ### Confirmation e-mail — le piège
 
 Les identifiants historiques sont des **pseudos** convertis en
@@ -727,6 +739,33 @@ Vérification manuelle attendue :
 ---
 
 ## Historique du projet
+
+### 30 juillet 2026 — Ports d'IA et passage à l'échelle (module Cuisine, sprint C6)
+
+Dernier sprint du module « Cuisine, Recettes & Courses ». **Aucun écran** : de
+l'architecture, pour que trois décisions futures soient faciles à prendre plutôt
+que prises à moitié aujourd'hui. Détails dans `CUISINE.md`, section C6.
+
+- **`src/lib/ia/`** : trois ports (écrire une recette, lire une photo de frigo,
+  trouver un remplacement) décrits comme des contrats, avec leurs bouchons.
+  Aucun appel réel, aucune dépendance ajoutée.
+- **`supabase/catalogue.sql`** et **`supabase/foyer.sql`** : le catalogue à
+  l'échelle et le partage familial. **Non appliqués** — le connecteur Supabase
+  est en lecture seule, c'est un copier-coller pour Yann. Seule la syntaxe est
+  validée, par un parseur Postgres réel.
+- **`src/lib/recettes/source.ts`** : l'abstraction de provenance du catalogue,
+  avec sa pagination par curseur.
+
+**Trois règles posées ici, à ne pas défaire :** un bouchon ne fabrique jamais de
+fausses données (il déclare son indisponibilité) ; aucun port ne reprend le
+travail des règles, donc il n'y a ni port de planification ni port d'analyse
+nutritionnelle ; et **le partage familial ne touche pas aux données de santé** —
+`public.donnees` reste strictement personnelle, le foyer ne porte que le
+garde-manger, les courses et les menus.
+
+**Un défaut corrigé avant livraison**, attrapé à la relecture : la colonne
+générée de recherche plein texte contenait une sous-requête, que Postgres refuse.
+Le copier-coller aurait échoué à la première instruction.
 
 ### 30 juillet 2026 — Le mode Cuisine (module Cuisine, sprint C5)
 
