@@ -328,6 +328,24 @@ temps de l'affichage — une douchette lit mal un écran sombre, et c'est le seu
 moment où l'app doit être vue de quelqu'un d'autre — et il doit fonctionner
 **hors connexion**, puisqu'on est en caisse. Les formats sont EAN-13 ou Code 128 selon les enseignes.
 
+**Redessiner le code n'est pas le copier : c'est l'écrire proprement.** La
+distinction a été mal comprise une première fois, elle le sera encore. Un
+code-barres n'est que la traduction visuelle d'un numéro ; la carte de
+l'utilisateur porte ce numéro, le scan le lit, et la caisse relit **exactement le
+même** depuis l'écran. Rien n'est fabriqué ni imité — c'est sa carte, rendue
+lisible. C'est ce que font Stocard, Google Wallet et FidMe.
+
+L'alternative intuitive — garder la **photo** de la carte — est nettement moins
+fiable : reflets, angle, courbure du plastique, définition. Une photo de
+code-barres passe mal en caisse, un tracé net passe toujours. Ne pas y revenir en
+croyant simplifier.
+
+**Une limite qui ne se corrige pas côté application** : les douchettes laser
+anciennes ne lisent pas les écrans, seulement le papier et le plastique. Les
+lecteurs à capteur d'image, majoritaires aujourd'hui, n'ont pas ce problème.
+L'écran doit passer en luminosité maximale, et l'interface ne doit jamais
+laisser croire que la carte physique devient inutile.
+
 **Rien de nouveau à installer** — vérifié le 30/07/2026 : `zxing-wasm`, déjà
 présent pour le scan, publie aussi `zxing-wasm/writer` avec son propre
 `zxing_writer.wasm`. Le même motif que `lib/decodeur.ts` s'applique : importer le
