@@ -13,6 +13,7 @@ import type {
   ListeCourses,
   MesureSante,
   MessageCoach,
+  ModeleSemaine,
   PeseeEntree,
   PlanSemaine,
   Profil,
@@ -43,8 +44,16 @@ export interface EtatUtilisateur {
   mesuresSante: MesureSante[]
   /** Séances de sport saisies à la main. */
   seances: SeanceSport[]
-  /** La semaine de menus en cours. `null` tant qu'aucune n'a été générée. */
-  menus: PlanSemaine | null
+  /**
+   * Les semaines planifiées, une par lundi (`debut` fait office de clé).
+   *
+   * Remplace le champ `menus` d'avant le 30/07/2026, qui n'en tenait qu'une :
+   * planifier suppose de voir devant soi, et de garder la semaine passée assez
+   * longtemps pour la reposer. La migration est dans `fusionner`.
+   */
+  plans: PlanSemaine[]
+  /** Semaines mises de côté pour être reposées telles quelles. */
+  modeles: ModeleSemaine[]
   /** Le contenu du frigo, des placards et du congélateur. */
   stocks: ArticleStock[]
   /**
@@ -118,7 +127,8 @@ export function etatInitial(u: Utilisateur): EtatUtilisateur {
     alimentsPerso: [],
     mesuresSante: [],
     seances: [],
-    menus: null,
+    plans: [],
+    modeles: [],
     stocks: [],
     courses: [],
     favoris: [],
@@ -196,8 +206,22 @@ export async function effacerDonnees(userId: string): Promise<void> {
   localStorage.removeItem(CLE_LOCALE(userId))
 }
 
+/**
+ * Les champs disparus, encore présents dans les documents déjà enregistrés.
+ *
+ * Le typer explicitement plutôt que de lire un `any` : ce sont les seules
+ * lectures d'un schéma révolu, et elles doivent se voir.
+ */
+interface ChampsHistoriques {
+  /** Avant le 30/07/2026, une seule semaine de menus était conservée. */
+  menus?: PlanSemaine | null
+}
+
 /** Complète un document ancien avec les champs ajoutés depuis sa création. */
-function fusionner(u: Utilisateur, partiel: Partial<EtatUtilisateur>): EtatUtilisateur {
+function fusionner(
+  u: Utilisateur,
+  partiel: Partial<EtatUtilisateur> & ChampsHistoriques,
+): EtatUtilisateur {
   const base = etatInitial(u)
   return {
     profil: { ...base.profil, ...partiel.profil, id: u.id, email: u.email },
@@ -208,7 +232,10 @@ function fusionner(u: Utilisateur, partiel: Partial<EtatUtilisateur>): EtatUtili
     alimentsPerso: partiel.alimentsPerso ?? [],
     mesuresSante: partiel.mesuresSante ?? [],
     seances: partiel.seances ?? [],
-    menus: partiel.menus ?? null,
+    // La semaine unique d'avant devient la première du tableau : la perdre
+    // effacerait un plan que quelqu'un vient peut-être de composer.
+    plans: partiel.plans ?? (partiel.menus ? [partiel.menus] : []),
+    modeles: partiel.modeles ?? [],
     stocks: partiel.stocks ?? [],
     courses: partiel.courses ?? [],
     favoris: partiel.favoris ?? [],
@@ -269,6 +296,7 @@ export type {
   JournalEau,
   JournalRepas,
   ListeCourses,
+  ModeleSemaine,
   MesureSante,
   MessageCoach,
   PeseeEntree,

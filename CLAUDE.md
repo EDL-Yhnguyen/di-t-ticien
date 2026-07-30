@@ -143,6 +143,7 @@ src/
     stocks.ts           garde-manger : échéances, urgences, recettes réalisables
     courses.ts          listes de courses enregistrées : cumul, versement, retour au stock
     catalogue.ts        lectures du catalogue : difficulté, régimes, macros, illustration, recherche
+    ics.ts              export d’une semaine de menus vers un agenda (.ics)
     ingredients.ts      rapprochement des noms de produits (stock ↔ recettes ↔ courses)
   components/
     Mosaique.tsx        treemap « squarified » : aire = kcal, couleur = Nutri
@@ -178,7 +179,7 @@ api/
 | `/app/courses` | `Courses.tsx` | listes de courses, cochage enregistré, retour de courses |
 | `/app/coach` | `Coach.tsx` | coach conversationnel (accord préalable) |
 | `/app/stats` | `Stats.tsx` | tendances sur 7 / 30 / 90 jours |
-| `/app/menus` | `Menus.tsx` | semaine de menus, remplacement, courses |
+| `/app/menus` | `Menus.tsx` | planification jour / semaine / mois, modèles, export agenda |
 | `/app/sport` | `Sport.tsx` | séances, dépense estimée, repère de l'OMS |
 | `/app/plan` | `PagePlan.tsx` | le plan alimentaire détaillé |
 | `/app/badges` | `Badges.tsx` | badges débloqués |
@@ -227,6 +228,14 @@ modifier((brouillon) => { brouillon.profil.herbalifeActif = true })
 `modifier` fait un `structuredClone`, applique la recette mutative, évalue les
 badges, puis planifie `enregistrer()` avec un debounce de 400 ms (vidé sur
 `pagehide`). **Ne jamais appeler `enregistrer()` directement depuis une page.**
+
+### Retirer ou renommer un champ persistant — la 4e place
+
+Un champ supprimé de `EtatUtilisateur` **existe encore dans les documents déjà
+enregistrés**. Le lire pour migrer sa valeur se fait via l'interface
+`ChampsHistoriques` de `store.ts`, typée explicitement plutôt qu'en `any` : ce
+sont les seules lectures d'un schéma révolu, et elles doivent se voir. Exemple en
+place : `menus` (une semaine) devenu `plans` (plusieurs) le 30/07/2026.
 
 ### Ajouter un champ persistant — 3 endroits, sinon il est perdu
 
@@ -715,6 +724,39 @@ Vérification manuelle attendue :
 ---
 
 ## Historique du projet
+
+### 30 juillet 2026 — La planification (module Cuisine, sprint C4)
+
+Les menus passent d'une semaine unique à un vrai calendrier. Décisions
+détaillées dans `CUISINE.md`, section C4.
+
+- **`plans` remplace `menus`** : plusieurs semaines, une par lundi, `debut`
+  faisant office de clé. Les documents existants sont migrés dans `fusionner`
+  (interface `ChampsHistoriques`) — la semaine unique devient la première du
+  tableau plutôt que d'être perdue.
+- **Trois échelles** sur `/app/menus` : jour, semaine, mois. La vue mensuelle ne
+  montre pas les plats — illisibles à cette échelle — mais ce qui se décide à
+  cette échelle : quelles semaines sont composées, lesquelles sont vides.
+- **Génération multi-semaines à mémoire partagée** : sans ce partage, quatre
+  semaines générées d'affilée se ressembleraient toutes.
+- **Déplacer, copier, modéliser** : glisser-déposer à la souris, déplacement au
+  doigt par la fiche du repas (le `dragstart` tactile n'existe pas — les deux
+  chemins sont nécessaires), copie d'une journée ou d'une semaine, modèles sans
+  dates, semaines préconstruites en jeux de critères.
+- **Export `.ics`** (`lib/ics.ts`) : la version livrable de la synchronisation
+  d'agendas. Heures locales flottantes, `UID` stables, pliage à 75 octets,
+  aucune alarme.
+
+**Vérifié au pilote Playwright** sur le build de production en mode démo, 390 px
+et 1280 px, clair et sombre : quatre semaines générées d'un coup, les trois
+échelles, copies, échange de repas contrôlé **dans le document** par les deux
+chemins, modèle sans dates, et le fichier `.ics` inspecté ligne à ligne. Les
+parcours C2 et C3 ont été rejoués sans régression.
+
+**Un défaut corrigé en vérifiant** : cinq boutons empilés en 390 px repoussaient
+la semaine sous le pli. Et un piège de banc d'essai noté dans `CUISINE.md` : la
+première vérification de l'échange de repas portait sur deux repas identiques,
+donc ne prouvait rien.
 
 ### 30 juillet 2026 — Les recettes premium (module Cuisine, sprint C3)
 

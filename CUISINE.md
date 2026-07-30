@@ -17,7 +17,7 @@ pour ne pas redécouvrir les mêmes murs à chaque reprise.
 | **C1** | Garde-manger | Frigo / placards / congélateur, DLC et DDM, tableau de bord des dates, « Que puis-je cuisiner ? » | 8, 9, 10, 11, 12, 16 | **Livré** le 29/07/2026 |
 | **C2** | Courses | Liste par rayon depuis le plan **et** ajouts libres, cochage persistant, plusieurs listes, historique, retour de courses → garde-manger | 6 | **Livré** le 30/07/2026 |
 | **C3** | Recettes premium | Schéma étendu (cuisine du monde, difficulté, coût, portions, régimes, nutriments, substitutions, conservation, réchauffage, variantes d'appareils), fiche détaillée, recherche multicritère, favoris | 1, 2, 3, 19 | **Livré** le 30/07/2026 |
-| **C4** | Planification | Calendrier jour / semaine / mois, glisser-déposer, copier un jour ou une semaine, modèles, semaines préconstruites, génération multi-semaines, export `.ics` | 4, 5 | À faire |
+| **C4** | Planification | Calendrier jour / semaine / mois, glisser-déposer, copier un jour ou une semaine, modèles, semaines préconstruites, génération multi-semaines, export `.ics` | 4, 5 | **Livré** le 30/07/2026 |
 | **C5** | Mode Cuisine | Plein écran, étapes une à une, minuteurs, écran maintenu allumé, batch cooking et ordre des cuissons | 17, 18 | À faire |
 | **C6** | Ports d'IA et passage à l'échelle | `src/lib/ia/` : interfaces et bouchons documentés, sans aucun appel réel ; schéma Supabase du catalogue et du partage familial | 7, 13, 14, 15, 21 | À faire |
 
@@ -285,6 +285,91 @@ l'illustration tirée au hasard (ci-dessus), le dégradé entre deux lavis qui
 donnait un vert-brun boueux en thème sombre — remplacé par un lavis uni —, et un
 « Papillote de dinde aux poireaux » illustré par un poisson parce que la table
 des pictogrammes cherchait dans le titre et les ingrédients d'un seul bloc.
+
+---
+
+## C4 — La planification (livré le 30/07/2026)
+
+### Ce qui est en place
+
+- `EtatUtilisateur.plans` : **plusieurs semaines**, une par lundi (`debut` fait
+  office de clé). Remplace le champ `menus` qui n'en tenait qu'une ; la migration
+  est dans `fusionner`, via l'interface `ChampsHistoriques`.
+- `EtatUtilisateur.modeles` : semaines mises de côté, **sans dates**.
+- `lib/menu.ts` : génération multi-semaines à mémoire partagée, `poserPlan`,
+  `copieDeSemaine`, `copierJour`, `deplacerRepas`, modèles, semaines
+  préconstruites, `lundisDuMois`.
+- `lib/ics.ts` : export `.ics` d'une semaine.
+- `/app/menus` refondu : trois échelles (jour, semaine, mois), navigation avant
+  et arrière, glisser-déposer à la souris, déplacement au doigt, copie de
+  journée et de semaine, modèles, export agenda.
+
+### Les décisions à ne pas défaire
+
+**La mémoire des recettes est partagée entre les semaines générées ensemble.**
+Générées indépendamment, quatre semaines se ressembleraient toutes — chacune
+repartant du même catalogue avec le même barème. Vérifié à l'écran : 1 à 3 repas
+identiques au même créneau entre deux semaines consécutives, sur 28.
+
+**`debut` est la clé d'un plan.** Deux plans pour le même lundi seraient deux
+vérités, et l'écran afficherait celui que le hasard de l'ordre place en premier.
+D'où `poserPlan`, qui remplace au lieu d'empiler.
+
+**Un modèle ne porte pas de dates**, seulement sept jours de repas dans l'ordre :
+c'est ce qui lui permet de se poser sur n'importe quelle semaine. Vérifié dans le
+document.
+
+**Les semaines préconstruites sont des jeux de critères, pas des semaines
+figées.** Quatre semaines écrites en dur feraient 112 références de recettes à
+maintenir à la main, périmées au premier renommage — et qui ignoreraient
+l'objectif calorique de la personne, alors que c'est justement ce que le
+générateur sait faire.
+
+**Déplacer un repas sur un créneau occupé les échange.** Un glisser-déposer qui
+détruit une donnée est un geste qu'on n'ose plus refaire.
+
+**Le glisser-déposer HTML n'a pas d'équivalent tactile** — il n'existe pas de
+`dragstart` au doigt. C'est donc un confort de souris, et le même déplacement
+s'obtient partout par la fiche du repas (« Déplacer ce repas »). **Ne pas retirer
+ce second chemin** en croyant à un doublon : sur un téléphone, c'est le seul.
+
+**Copier une journée ne la vide pas.** « J'ai bien mangé hier, je remets la même
+chose » est une copie ; le déplacement, c'est l'autre geste.
+
+**L'export `.ics` est la version livrable de la section 5 du brief** (voir plus
+haut le point 4 des impossibles). Détails qui comptent :
+
+- **Heures locales flottantes**, sans `TZID` ni `Z` : un déjeuner doit rester à
+  midi, y compris pour quelqu'un qui change de fuseau en cours de semaine.
+- **Aucune alarme** : vingt-huit rappels par semaine transformeraient un plan de
+  repas en harcèlement. C'est à l'agenda d'en décider.
+- **`UID` stable** par date, moment et recette : réimporter la même semaine met à
+  jour les événements au lieu de créer des doublons.
+- Pliage des lignes à 75 **octets** et non caractères, et échappement des
+  virgules : « Poulet au citron, haricots verts » non échappé découpe le champ en
+  deux et l'agenda n'affiche que la moitié du plat.
+
+### Vérifié à l'écran avant livraison
+
+Au pilote Playwright, sur le build de production en mode démo, 390 px et
+1280 px, clair et sombre, aucune erreur console : génération de quatre semaines
+d'un coup (bons lundis, semaines différentes entre elles), les trois échelles,
+navigation d'un mois à l'autre, copie de journée et de semaine avec
+avertissement « déjà composée », déplacement au doigt **et** glisser-déposer à la
+souris (échange contrôlé dans le document sur deux repas distincts), modèle
+enregistré sans dates, semaine préconstruite végétarienne, et le fichier `.ics`
+inspecté ligne à ligne : 28 `VEVENT`, CRLF partout, aucune ligne au-delà de
+75 octets, `DTSTART` flottant, virgules échappées, pas de `VALARM`. Les parcours
+C2 et C3 ont été rejoués en entier.
+
+**Un défaut corrigé à ce moment-là** : cinq boutons d'action empilés en 390 px
+repoussaient la semaine — le contenu de l'écran — sous le pli. Deux gestes
+fréquents restent en pleine largeur, les trois autres passent en une ligne
+compacte.
+
+**Piège du banc d'essai** : un test peut passer sans rien prouver. La première
+vérification de l'échange portait sur deux dîners identiques (le mardi venait
+d'être recopié depuis le lundi) : l'assertion était vraie quoi qu'il arrive.
 
 **Piège du banc d'essai** : injecter des données dans le `localStorage` d'une
 page ouverte ne sert à rien — `AppContext` vide son debounce sur `pagehide` et

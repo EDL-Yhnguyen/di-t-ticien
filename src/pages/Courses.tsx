@@ -34,6 +34,7 @@ import {
   verser,
 } from '../lib/courses'
 import type { PropositionCourse } from '../lib/courses'
+import { planDeLaDate } from '../lib/menu'
 import { parCodeBarres } from '../lib/openfoodfacts'
 import { Lien } from '../lib/router'
 import type { ArticleCourse, Emplacement, ListeCourses, Rayon } from '../lib/types'
@@ -299,7 +300,10 @@ export function Courses() {
                   dans,
                   retenues,
                   versement === 'placard' ? 'placard' : 'recette',
-                  versement === 'semaine' ? (brouillon.menus ?? undefined) : undefined,
+                  // La semaine en cours, celle qui contient aujourd'hui : c'est
+                  // celle dont on fait les courses. Les semaines suivantes se
+                  // versent depuis l'écran des menus, où on les voit.
+                  versement === 'semaine' ? planDeLaDate(brouillon.plans) : undefined,
                 )
               })
               setVersement(null)
@@ -588,7 +592,7 @@ function FeuilleVersement({
 }) {
   const { etat } = useSession()
   const liste = listesEnCours(etat.courses)[0] ?? null
-  const plan = etat.menus
+  const plan = planDeLaDate(etat.plans) ?? null
 
   const propositions = useMemo(
     () =>

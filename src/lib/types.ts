@@ -285,10 +285,26 @@ export interface JourMenu {
 }
 
 export interface PlanSemaine {
-  /** Le lundi de la semaine couverte, en ISO. */
+  /** Le lundi de la semaine couverte, en ISO. C'est la clé : une semaine, un plan. */
   debut: string
   jours: JourMenu[]
   genereLe: string
+}
+
+/**
+ * Une semaine mise de côté pour être reposée ailleurs.
+ *
+ * Un modèle ne porte **pas de dates**, seulement sept jours de repas dans
+ * l'ordre du lundi au dimanche : c'est ce qui lui permet de s'appliquer à
+ * n'importe quelle semaine. Y garder les dates d'origine obligerait à les
+ * recalculer à chaque pose, et la première erreur de décalage passerait
+ * inaperçue.
+ */
+export interface ModeleSemaine {
+  id: string
+  nom: string
+  creeLe: string
+  jours: Record<Moment, string | null>[]
 }
 
 /* ───────────────────── Rayons, courses et garde-manger ───────────────────── */

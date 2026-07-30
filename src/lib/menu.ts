@@ -1,9 +1,9 @@
 import { cibleDuRepas } from './journal'
 import { listeDeCourses, recetteParId, recettesDuMoment } from './recettes'
 import type { Recette, Saison, Tag } from './recettes'
-import type { JourMenu, Moment, PlanSemaine } from './types'
+import type { JourMenu, ModeleSemaine, Moment, PlanSemaine } from './types'
 import { MOMENTS } from './types'
-import { jourISO, limiter } from './utils'
+import { identifiant, jourISO, limiter } from './utils'
 
 /**
  * Le planificateur de menus : composer une semaine depuis le catalogue.
@@ -60,16 +60,51 @@ const ALEA = 0.22
 const REPORT_MAX = 200
 
 export function genererSemaine(options: OptionsMenu): PlanSemaine {
+  return composer(options, new Map(), 0)
+}
+
+/**
+ * Plusieurs semaines d'affilée, sans se répéter d'une à l'autre.
+ *
+ * La mémoire des recettes déjà employées est **partagée** entre les semaines :
+ * générées indépendamment, quatre semaines se ressembleraient toutes, chacune
+ * repartant du même catalogue avec le même barème. C'est ce partage qui fait la
+ * différence entre « quatre semaines » et « la même semaine quatre fois ».
+ */
+export function genererSemaines(options: OptionsMenu, nombre: number): PlanSemaine[] {
+  const derniereUtilisation = new Map<string, number>()
+  const semaines: PlanSemaine[] = []
+
+  for (let s = 0; s < nombre; s++) {
+    semaines.push(
+      composer(
+        { ...options, debut: decalerJours(options.debut, s * 7) },
+        derniereUtilisation,
+        s * 7,
+      ),
+    )
+  }
+
+  return semaines
+}
+
+/**
+ * Le cœur de la génération. `decalage` situe la semaine dans la série, pour que
+ * la pénalité de répétition franchisse les frontières de semaine — sans lui, le
+ * dimanche d'une semaine et le lundi de la suivante peuvent servir le même plat.
+ */
+function composer(
+  options: OptionsMenu,
+  derniereUtilisation: Map<string, number>,
+  decalage: number,
+): PlanSemaine {
   const saison = options.saison ?? saisonActuelle()
   const tags = options.tags ?? []
 
-  /** Dernier index de jour où chaque recette a été employée. */
-  const derniereUtilisation = new Map<string, number>()
-
   const jours: JourMenu[] = []
 
-  for (let index = 0; index < 7; index++) {
-    const date = decalerJours(options.debut, index)
+  for (let index = decalage; index < decalage + 7; index++) {
+    const date = decalerJours(options.debut, index - decalage)
     const repas: Record<Moment, string | null> = {
       'petit-dejeuner': null,
       dejeuner: null,
@@ -156,6 +191,144 @@ function noter(
   return score + Math.random() * ALEA
 }
 
+/* ─────────────────── Retrouver, poser, copier une semaine ─────────────────── */
+
+export function planPour(plans: PlanSemaine[], debut: string): PlanSemaine | undefined {
+  return plans.find((p) => p.debut === debut)
+}
+
+/** Le plan qui couvre cette date — celui de son lundi. */
+export function planDeLaDate(plans: PlanSemaine[], date = jourISO()): PlanSemaine | undefined {
+  return planPour(plans, lundiDeLaSemaine(date))
+}
+
+/**
+ * Pose une semaine dans le tableau, **en place** : remplace celle du même lundi
+ * s'il y en a une, l'ajoute sinon. À appeler dans un `modifier`.
+ *
+ * `debut` est la clé : deux plans pour le même lundi seraient deux vérités, et
+ * l'écran afficherait celle que le hasard de l'ordre place en premier.
+ */
+export function poserPlan(plans: PlanSemaine[], plan: PlanSemaine): void {
+  const index = plans.findIndex((p) => p.debut === plan.debut)
+  if (index === -1) plans.push(plan)
+  else plans[index] = plan
+}
+
+/** Une copie de la semaine, posée sur un autre lundi. */
+export function copieDeSemaine(source: PlanSemaine, debutCible: string): PlanSemaine {
+  return {
+    debut: debutCible,
+    genereLe: new Date().toISOString(),
+    jours: source.jours.map((jour, index) => ({
+      date: decalerJours(debutCible, index),
+      repas: { ...jour.repas },
+    })),
+  }
+}
+
+/**
+ * Recopie les repas d'un jour sur un autre, **en place**.
+ *
+ * Copier plutôt que déplacer : « j'ai bien mangé hier, je remets la même chose »
+ * ne doit pas vider la journée d'origine. Le déplacement, lui, est le geste du
+ * glisser-déposer, et c'est `deplacerRepas`.
+ */
+export function copierJour(plan: PlanSemaine, source: string, cible: string): void {
+  const depuis = plan.jours.find((j) => j.date === source)
+  const vers = plan.jours.find((j) => j.date === cible)
+  if (!depuis || !vers) return
+  vers.repas = { ...depuis.repas }
+}
+
+/**
+ * Déplace un repas d'un créneau vers un autre, **en place**. Si la cible est
+ * occupée, les deux repas s'**échangent**.
+ *
+ * L'échange plutôt que l'écrasement : déposer le dîner de mardi sur celui de
+ * jeudi ne doit pas faire disparaître ce dernier sans le dire. Un geste de
+ * glisser-déposer qui détruit une donnée est un geste qu'on n'ose plus refaire.
+ */
+export function deplacerRepas(
+  plan: PlanSemaine,
+  de: { date: string; moment: Moment },
+  vers: { date: string; moment: Moment },
+): void {
+  const jourDe = plan.jours.find((j) => j.date === de.date)
+  const jourVers = plan.jours.find((j) => j.date === vers.date)
+  if (!jourDe || !jourVers) return
+
+  const deplace = jourDe.repas[de.moment]
+  jourDe.repas[de.moment] = jourVers.repas[vers.moment]
+  jourVers.repas[vers.moment] = deplace
+}
+
+/* ────────────────────────────── Modèles ────────────────────────────── */
+
+export function modeleDepuisPlan(plan: PlanSemaine, nom: string): ModeleSemaine {
+  return {
+    id: identifiant('m'),
+    nom: nom.trim() || 'Ma semaine type',
+    creeLe: new Date().toISOString(),
+    jours: plan.jours.map((j) => ({ ...j.repas })),
+  }
+}
+
+export function planDepuisModele(modele: ModeleSemaine, debut: string): PlanSemaine {
+  return {
+    debut,
+    genereLe: new Date().toISOString(),
+    jours: modele.jours.map((repas, index) => ({
+      date: decalerJours(debut, index),
+      repas: { ...repas },
+    })),
+  }
+}
+
+/**
+ * Les semaines préconstruites du brief.
+ *
+ * Ce sont des **jeux de critères**, pas 28 identifiants de recettes écrits en
+ * dur. Quatre semaines figées feraient 112 références à maintenir à la main, qui
+ * se périmeraient au premier renommage de recette — et qui ne tiendraient aucun
+ * compte de l'objectif calorique de la personne, alors que c'est précisément ce
+ * que le générateur sait faire. La semaine est donc composée au moment où on la
+ * choisit.
+ */
+export interface SemainePreconstruite {
+  id: string
+  nom: string
+  description: string
+  tags: Tag[]
+}
+
+export const SEMAINES_PRECONSTRUITES: SemainePreconstruite[] = [
+  {
+    id: 'equilibree',
+    nom: 'Équilibrée',
+    description: 'Le catalogue entier, réparti au plus près de votre objectif.',
+    tags: [],
+  },
+  {
+    id: 'vegetarienne',
+    nom: 'Végétarienne',
+    description: 'Sans viande ni poisson, sept jours durant.',
+    tags: ['vegetarien'],
+  },
+  {
+    id: 'express',
+    nom: 'Express',
+    description: 'Rien qui demande plus d’un quart d’heure.',
+    tags: ['rapide'],
+  },
+  {
+    id: 'batch',
+    nom: 'Cuisine du dimanche',
+    description: 'Des plats qui se préparent à l’avance et se gardent.',
+    tags: ['batch'],
+  },
+]
+
 /* ──────────────────────────── Remplacer un repas ──────────────────────────── */
 
 /**
@@ -234,4 +407,36 @@ export function decalerJours(date: string, n: number): string {
 /** Vrai quand le plan ne couvre plus la semaine en cours. */
 export function planPerime(plan: PlanSemaine | null, date = jourISO()): boolean {
   return plan === null || plan.debut !== lundiDeLaSemaine(date)
+}
+
+/**
+ * Les lundis d'un mois — la vue mensuelle est une pile de semaines.
+ *
+ * Un mois ne commence pas un lundi : la grille part donc du lundi de la semaine
+ * qui contient le 1er, et s'arrête au dernier lundi utile. Les jours qui
+ * débordent sur les mois voisins restent affichés — les cacher couperait une
+ * semaine en deux, alors que c'est justement l'unité qu'on planifie.
+ */
+export function lundisDuMois(ancre: string): string[] {
+  const premier = `${ancre.slice(0, 7)}-01`
+  const dernierJour = new Date(
+    Number(ancre.slice(0, 4)),
+    Number(ancre.slice(5, 7)),
+    0,
+  ).getDate()
+  const dernier = `${ancre.slice(0, 7)}-${String(dernierJour).padStart(2, '0')}`
+
+  const lundis: string[] = []
+  let courant = lundiDeLaSemaine(premier)
+  while (courant <= lundiDeLaSemaine(dernier)) {
+    lundis.push(courant)
+    courant = decalerJours(courant, 7)
+  }
+  return lundis
+}
+
+/** Le mois voisin, en gardant le premier du mois comme ancre. */
+export function decalerMois(ancre: string, n: number): string {
+  const d = new Date(Number(ancre.slice(0, 4)), Number(ancre.slice(5, 7)) - 1 + n, 1)
+  return jourISO(d)
 }
