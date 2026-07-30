@@ -2,6 +2,7 @@ import type { Utilisateur } from './auth'
 import { estCompteElodie } from './auth'
 import { supabase } from './supabase'
 import { jourISO } from './utils'
+import type { CarteFidelite } from './fidelite'
 import type {
   AgregatPrix,
   Aliment,
@@ -85,6 +86,19 @@ export interface EtatUtilisateur {
    */
   prix: AgregatPrix[]
   /**
+   * Les cartes de fidélité, scannées une fois pour être relues à la caisse.
+   *
+   * Elles vivent dans le document et non en local, contrairement aux relevés de
+   * prix : il y en a une poignée, et c'est justement au magasin — donc souvent
+   * depuis le téléphone et non l'ordinateur — qu'on en a besoin. Une carte qui
+   * ne suivrait pas d'un appareil à l'autre ne servirait à rien.
+   *
+   * Un numéro de carte est une donnée personnelle rattachée à une enseigne : il
+   * entre dans l'export et part avec la suppression du compte, comme le reste
+   * du document.
+   */
+  cartes: CarteFidelite[]
+  /**
    * Identifiants des recettes mises de côté.
    *
    * Un tableau d'identifiants et non de recettes : le catalogue évolue, et
@@ -155,6 +169,7 @@ export function etatInitial(u: Utilisateur): EtatUtilisateur {
     stocks: [],
     courses: [],
     prix: [],
+    cartes: [],
     favoris: [],
     conversation: [],
     consentementCoach: null,
@@ -264,6 +279,7 @@ function fusionner(
     stocks: partiel.stocks ?? [],
     courses: partiel.courses ?? [],
     prix: partiel.prix ?? [],
+    cartes: partiel.cartes ?? [],
     favoris: partiel.favoris ?? [],
     conversation: partiel.conversation ?? [],
     consentementCoach: partiel.consentementCoach ?? null,

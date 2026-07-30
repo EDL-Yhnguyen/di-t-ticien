@@ -39,6 +39,7 @@ const Cuisiner = lazy(() => import('./pages/Cuisiner').then((m) => ({ default: m
 const Courses = lazy(() => import('./pages/Courses').then((m) => ({ default: m.Courses })))
 const Ticket = lazy(() => import('./pages/Ticket').then((m) => ({ default: m.Ticket })))
 const Prix = lazy(() => import('./pages/Prix').then((m) => ({ default: m.Prix })))
+const Cartes = lazy(() => import('./pages/Cartes').then((m) => ({ default: m.Cartes })))
 const ModeCuisine = lazy(() =>
   import('./pages/ModeCuisine').then((m) => ({ default: m.ModeCuisine })),
 )
@@ -67,6 +68,9 @@ const ECRANS_A_PRECHARGER = [
   () => import('./pages/Courses'),
   () => import('./pages/Ticket'),
   () => import('./pages/Prix'),
+  // Préchargée comme les autres, mais elle en a plus besoin que la plupart :
+  // c'est en magasin qu'on l'ouvre, et le réseau y est souvent absent.
+  () => import('./pages/Cartes'),
   () => import('./pages/ModeCuisine'),
   () => import('./pages/Profil'),
   () => import('./pages/Menus'),
@@ -247,6 +251,8 @@ function ecranPour(chemin: string) {
       return <Ticket />
     case '/app/prix':
       return <Prix />
+    case '/app/cartes':
+      return <Cartes />
     case '/app/coach':
       return <Coach />
     case '/app/stats':
