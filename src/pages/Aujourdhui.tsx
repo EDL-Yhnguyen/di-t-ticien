@@ -35,7 +35,11 @@ import { VERRES_PAR_JOUR } from '../lib/plan'
 import { Lien } from '../lib/router'
 import { bonusSportDuJour, seancesDuJour } from '../lib/sport'
 import { eauDuJour, poidsLePlusRecent } from '../lib/store'
-import type { EntreeJournal } from '../lib/types'
+// Depuis `peremption` et non `stocks` : ce dernier parcourt le catalogue de
+// recettes, et cet écran est chargé d'emblée. L'import fautif faisait passer le
+// fichier initial de 280 à 353 Ko.
+import { articlesUrgents } from '../lib/peremption'
+import type { ArticleStock, EntreeJournal } from '../lib/types'
 import { LIBELLE_MOMENT } from '../lib/types'
 import { classes, dateLongue, entier, jourISO, salutation } from '../lib/utils'
 
@@ -198,6 +202,9 @@ export function Aujourdhui() {
           </div>
         )}
       </Carte>
+
+      {/* ── Ce qui va se perdre ── */}
+      <AlerteGaspillage stocks={etat.stocks} />
 
       {/* ── Macros ── */}
       {resume.kcal > 0 && (
@@ -408,6 +415,86 @@ export function Aujourdhui() {
 }
 
 /* ─────────────────────────────── Sous-vues ─────────────────────────────── */
+
+/**
+ * Ce qui va se perdre si personne ne s'en occupe.
+ *
+ * L'alerte est ici et pas seulement dans le garde-manger : une date limite
+ * n'aide que si on la voit **le jour où il faut décider**, et personne n'ouvre
+ * l'écran du frigo pour vérifier ce qui périme. Sur l'écran qu'on ouvre tous les
+ * jours, la question se pose d'elle-même.
+ *
+ * Le vocabulaire suit la distinction DLC/DDM du garde-manger : « à jeter » pour
+ * ce qui est sanitaire, « à finir » pour ce qui ne perd que du goût. Les
+ * confondre ferait jeter des aliments parfaitement bons, c'est-à-dire
+ * l'inverse du but.
+ */
+function AlerteGaspillage({ stocks }: { stocks: ArticleStock[] }) {
+  const urgents = useMemo(() => articlesUrgents(stocks), [stocks])
+  if (urgents.length === 0) return null
+
+  const perimes = urgents.filter((u) => u.echeance.urgence === 'perime')
+  const aFinir = urgents.filter((u) => u.echeance.urgence !== 'perime')
+
+  // Rien d'utile à proposer quand tout est déjà perdu : on le signale, mais on
+  // n'envoie pas cuisiner ce qu'il faut jeter.
+  const cible = aFinir.length > 0 ? '/app/cuisiner' : '/app/garde-manger'
+
+  return (
+    <Carte
+      ton={perimes.length > 0 ? 'alerte' : 'accent'}
+      className="animate-rise p-5"
+      style={{ animationDelay: '150ms' }}
+    >
+      <TitreSection eyebrow="Anti-gaspillage">
+        {aFinir.length > 0 ? (
+          <>
+            <span className="tnum">{aFinir.length}</span> produit
+            {aFinir.length > 1 ? 's' : ''} à finir
+          </>
+        ) : (
+          <>
+            <span className="tnum">{perimes.length}</span> produit
+            {perimes.length > 1 ? 's' : ''} à jeter
+          </>
+        )}
+      </TitreSection>
+
+      <ul className="space-y-2">
+        {urgents.slice(0, 3).map(({ article, echeance: e }) => (
+          <li key={article.id} className="flex items-center gap-3">
+            <span className="min-w-0 flex-1 truncate font-medium text-ink">{article.nom}</span>
+            <Etiquette ton={e.urgence === 'perime' ? 'alerte' : e.sanitaire ? 'alerte' : 'accent'}>
+              {e.urgence === 'perime'
+                ? e.sanitaire
+                  ? 'à jeter'
+                  : 'moins bon'
+                : e.urgence === 'aujourdhui'
+                  ? 'aujourd’hui'
+                  : e.urgence === 'demain'
+                    ? 'demain'
+                    : `${e.joursRestants} j`}
+            </Etiquette>
+          </li>
+        ))}
+      </ul>
+
+      {urgents.length > 3 && (
+        <p className="mt-2 text-sm text-ink-soft">
+          et <span className="tnum">{urgents.length - 3}</span> autre
+          {urgents.length - 3 > 1 ? 's' : ''}.
+        </p>
+      )}
+
+      <Lien
+        vers={cible}
+        className="mt-4 block rounded-2xl border border-line-fort bg-surface px-4 py-3 text-center font-semibold text-ink transition hover:bg-sunken"
+      >
+        {aFinir.length > 0 ? 'Que puis-je cuisiner avec ?' : 'Voir mon garde-manger'}
+      </Lien>
+    </Carte>
+  )
+}
 
 function JourneeVide() {
   return (

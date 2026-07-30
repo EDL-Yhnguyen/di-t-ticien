@@ -103,8 +103,11 @@ export function Menus() {
   }
 
   function generer(filtres: Tag[], nombre: number) {
+    // Le garde-manger est passé au générateur : à qualité de repas comparable,
+    // la semaine ira chercher ce qui va périmer plutôt que de le laisser se
+    // perdre pendant qu'on cuisine autre chose.
     const semaines = genererSemaines(
-      { debut, objectifKcal: objectif, tags: filtres },
+      { debut, objectifKcal: objectif, tags: filtres, stocks: etat.stocks },
       nombre,
     )
     modifier((brouillon) => {

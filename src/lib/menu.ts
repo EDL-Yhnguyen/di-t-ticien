@@ -1,7 +1,9 @@
+import { memeProduit } from './ingredients'
 import { cibleDuRepas } from './journal'
 import { listeDeCourses, recetteParId, recettesDuMoment } from './recettes'
 import type { Recette, Saison, Tag } from './recettes'
-import type { JourMenu, ModeleSemaine, Moment, PlanSemaine } from './types'
+import { articlesUrgents, joursEntre } from './peremption'
+import type { ArticleStock, JourMenu, ModeleSemaine, Moment, PlanSemaine } from './types'
 import { MOMENTS } from './types'
 import { identifiant, jourISO, limiter } from './utils'
 
@@ -35,6 +37,16 @@ export interface OptionsMenu {
   tags?: Tag[]
   /** Absente = la saison du jour. */
   saison?: Saison
+  /**
+   * Le garde-manger, s'il est connu.
+   *
+   * Fourni, la semaine est composée **en visant d'abord ce qui va périmer**.
+   * Absent, la génération est exactement celle d'avant : ce n'est pas une
+   * option qu'on active, c'est une information qu'on donne ou non.
+   */
+  stocks?: ArticleStock[]
+  /** Le jour où l'on se trouve, pour situer les échéances. Absent = aujourd'hui. */
+  aujourdhui?: string
 }
 
 /**
@@ -58,6 +70,25 @@ const ALEA = 0.22
  * une journée légèrement au-dessus de l'objectif qu'un repas absurde.
  */
 const REPORT_MAX = 200
+
+/**
+ * Ce que vaut, dans le barème, une recette qui sauve un produit qui périme.
+ *
+ * Calibré au-dessus de la pénalité hors saison (0,45) et en dessous d'un écart
+ * calorique franc : sauver un yaourt doit pouvoir faire préférer une recette
+ * d'une autre saison, jamais imposer un dîner à mille calories de la cible.
+ * L'anti-gaspillage est une raison de choisir entre deux plats convenables, pas
+ * une raison d'en servir un mauvais.
+ */
+const BONUS_ANTI_GASPI = 0.6
+
+/**
+ * Au-delà de deux produits sauvés, le bonus n'augmente plus.
+ *
+ * Sans ce plafond, une recette à quinze ingrédients écraserait toutes les
+ * autres pendant toute la semaine par la seule vertu de sa longueur.
+ */
+const SAUVETAGES_COMPTES = 2
 
 export function genererSemaine(options: OptionsMenu): PlanSemaine {
   return composer(options, new Map(), 0)
@@ -101,6 +132,15 @@ function composer(
   const saison = options.saison ?? saisonActuelle()
   const tags = options.tags ?? []
 
+  const sauvetages = sauvetagesPossibles(
+    options.stocks ?? [],
+    options.aujourdhui ?? jourISO(),
+    options.debut,
+  )
+  const parRecette = indexerSauvetages(sauvetages)
+  /** Les articles déjà pris en charge par un repas de la semaine. */
+  const pris = new Set<string>()
+
   const jours: JourMenu[] = []
 
   for (let index = decalage; index < decalage + 7; index++) {
@@ -125,11 +165,18 @@ function composer(
         tags,
         index,
         derniereUtilisation,
+        jourDeLaSemaine: index - decalage,
+        parRecette,
+        pris,
       })
 
       if (!choisie) continue
       repas[moment] = choisie.id
       derniereUtilisation.set(choisie.id, index)
+      // Un produit ne se sauve qu'une fois. Sans cette marque, les trois repas
+      // qui savent employer le yaourt qui périme seraient tous trois
+      // récompensés, et la semaine tournerait autour d'un seul pot.
+      for (const sauvetage of parRecette.get(choisie.id) ?? []) pris.add(sauvetage.id)
       ecartCumule += base - choisie.kcal
     }
 
@@ -139,6 +186,72 @@ function composer(
   return { debut: options.debut, jours, genereLe: new Date().toISOString() }
 }
 
+/* ─────────────────────────── Anti-gaspillage ─────────────────────────── */
+
+/** Un produit du garde-manger qu'une recette de la semaine pourrait sauver. */
+interface Sauvetage {
+  id: string
+  nom: string
+  /**
+   * Le dernier jour de la semaine où le produit est encore bon, en index 0 à 6.
+   *
+   * C'est ce qui empêche de « sauver » un yaourt de mardi en le programmant
+   * dimanche. Une échéance sans horizon ne sert à rien : elle déplacerait le
+   * repas sans sauver le produit.
+   */
+  dernierJour: number
+}
+
+function sauvetagesPossibles(
+  stocks: ArticleStock[],
+  aujourdhui: string,
+  debut: string,
+): Sauvetage[] {
+  // Le lundi de la semaine composée n'est pas forcément aujourd'hui : on
+  // planifie souvent la semaine suivante, et un produit encore bon aujourd'hui
+  // peut être perdu avant qu'elle commence.
+  const jusquAuDebut = joursEntre(aujourdhui, debut)
+
+  return articlesUrgents(stocks, aujourdhui)
+    .filter(
+      (u) =>
+        // Un produit déjà périmé ne se cuisine pas. Bâtir un repas autour de ce
+        // qu'il faut jeter serait exactement l'inverse du but.
+        u.echeance.urgence !== 'perime' && u.echeance.joursRestants !== null,
+    )
+    .map((u) => ({
+      id: u.article.id,
+      nom: u.article.nom,
+      dernierJour: (u.echeance.joursRestants as number) - jusquAuDebut,
+    }))
+    .filter((s) => s.dernierJour >= 0)
+}
+
+/**
+ * Quelles recettes emploient quels produits menacés.
+ *
+ * Calculé **une fois** plutôt que dans le barème : celui-ci repasse sur les
+ * mêmes candidates vingt-huit fois par semaine générée, et rapprocher les noms
+ * à chaque passage a déjà coûté une seconde et demie à l'écran « Que puis-je
+ * cuisiner ? » (voir `ingredients.ts`).
+ */
+function indexerSauvetages(sauvetages: Sauvetage[]): Map<string, Sauvetage[]> {
+  const index = new Map<string, Sauvetage[]>()
+  if (sauvetages.length === 0) return index
+
+  for (const moment of MOMENTS) {
+    for (const recette of recettesDuMoment(moment)) {
+      if (index.has(recette.id)) continue
+      const couverts = sauvetages.filter((s) =>
+        recette.ingredients.some((i) => memeProduit(s.nom, i.nom)),
+      )
+      if (couverts.length > 0) index.set(recette.id, couverts)
+    }
+  }
+
+  return index
+}
+
 function choisirRecette(p: {
   moment: Moment
   cible: number
@@ -146,6 +259,9 @@ function choisirRecette(p: {
   tags: Tag[]
   index: number
   derniereUtilisation: Map<string, number>
+  jourDeLaSemaine: number
+  parRecette: Map<string, Sauvetage[]>
+  pris: Set<string>
 }): Recette | null {
   const candidates = recettesDuMoment(p.moment).filter((r) =>
     p.tags.every((tag) => r.tags.includes(tag)),
@@ -173,6 +289,9 @@ function noter(
     saison: Saison
     index: number
     derniereUtilisation: Map<string, number>
+    jourDeLaSemaine: number
+    parRecette: Map<string, Sauvetage[]>
+    pris: Set<string>
   },
 ): number {
   // L'écart calorique, ramené à une échelle où 1 = un repas deux fois trop gros.
@@ -187,6 +306,13 @@ function noter(
   if (vue !== undefined) {
     score -= p.index - vue <= 2 ? PENALITE_RECENTE : PENALITE_DEJA_VUE
   }
+
+  // Ne comptent que les produits encore bons ce jour-là et pas déjà pris en
+  // charge par un repas précédent de la semaine.
+  const sauves = (p.parRecette.get(recette.id) ?? []).filter(
+    (s) => !p.pris.has(s.id) && s.dernierJour >= p.jourDeLaSemaine,
+  )
+  score += Math.min(sauves.length, SAUVETAGES_COMPTES) * BONUS_ANTI_GASPI
 
   return score + Math.random() * ALEA
 }
