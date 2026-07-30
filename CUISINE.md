@@ -21,6 +21,7 @@ pour ne pas redécouvrir les mêmes murs à chaque reprise.
 | **C5** | Mode Cuisine | Plein écran, étapes une à une, minuteurs, écran maintenu allumé, batch cooking et ordre des cuissons | 17, 18 | **Livré** le 30/07/2026 |
 | **C6** | Ports d'IA et passage à l'échelle | `src/lib/ia/` : interfaces et bouchons documentés, sans aucun appel réel ; schéma Supabase du catalogue et du partage familial | 7, 13, 14, 15, 21 | **Livré** le 30/07/2026 |
 | **C7** | Catalogue à grande échelle | Générateur de recettes composées à partir de briques et de techniques, calculs nutritionnels réels, plafonds d'affichage et mémoïsations | 2 | **Livré** le 30/07/2026 |
+| **C8** | Terroir, classement et photos | 76 plats emblématiques écrits à la main (carbonade flamande…), dix styles régionaux dans le générateur, filtres terroir / type de plat / goût / occasion, 57 photos sous licence libre | 1, 2, 3 | **Livré** le 31/07/2026 |
 
 **C1 avant tout le reste** : les sections 11, 12 et 16 du brief supposent un
 stock, et C2 s'y adosse aussi (ce qu'on a déjà ne se rachète pas).
@@ -40,11 +41,11 @@ Vite + fonctions serverless `/api`. Constat déjà posé dans `AUDIT.md`.
 
 ### 2. « Plusieurs dizaines de milliers de recettes » : réglé en C7, mais pas comme demandé
 
-**Mise à jour du 30/07/2026 (sprint C7)** : le catalogue compte désormais
-**5 522 recettes**, dont 5 469 composées par le générateur de
-`lib/recettes/generateur.ts`. Le paragraphe ci-dessous reste vrai sur un point,
-et c'est le point important : **le contenu des catalogues existants n'est pas
-récupérable.**
+**Mise à jour du 31/07/2026** : le catalogue compte désormais **7 608 recettes**,
+dont 7 479 composées par le générateur de `lib/recettes/generateur.ts` et **76
+plats emblématiques écrits à la main** dans `lib/recettes/terroir/`. Le
+paragraphe ci-dessous reste vrai sur un point, et c'est le point important : **le
+contenu des catalogues existants n'est pas récupérable.**
 
 Yann a demandé d'aller chercher « le batch cooking Weight Watchers et toutes les
 recettes de cuisiniers réputés, Etchebest, Norbert ». Ce n'est pas faisable, et
@@ -71,10 +72,25 @@ des noms communs de cuisine. Le générateur assemble des briques réelles
 formats de plat, et **calcule** les calories au lieu de les saisir. Détails dans
 la section C7.
 
-Restent vraies, elles, les deux limites d'origine : les **photos** n'existent
-toujours pas (l'absence dégrade vers une illustration générée), et un import en
-masse depuis une source tierce passerait par l'abstraction de
-`lib/recettes/source.ts` et la table de `supabase/catalogue.sql`.
+**Ce que la combinatoire ne donnera jamais**, et qui a été ajouté le 31/07/2026 :
+un plat qu'on cherche **par son nom**. Une carbonade flamande n'est pas un bœuf
+mijoté à la bière, c'est une suite de gestes précis — la viande séchée avant
+d'être saisie, le pain d'épices moutardé posé en surface. Personne ne tape
+« mijoté de bœuf, oignons et pommes de terre façon bistrot ». D'où
+`lib/recettes/terroir/`, écrit à la main : les textes sont les nôtres, le plat
+appartient à tout le monde, et rien n'est recopié.
+
+**Les photos existent depuis le 31/07/2026**, mais pas comme le paragraphe
+d'origine le supposait : 57 images **sous licence libre de Wikimedia Commons**,
+récupérées par `outils/photos.mjs`, en deux tailles, **avec attribution affichée
+à l'écran** — c'est la condition d'usage de CC BY et CC BY-SA, pas une politesse.
+Les 7 479 recettes composées n'en ont pas et n'en auront pas : aucune image ne
+correspond à un assemblage, et une photo qui montre autre chose que ce qu'on va
+obtenir est un mensonge poli. Elles gardent l'illustration générée.
+
+Reste vraie, elle, l'autre limite d'origine : un import en masse depuis une
+source tierce passerait par l'abstraction de `lib/recettes/source.ts` et la table
+de `supabase/catalogue.sql`.
 
 ### 3. Le partage familial et le catalogue à l'échelle demandent du SQL que Claude ne peut pas appliquer
 
@@ -240,8 +256,17 @@ aurait écrit « 3 rouleaus ».
   macros d'une part, illustration, quantités pour plusieurs — et la recherche
   multicritère. Rien n'y est stocké.
 - `/app/cuisine` refondu : recherche texte (titre **et** ingrédients), feuille
-  « Affiner » (moment, charge, temps, difficulté, cuisine du monde, régime,
-  étiquettes), favoris, et une fiche détaillée.
+  « Affiner » (moment, charge, temps, difficulté, cuisine du monde, **terroir**,
+  **type de plat**, **profil de goût**, **occasion**, régime, étiquettes),
+  favoris, et une fiche détaillée.
+
+  Les quatre axes en gras datent du 31/07/2026. `typePlat`, `gouts` et
+  `occasions` se **déduisent** quand ils ne sont pas écrits (`typePlatDe`,
+  `goutsDe`, `occasionsDe`) : sans déduction, un filtre ne montrerait que les 129
+  recettes manuelles et cacherait 98 % du catalogue — un filtre qui cache
+  l'essentiel est pire que pas de filtre. La déduction est légitime ici et ne
+  l'était pas pour les régimes : se tromper de forme de plat contrarie, se
+  tromper de régime rend malade.
 - `EtatUtilisateur.favoris` : des identifiants, pas des recettes.
 
 ### Les décisions à ne pas défaire
@@ -579,10 +604,12 @@ texte cherchable passe désormais par une fonction `immutable`.
 
 ## C7 — Le catalogue à grande échelle (livré le 30/07/2026)
 
-Demandé par Yann : « au moins 5 000 recettes ». Le catalogue en compte **5 522**,
-dont 5 469 composées. Ce qui n'a **pas** été fait, et pourquoi, est écrit au
-point 2 de « Ce qui ne peut pas se faire littéralement » : ni Weight Watchers, ni
-les recettes de chefs, ni aucun texte protégé.
+Demandé par Yann : « au moins 5 000 recettes ». Le catalogue en comptait **5 522**
+à la livraison de ce sprint, dont 5 469 composées ; il est passé à **7 608** le
+31/07/2026 avec les styles régionaux et le terroir (voir C8). Ce qui n'a **pas**
+été fait, et pourquoi, est écrit au point 2 de « Ce qui ne peut pas se faire
+littéralement » : ni Weight Watchers, ni les recettes de chefs, ni aucun texte
+protégé.
 
 ### Ce qui est en place
 
@@ -715,3 +742,64 @@ l'état en mémoire réécrase l'injection au rechargement. Il faut relire le
 stockage **après** un délai supérieur à 400 ms, puis réinjecter dans un
 contexte neuf via `addInitScript`. Et laisser passer l'animation d'entrée
 (500 ms) avant toute capture, sinon la moitié de l'écran est transparente.
+
+---
+
+## C8 — Le terroir, les axes de classement et les photos (livré le 31/07/2026)
+
+Parti d'un signalement de Yann : « dans les recettes y'a même pas la carbonade
+flamande ».
+
+C'était exact, et ce n'était pas un oubli de contenu : **le générateur ne peut
+pas produire un plat nommé.** Il assemble des techniques, ce qui donne des plats
+corrects et anonymes. Une carbonade n'est pas un bœuf mijoté à la bière — c'est
+la viande séchée avant d'être saisie, le pain d'épices moutardé posé en surface,
+le sucre qui répond à l'amertume. Aucune combinatoire ne retrouve ça, et surtout
+personne ne la cherche autrement que par son nom.
+
+### Ce qui est en place
+
+- **`lib/recettes/terroir/`** — 76 plats emblématiques écrits à la main, répartis
+  en `nord.ts` (Flandre, Belgique, Bretagne, Normandie, Alsace, Lorraine, Val de
+  Loire), `sud.ts` (Bourgogne, Lyonnais, Savoie, Auvergne, Provence, Sud-Ouest,
+  Pays basque, Languedoc, Corse, outre-mer) et `monde.ts`. Textes écrits par nous,
+  quantités et calories **pour une personne** comme partout ailleurs.
+- **Quatre axes dans `recettes/types.ts`** : `Region`, `Gout`, `TypePlat`,
+  `Occasion`. Les noms de régions sont **culinaires et non administratifs** —
+  « Nord et Flandre » plutôt que « Hauts-de-France » : un découpage régional a
+  changé trois fois en trente ans, la cuisine non.
+- **Dix styles régionaux dans le générateur.** Un `Style` n'est pas une `Cuisine` :
+  `cuisine` filtre les briques — aucune n'a eu à être réécrite pour dix régions —
+  pendant que `id`, `region` et les tournures portent l'identité régionale.
+- **57 photos sous licence libre**, deux tailles, attribution affichée.
+
+### Ce qu'il ne faut pas défaire
+
+- **Les styles historiques gardent l'identifiant de leur cuisine.** L'identifiant
+  d'une recette composée contient celui de son style ; changer `francaise` en
+  autre chose aurait cassé tous les favoris et tous les plans enregistrés.
+- **Les styles régionaux viennent après les historiques dans `STYLES`.** La graine
+  qui choisit les aromates avance au fil des styles : les insérer avant aurait
+  laissé les identifiants valides mais changé le contenu de recettes déjà mises en
+  favori — pire qu'une erreur visible.
+- **Les régions valent 35 % du plafond de chaque format** (`part`). À plein
+  régime, dix styles de plus doublaient le catalogue pour un gain de variété qui,
+  lui, ne double pas : ce sont les mêmes briques sous une autre tournure.
+- **`CreditPhoto` n'est pas décoratif.** CC BY et CC BY-SA autorisent l'usage
+  commercial et la modification à une seule condition : créditer. Le retirer ferait
+  passer le projet de l'usage libre à la contrefaçon.
+
+### Ce qui a été trouvé en vérifiant, et que le typecheck ne voyait pas
+
+- **Une vignette de 960 px servie dans un carré de 48 px** — 180 Ko par ligne de
+  liste, quatre mégaoctets pour un écran de résultats. D'où la seconde taille dans
+  `public/plats/mini/`.
+- **Une photo d'oignons crus attribuée à la carbonade.** Le fichier s'appelait
+  « Ingredients carbonade.png », le filtre sur le titre était satisfait, et l'écran
+  promettait un plat qu'on n'obtiendrait jamais. `outils/photos.mjs` écarte
+  désormais les titres de préparation et garde la plus grande image recevable
+  plutôt que la première.
+- **Des crédits écrasés par une exécution interrompue.** Un 429 de Wikimedia en
+  cours de route laissait des images sur le disque dont l'attribution venait de
+  disparaître du code. Le script relit les crédits existants avant de réécrire, et
+  signale les images orphelines.
