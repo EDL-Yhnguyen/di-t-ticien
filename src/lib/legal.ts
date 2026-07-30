@@ -36,8 +36,16 @@ export interface Editeur {
  * identité.
  *
  * **C'est l'état durable du site** (décidé le 29/07/2026) : la diffusion reste
- * familiale et aucune monétisation n'est prévue. Le drapeau ne tomberait que
- * si l'application devenait payante ou publicitaire — il faudrait alors passer
+ * familiale et aucun abonnement n'est prévu.
+ *
+ * Le site porte depuis le 30/07/2026 un **lien de parrainage iGraal**, et le
+ * régime ne change pas pour autant : le critère de la LCEN est l'exercice d'une
+ * **activité professionnelle**, qu'un lien isolé, signalé comme tel et
+ * rapportant du cashback occasionnel ne constitue pas.
+ *
+ * Le drapeau tomberait si Mamakilo devenait payant, portait de la publicité
+ * vendue à des tiers, ou si les revenus d'affiliation devenaient réguliers et
+ * recherchés pour eux-mêmes. Il faudrait alors passer
  * `EDITEUR_NON_PROFESSIONNEL` à `false` et remplir `nom`, `statut` et
  * `adresse`, qui deviendraient publics.
  */

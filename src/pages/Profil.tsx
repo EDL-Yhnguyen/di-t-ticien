@@ -29,6 +29,7 @@ import { Lien } from '../lib/router'
 import { LIBELLE_ACTIVITE, depenseJournaliere, objectifCalorique } from '../lib/nutrition'
 import { poidsActuel, type EtatUtilisateur } from '../lib/store'
 import { modeDemo } from '../lib/supabase'
+import { Parrainage } from '../components/Parrainage'
 import { PhotoFamille, usePhoto } from '../components/PhotoFamille'
 import { telechargerExport } from '../lib/rgpd'
 import type { Activite, Praticien } from '../lib/types'
@@ -337,6 +338,11 @@ export function Profil() {
             </a>
           )}
         </Carte>
+      </section>
+
+      <section>
+        <TitreSection>Un coup de pouce</TitreSection>
+        <Parrainage />
       </section>
 
       <section>

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Gamepad2, LineChart, NotebookText, ShieldHalf } from 'lucide-react'
 import { Assiette, type PartAssiette } from '../components/Assiette'
+import { Parrainage } from '../components/Parrainage'
 import { Bouton, Marque } from '../components/ui'
 import { Lien } from '../lib/router'
 
@@ -172,6 +173,9 @@ export function Accueil() {
       </main>
 
       <footer className="mx-auto max-w-5xl px-5 py-10 text-center">
+        <div className="mx-auto mb-8 max-w-md text-left">
+          <Parrainage />
+        </div>
         <p className="text-sm text-ink-faint">
           Mamakilo n’est pas un dispositif médical et ne remplace pas une consultation. Pour un
           suivi personnalisé, consultez un diététicien-nutritionniste.
