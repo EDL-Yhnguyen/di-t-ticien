@@ -169,7 +169,7 @@ export function Courses() {
         <Carte className="animate-rise" style={{ animationDelay: '60ms' }}>
           <EtatVide
             emoji="🧺"
-            titre="Aucune liste en cours"
+            titre="Pas de liste en cours"
             action={
               <Bouton onClick={() => creer()}>
                 <Plus size={17} aria-hidden="true" />
@@ -228,7 +228,7 @@ export function Courses() {
             <Carte className="animate-rise" style={{ animationDelay: '120ms' }}>
               <EtatVide
                 emoji="🥕"
-                titre="La liste est vide"
+                titre="Rien à acheter pour le moment"
                 action={
                   <Bouton ton="doux" onClick={() => setVersement('semaine')}>
                     <CalendarDays size={17} aria-hidden="true" />

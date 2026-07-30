@@ -47,7 +47,7 @@ export function Cuisiner() {
         <Carte>
           <EtatVide
             emoji="🧺"
-            titre="Votre garde-manger est vide"
+            titre="Le garde-manger est vide. Ça arrive."
             action={
               <Lien vers="/app/garde-manger" className="inline-block">
                 <Bouton>Remplir mon garde-manger</Bouton>
@@ -88,7 +88,7 @@ export function Cuisiner() {
 
       {propositions.length === 0 && (
         <Carte>
-          <EtatVide emoji="🤷" titre="Rien ne colle avec ces filtres">
+          <EtatVide emoji="🤷" titre="Rien sous la main avec ces critères">
             Élargissez le temps disponible, ou ajoutez ce qui vous reste dans le garde-manger.
           </EtatVide>
         </Carte>
