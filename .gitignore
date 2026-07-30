@@ -1,6 +1,13 @@
 node_modules
 dist
 dist-ssr
+
+# Le moteur OCR est recopié depuis node_modules par outils/ocr.mjs, avant
+# chaque dev et chaque build (Vercel compris). Le versionner figerait 3,5 Mo de
+# binaires dans l'historique d'un dépôt public, pour un fichier qui se
+# régénère. Le modèle de langue de public/tessdata/, lui, est bien versionné :
+# il ne vient d'aucun paquet npm.
+public/ocr
 *.tsbuildinfo
 *.local
 .env

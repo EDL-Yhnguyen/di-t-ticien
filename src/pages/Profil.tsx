@@ -13,6 +13,7 @@ import {
   TrendingUp,
   LogOut,
   NotebookText,
+  ReceiptText,
   Refrigerator,
   ShieldCheck,
   ShoppingBasket,
@@ -166,6 +167,14 @@ export function Profil() {
             {coursesAPrendre > 0 && (
               <span className="text-sm text-ink-faint tnum">{coursesAPrendre}</span>
             )}
+            <ChevronRight size={17} className="shrink-0 text-ink-faint" aria-hidden="true" />
+          </Lien>
+          <Lien
+            vers="/app/ticket"
+            className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken"
+          >
+            <ReceiptText size={19} className="shrink-0 text-primaire" aria-hidden="true" />
+            <span className="flex-1 font-medium text-ink">Lire un ticket de caisse</span>
             <ChevronRight size={17} className="shrink-0 text-ink-faint" aria-hidden="true" />
           </Lien>
           <Lien

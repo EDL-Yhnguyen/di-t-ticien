@@ -79,6 +79,33 @@ self.addEventListener('fetch', (evenement) => {
     return
   }
 
+  // Le moteur OCR et le modèle français, servis depuis `public/` et non depuis
+  // `/assets/` : ils ne portent pas d'empreinte, donc la règle ci-dessus ne les
+  // couvre pas. Le cache d'abord quand même, parce que leur contenu est figé
+  // (un binaire WebAssembly et un modèle de langue ne changent qu'avec le
+  // projet) et surtout parce qu'ils pèsent près de trois mégaoctets : les
+  // retélécharger à chaque ticket serait insupportable, et un ticket se
+  // photographie souvent dans un magasin où le réseau ne passe pas.
+  //
+  // Leur renouvellement passe donc par `VERSION`, comme le reste de la coquille.
+  if (
+    url.origin === self.location.origin &&
+    (url.pathname.startsWith('/ocr/') || url.pathname.startsWith('/tessdata/'))
+  ) {
+    evenement.respondWith(
+      caches.match(requete).then(
+        (cache) =>
+          cache ??
+          fetch(requete).then((reponse) => {
+            const copie = reponse.clone()
+            caches.open(RESSOURCES).then((c) => c.put(requete, copie))
+            return reponse
+          }),
+      ),
+    )
+    return
+  }
+
   // Polices Google : servies depuis le cache, rafraîchies en arrière-plan.
   if (url.hostname.endsWith('gstatic.com') || url.hostname.endsWith('googleapis.com')) {
     evenement.respondWith(

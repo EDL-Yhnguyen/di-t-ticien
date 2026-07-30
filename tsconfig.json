@@ -20,7 +20,16 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
 
-    "types": ["vite/client"]
+    "types": ["vite/client"],
+
+    // `tesseract-wasm` livre bien ses déclarations, mais son champ `exports`
+    // n'expose aucune condition `types` : la résolution « bundler » ne peut donc
+    // pas les atteindre, et le lecteur de tickets partait en `any`. On désigne
+    // le fichier directement plutôt que de réécrire des types à la main, qui
+    // dériveraient à la première mise à jour du paquet.
+    "paths": {
+      "tesseract-wasm": ["./node_modules/tesseract-wasm/dist/index.d.ts"]
+    }
   },
   "include": ["src", "vite.config.ts"]
 }
