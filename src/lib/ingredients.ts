@@ -70,10 +70,28 @@ export function cleIngredient(nom: string): string {
 }
 
 /**
- * Les mots qui désignent vraiment le produit. Les mots d'un seul ou deux
- * caractères tombent avec les mots vides : « à », « d' » n'aident personne.
+ * Les mots qui désignent vraiment le produit, mémoïsés par nom.
+ *
+ * Les mots d'un seul ou deux caractères tombent avec les mots vides : « à »,
+ * « d' » n'aident personne.
+ *
+ * Un catalogue de cinq mille recettes ne contient qu'une soixantaine de noms
+ * d'ingrédients distincts, mais `recettesRealisables` compare chaque ingrédient
+ * de chaque recette à chaque article du stock : cent soixante-cinq mille appels
+ * pour soixante résultats différents. L'écran « Que puis-je cuisiner ? » mettait
+ * une seconde et demie à s'ouvrir.
  */
+const porteursMemoises = new Map<string, string[]>()
+
 export function motsPorteurs(nom: string): string[] {
+  const connu = porteursMemoises.get(nom)
+  if (connu) return connu
+  const calcule = calculerMotsPorteurs(nom)
+  porteursMemoises.set(nom, calcule)
+  return calcule
+}
+
+function calculerMotsPorteurs(nom: string): string[] {
   return nom
     .split(/[\s'’,()/-]+/)
     .map(normaliserMot)

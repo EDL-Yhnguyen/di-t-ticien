@@ -122,7 +122,7 @@ src/
     plan.ts             plan de référence, teintes, parts d'assiette
     nutrition.ts        Mifflin-St Jeor, dépense, objectif, trajectoire, IMC
     badges.ts           BADGES[] déclaratif + badgesADebloquer()
-    recettes/           catalogue de recettes (voir « Le catalogue de recettes »)
+    recettes/           catalogue : 53 écrites à la main + 5 469 composées (voir « Le catalogue »)
     legal.ts            identité de l'éditeur, hébergeurs, destinataires
     rgpd.ts             consentement, export des données, suppression du compte
     utils.ts            helpers (jourISO, classes, …)
@@ -580,8 +580,21 @@ règles à ne pas contourner, détaillées dans `CUISINE.md` :
   Ne pas le tirer au hasard : un chili végétarien illustré par un poisson est
   faux, et une vignette fausse est pire que pas de vignette.
 
-**53 recettes au 29/07/2026** : 15 petits déjeuners, 14 déjeuners, 10
-collations, 14 dîners. Le déséquilibre d'origine (6 déjeuners, 5 dîners) faisait
+**Le catalogue compte 5 522 recettes depuis le 30/07/2026** : les 53 écrites à la
+main (15 petits déjeuners, 14 déjeuners, 10 collations, 14 dîners) **puis** 5 469
+composées par `recettes/generateur.ts` à partir des briques de `recettes/briques.ts`.
+
+- **Tout ce qui parcourt le catalogue passe par `catalogue()`**, jamais par
+  `RECETTES` — cette constante ne contient que les recettes manuelles. `catalogue()`
+  est paresseuse et mémoïsée : l'écran du journal ne paie pas la génération.
+- **Les identifiants composés (`c:...`) sont déterministes.** Favoris, plans de
+  menus et listes de courses les référencent : introduire du hasard dans le
+  générateur casserait les données de tout le monde.
+- **Ni Weight Watchers ni les recettes de chefs** — le texte d'une recette est une
+  œuvre protégée et le dépôt est public. Le générateur ne compose qu'à partir de
+  techniques et de styles régionaux, qui sont des noms communs. Détail et sources
+  libres examinées dans `CUISINE.md`, point 2.
+- **L'affichage est plafonné** à 24 recettes par moment, avec le reste annoncé. Le déséquilibre d'origine (6 déjeuners, 5 dîners) faisait
 revenir les mêmes plats deux ou trois fois dans une semaine générée — le
 planificateur ne peut pas faire mieux que son catalogue, sa pénalité de
 répétition ne compense pas un manque de candidats. Garder au moins une douzaine
@@ -739,6 +752,37 @@ Vérification manuelle attendue :
 ---
 
 ## Historique du projet
+
+### 30 juillet 2026 — Le catalogue passe à 5 522 recettes (module Cuisine, sprint C7)
+
+Yann a demandé « au moins 5 000 recettes », en citant le batch cooking Weight
+Watchers et les recettes de chefs. Le catalogue en compte désormais 5 522 — mais
+**aucune ne vient de là**, et c'est un refus assumé : le texte d'une recette est
+une œuvre protégée, le système de points de Weight Watchers est une marque, et ce
+dépôt est public. Les sources libres examinées et écartées sont listées dans
+`CUISINE.md`, point 2.
+
+Ce qui est livré à la place compose à partir de **techniques**, qui
+n'appartiennent à personne :
+
+- **`recettes/briques.ts`** : protéines, féculents, légumes, matières grasses,
+  aromates, bases du matin — avec valeurs Ciqual, quantités, temps de cuisson par
+  technique, affinités de style et régimes garantis.
+- **`recettes/generateur.ts`** : dix formats de plat et leurs patrons d'étapes.
+  Les calories sont une **somme**, pas une saisie. Les identifiants sont
+  déterministes, condition pour que les favoris et les plans y survivent.
+- **Perf** : génération paresseuse, étapes calculées à la première lecture,
+  affichage plafonné à 24 par moment, trois mémoïsations. Mesuré à l'écran :
+  ouverture de Cuisine 501 ms, frappe 35-88 ms, génération de quatre semaines
+  151 ms, et l'écran du journal reste à 209 ms — il ne paie pas le catalogue.
+
+**Neuf défauts de langue corrigés en lisant les recettes produites** (accords,
+articles, contractions, noms propres, typographie du deux-points) : la liste est
+dans `CUISINE.md`. C'est la part du travail qu'aucun typecheck ne fait.
+
+**Et un piège de banc d'essai** : mes premiers chronos englobaient mes propres
+`waitForTimeout` et annonçaient 3 262 ms là où le vrai temps était 151 ms.
+Mesurer, c'est attendre le résultat, pas un délai.
 
 ### 30 juillet 2026 — Ports d'IA et passage à l'échelle (module Cuisine, sprint C6)
 

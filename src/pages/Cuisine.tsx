@@ -32,7 +32,7 @@ import {
   LIBELLE_TAG,
   PLACARD,
   RAYONS,
-  RECETTES,
+  catalogue,
   listeDeCourses,
   recetteParId,
   type Difficulte,
@@ -69,7 +69,23 @@ import { Lien, useRoutage } from '../lib/router'
 import { BandeauCuisineEnCours } from './ModeCuisine'
 import { poidsLePlusRecent } from '../lib/store'
 import { LIBELLE_MOMENT, MOMENTS } from '../lib/types'
+import type { Moment } from '../lib/types'
 import { classes, entier, jourISO } from '../lib/utils'
+
+/**
+ * Le catalogue complet, résolu une fois par module : il comprend les milliers de
+ * recettes composées, dont la génération est paresseuse (voir `generateur.ts`).
+ */
+const CATALOGUE = catalogue()
+
+/**
+ * Combien de recettes s'affichent par moment avant de demander la suite.
+ *
+ * Une recherche large en rend plusieurs milliers : les poser toutes dans le DOM
+ * bloquerait le fil principal pour une liste que personne ne fera défiler
+ * jusqu'au bout. Vingt-quatre remplissent deux écrans de téléphone.
+ */
+const PAS_AFFICHAGE = 24
 
 const BANDES: Bande[] = ['vert', 'bleu', 'orange']
 
@@ -102,6 +118,14 @@ export function Cuisine() {
   const [bande, setBande] = useState<Bande | null>(null)
   const [criteres, setCriteres] = useState<Criteres>({})
   const [favorisSeuls, setFavorisSeuls] = useState(false)
+  /**
+   * Combien de recettes sont dépliées, par moment.
+   *
+   * Remis à zéro dès qu'un critère change : garder « 120 affichées » après une
+   * nouvelle recherche ferait rendre cent vingt lignes d'un coup, et l'écran
+   * semblerait bloqué au moment précis où l'on vient de taper.
+   */
+  const [limites, setLimites] = useState<Partial<Record<Moment, number>>>({})
 
   // La bande d'une recette dépend de la personne : 500 kcal est un dîner
   // copieux pour l'une et un dîner juste pour l'autre. On la calcule donc
@@ -116,7 +140,7 @@ export function Cuisine() {
 
   const bandes = useMemo(() => {
     const table = new Map<string, Bande>()
-    for (const recette of RECETTES) {
+    for (const recette of CATALOGUE) {
       table.set(recette.id, bandePour(recette.kcal, cibleDuRepas(objectif, recette.moment)))
     }
     return table
@@ -130,7 +154,7 @@ export function Cuisine() {
   const resultats = useMemo(() => {
     const parCriteres = rechercher(
       { ...criteres, texte, parmi: favorisSeuls ? favoris : null },
-      RECETTES,
+      CATALOGUE,
     )
     return bande === null ? parCriteres : parCriteres.filter((r) => bandes.get(r.id) === bande)
   }, [criteres, texte, favorisSeuls, favoris, bande, bandes])
@@ -162,6 +186,7 @@ export function Cuisine() {
     setBande(null)
     setTexte('')
     setFavorisSeuls(false)
+    setLimites({})
   }
 
   return (
@@ -169,7 +194,7 @@ export function Cuisine() {
       <header>
         <h1 className="font-display text-3xl font-semibold text-ink">Cuisine</h1>
         <p className="mt-0.5 text-sm text-ink-soft">
-          {RECETTES.length} recettes, cherchables par ce que vous avez, par le temps que vous avez,
+          {CATALOGUE.length} recettes, cherchables par ce que vous avez, par le temps que vous avez,
           ou par envie.
         </p>
       </header>
@@ -243,7 +268,10 @@ export function Cuisine() {
               <input
                 type="search"
                 value={texte}
-                onChange={(e) => setTexte(e.target.value)}
+                onChange={(e) => {
+                  setTexte(e.target.value)
+                  setLimites({})
+                }}
                 placeholder="Un plat, ou un ingrédient à écouler…"
                 aria-label="Chercher une recette"
                 className="w-full rounded-2xl border border-line bg-surface py-3 pr-4 pl-11 text-ink placeholder:text-ink-faint focus:border-corail focus:outline-none"
@@ -265,7 +293,10 @@ export function Cuisine() {
               <Bouton
                 ton={favorisSeuls ? 'primaire' : 'doux'}
                 aria-pressed={favorisSeuls}
-                onClick={() => setFavorisSeuls((v) => !v)}
+                onClick={() => {
+                  setFavorisSeuls((v) => !v)
+                  setLimites({})
+                }}
                 disabled={favoris.length === 0 && !favorisSeuls}
               >
                 <Heart
@@ -298,13 +329,15 @@ export function Cuisine() {
           {MOMENTS.map((moment) => {
             const recettes = resultats.filter((r) => r.moment === moment)
             if (recettes.length === 0) return null
+            const limite = limites[moment] ?? PAS_AFFICHAGE
+            const affichees = recettes.slice(0, limite)
             return (
               <section key={moment}>
                 <TitreSection eyebrow={`${recettes.length} recette${recettes.length > 1 ? 's' : ''}`}>
                   {LIBELLE_MOMENT[moment]}
                 </TitreSection>
                 <ul className="space-y-2">
-                  {recettes.map((recette) => (
+                  {affichees.map((recette) => (
                     <li key={recette.id}>
                       <LigneRecette
                         recette={recette}
@@ -318,6 +351,24 @@ export function Cuisine() {
                     </li>
                   ))}
                 </ul>
+
+                {/* Le nombre restant est annoncé plutôt que tu : une liste qui
+                    s'arrête sans le dire laisse croire qu'on a tout vu. */}
+                {recettes.length > limite && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setLimites((actuelles) => ({
+                        ...actuelles,
+                        [moment]: limite + PAS_AFFICHAGE,
+                      }))
+                    }
+                    className="mt-2 w-full rounded-card border border-line bg-surface py-2.5 text-sm font-semibold text-corail transition hover:bg-sunken"
+                  >
+                    Voir {Math.min(PAS_AFFICHAGE, recettes.length - limite)} recettes de plus
+                    <span className="text-ink-faint tnum"> ({recettes.length - limite} restantes)</span>
+                  </button>
+                )}
               </section>
             )
           })}
@@ -347,8 +398,14 @@ export function Cuisine() {
         <FeuilleAffiner
           criteres={criteres}
           bande={bande}
-          onCriteres={setCriteres}
-          onBande={setBande}
+          onCriteres={(c) => {
+            setCriteres(c)
+            setLimites({})
+          }}
+          onBande={(b) => {
+            setBande(b)
+            setLimites({})
+          }}
           onEffacer={toutEffacer}
           resultats={resultats.length}
         />

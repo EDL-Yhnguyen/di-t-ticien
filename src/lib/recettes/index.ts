@@ -3,6 +3,7 @@ import type { Moment } from '../types'
 import { COLLATIONS } from './collation'
 import { DEJEUNERS } from './dejeuner'
 import { DINERS } from './diner'
+import { recettesComposees } from './generateur'
 import { PETITS_DEJEUNERS } from './petit-dejeuner'
 import { RAYONS, type Ingredient, type Rayon, type Recette } from './types'
 
@@ -23,6 +24,34 @@ export const RECETTES: Recette[] = [
   ...DINERS,
 ]
 
+/**
+ * Le catalogue entier : les recettes écrites à la main **puis** les composées.
+ *
+ * Deux constantes plutôt qu'une, et l'ordre n'est pas indifférent : `RECETTES`
+ * reste ce qu'un humain a écrit, et vient toujours en tête — une recette pensée
+ * pour elle-même vaut mieux qu'un assemblage, même correct. `catalogue()` y
+ * ajoute les milliers de recettes composées (voir `generateur.ts`).
+ *
+ * Une fonction et non une constante : la génération est paresseuse et mémoïsée,
+ * pour qu'un écran qui n'affiche que le journal alimentaire n'en paie pas le
+ * coût. Tout ce qui parcourt le catalogue passe par ici.
+ */
+export function catalogue(): Recette[] {
+  return catalogueMemoise ??= [...RECETTES, ...recettesComposees()]
+}
+
+let catalogueMemoise: Recette[] | null = null
+
+/**
+ * L'index des identifiants, construit au premier `recetteParId`.
+ *
+ * Un `find` linéaire sur cinq mille recettes est imperceptible une fois, et
+ * ruineux dans une boucle — or c'est exactement l'usage : `recettesDuPlan`
+ * résout vingt-huit identifiants, `listeDeCourses` autant, le mode cuisine
+ * plusieurs par étape.
+ */
+let parId: Map<string, Recette> | null = null
+
 /** Les indispensables du plan, à avoir en permanence. */
 export const PLACARD: Ingredient[] = [
   { nom: 'Pain spécial de boulangerie', quantite: 'pour la semaine', rayon: 'Boulangerie' },
@@ -35,12 +64,31 @@ export const PLACARD: Ingredient[] = [
 ]
 
 export function recetteParId(id: string): Recette | undefined {
-  return RECETTES.find((r) => r.id === id)
+  if (parId === null) parId = new Map(catalogue().map((r) => [r.id, r]))
+  return parId.get(id)
 }
 
+/**
+ * Les recettes d'un moment, groupées une fois pour toutes.
+ *
+ * Le planificateur appelle cette fonction à chaque créneau : vingt-huit fois par
+ * semaine, cent douze pour une génération de quatre semaines. Filtrer cinq mille
+ * recettes autant de fois coûtait trois secondes — mesuré à l'écran, pas
+ * supposé.
+ */
 export function recettesDuMoment(moment: Moment): Recette[] {
-  return RECETTES.filter((r) => r.moment === moment)
+  if (parMoment === null) {
+    parMoment = new Map()
+    for (const recette of catalogue()) {
+      const liste = parMoment.get(recette.moment)
+      if (liste) liste.push(recette)
+      else parMoment.set(recette.moment, [recette])
+    }
+  }
+  return parMoment.get(moment) ?? []
 }
+
+let parMoment: Map<Moment, Recette[]> | null = null
 
 /* ─────────────────────────────── Courses ─────────────────────────────── */
 

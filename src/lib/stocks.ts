@@ -1,5 +1,5 @@
 import { memeProduit } from './ingredients'
-import { RECETTES } from './recettes'
+import { catalogue } from './recettes'
 import type { Ingredient, Recette } from './recettes'
 import type { ArticleStock, Emplacement, Moment, Rayon } from './types'
 import { jourISO } from './utils'
@@ -227,7 +227,7 @@ export function recettesRealisables(
       .map((u) => u.article.id),
   )
 
-  const candidates = RECETTES.filter(
+  const candidates = catalogue().filter(
     (r) =>
       (options.moment === undefined || r.moment === options.moment) &&
       (options.minutesMax === undefined || r.minutes <= options.minutesMax),
@@ -264,5 +264,5 @@ export function recettesRealisables(
 
 /** Vrai quand l'article couvre au moins un ingrédient d'une recette du catalogue. */
 export function articleCuisinable(article: ArticleStock): boolean {
-  return RECETTES.some((r) => r.ingredients.some((i) => memeProduit(article.nom, i.nom)))
+  return catalogue().some((r) => r.ingredients.some((i) => memeProduit(article.nom, i.nom)))
 }

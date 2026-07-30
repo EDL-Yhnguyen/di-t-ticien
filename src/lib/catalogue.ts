@@ -1,6 +1,6 @@
 import { multiplierQuantite } from './ingredients'
 import { portionDeLaRecette, valeursDeLaRecette } from './journalRecette'
-import { RECETTES } from './recettes'
+import { catalogue } from './recettes'
 import type { Cuisine, Difficulte, Ingredient, Recette, Regime, Tag } from './recettes'
 import type { Moment } from './types'
 
@@ -224,7 +224,22 @@ function empreinte(texte: string): number {
   return somme
 }
 
+const illustrationsMemoisees = new Map<string, Illustration>()
+
+/**
+ * Mémoïsée par identifiant : une liste de soixante-douze lignes recalculait
+ * autant de fois les vingt-cinq expressions de `PICTOGRAMMES` contre le titre et
+ * les ingrédients, à chaque rendu — y compris quand on déplie la liste.
+ */
 export function illustrationDe(recette: Recette): Illustration {
+  const connue = illustrationsMemoisees.get(recette.id)
+  if (connue) return connue
+  const calculee = calculerIllustration(recette)
+  illustrationsMemoisees.set(recette.id, calculee)
+  return calculee
+}
+
+function calculerIllustration(recette: Recette): Illustration {
   // Le titre d'abord, les ingrédients ensuite — et non les deux d'un bloc, sinon
   // c'est l'ordre de la table qui tranche : « Papillote de dinde aux poireaux »
   // recevait un poisson, parce que « papillote » venait avant « dinde ».
@@ -278,12 +293,38 @@ function sansAccent(texte: string): string {
 }
 
 /**
+ * Le texte cherchable d'une recette, calculé une fois par recette.
+ *
+ * Sans ce cache, chaque frappe normalisait le titre et les sept ingrédients de
+ * cinq mille recettes — quarante mille passages de regex par caractère tapé.
+ * Mesuré à une trentaine de millisecondes sur une machine de bureau, donc trois
+ * à cinq fois plus sur un téléphone : la frappe commençait à traîner.
+ *
+ * Une `Map` par identifiant plutôt qu'un champ sur la recette : le catalogue
+ * composé est régénérable, et on ne veut pas que le cache survive à sa recette.
+ */
+const cherchable = new Map<string, string>()
+
+function texteCherchable(recette: Recette): string {
+  let texte = cherchable.get(recette.id)
+  if (texte === undefined) {
+    texte = sansAccent(`${recette.titre} ${recette.ingredients.map((i) => i.nom).join(' ')}`)
+    cherchable.set(recette.id, texte)
+  }
+  return texte
+}
+
+/**
  * Les critères se **cumulent** : cocher « rapide » et « sans gluten » ne montre
  * que ce qui est les deux à la fois. C'est la règle déjà en place pour les
  * étiquettes, étendue au reste — un filtre qui élargit au fur et à mesure qu'on
  * précise sa demande serait incompréhensible.
+ *
+ * L'ordre des tests n'est pas indifférent : les comparaisons d'égalité passent
+ * avant la recherche texte, la plus coûteuse, pour qu'elle ne s'exécute que sur
+ * ce qui a survécu au reste.
  */
-export function rechercher(criteres: Criteres, recettes: Recette[] = RECETTES): Recette[] {
+export function rechercher(criteres: Criteres, recettes: Recette[] = catalogue()): Recette[] {
   const texte = criteres.texte ? sansAccent(criteres.texte.trim()) : ''
 
   return recettes.filter((recette) => {
@@ -295,11 +336,7 @@ export function rechercher(criteres: Criteres, recettes: Recette[] = RECETTES): 
     if (criteres.tags?.some((tag) => !recette.tags.includes(tag))) return false
     if (criteres.regimes?.some((regime) => !respecte(recette, regime))) return false
 
-    if (texte) {
-      const dansLeTitre = sansAccent(recette.titre).includes(texte)
-      const dansLesIngredients = recette.ingredients.some((i) => sansAccent(i.nom).includes(texte))
-      if (!dansLeTitre && !dansLesIngredients) return false
-    }
+    if (texte && !texteCherchable(recette).includes(texte)) return false
 
     return true
   })
@@ -320,7 +357,7 @@ export function nombreDeCriteres(criteres: Criteres): number {
 }
 
 /** Les cuisines réellement représentées dans le catalogue, dans l'ordre du nom. */
-export function cuisinesDuCatalogue(recettes: Recette[] = RECETTES): Cuisine[] {
+export function cuisinesDuCatalogue(recettes: Recette[] = catalogue()): Cuisine[] {
   const vues = new Set<Cuisine>()
   for (const r of recettes) if (r.cuisine) vues.add(r.cuisine)
   return [...vues]

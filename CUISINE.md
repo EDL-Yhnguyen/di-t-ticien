@@ -20,6 +20,7 @@ pour ne pas redécouvrir les mêmes murs à chaque reprise.
 | **C4** | Planification | Calendrier jour / semaine / mois, glisser-déposer, copier un jour ou une semaine, modèles, semaines préconstruites, génération multi-semaines, export `.ics` | 4, 5 | **Livré** le 30/07/2026 |
 | **C5** | Mode Cuisine | Plein écran, étapes une à une, minuteurs, écran maintenu allumé, batch cooking et ordre des cuissons | 17, 18 | **Livré** le 30/07/2026 |
 | **C6** | Ports d'IA et passage à l'échelle | `src/lib/ia/` : interfaces et bouchons documentés, sans aucun appel réel ; schéma Supabase du catalogue et du partage familial | 7, 13, 14, 15, 21 | **Livré** le 30/07/2026 |
+| **C7** | Catalogue à grande échelle | Générateur de recettes composées à partir de briques et de techniques, calculs nutritionnels réels, plafonds d'affichage et mémoïsations | 2 | **Livré** le 30/07/2026 |
 
 **C1 avant tout le reste** : les sections 11, 12 et 16 du brief supposent un
 stock, et C2 s'y adosse aussi (ce qu'on a déjà ne se rachète pas).
@@ -37,22 +38,43 @@ refus : chacun a une version livrable, écrite ici.
 migration coûterait un sprint entier à fonctionnalité constante. Le socle reste
 Vite + fonctions serverless `/api`. Constat déjà posé dans `AUDIT.md`.
 
-### 2. « Plusieurs dizaines de milliers de recettes » : l'architecture, oui ; le contenu, non
+### 2. « Plusieurs dizaines de milliers de recettes » : réglé en C7, mais pas comme demandé
 
-L'architecture pour les tenir se construit (C3 pour le schéma, C6 pour la table
-Supabase indexée en recherche plein texte, avec pagination). **Le contenu, lui,
-n'existe pas** : il n'y a aucune source libre de droits de dizaines de milliers
-de recettes en français, encore moins avec photos, et les générer demanderait
-le budget d'IA que Yann a justement mis de côté.
+**Mise à jour du 30/07/2026 (sprint C7)** : le catalogue compte désormais
+**5 522 recettes**, dont 5 469 composées par le générateur de
+`lib/recettes/generateur.ts`. Le paragraphe ci-dessous reste vrai sur un point,
+et c'est le point important : **le contenu des catalogues existants n'est pas
+récupérable.**
 
-Ce qui est livrable : un catalogue qui grandit à la main (53 recettes au
-29/07/2026), derrière une abstraction de source qui accepte plus tard un import
-en masse sans toucher aux écrans.
+Yann a demandé d'aller chercher « le batch cooking Weight Watchers et toutes les
+recettes de cuisiniers réputés, Etchebest, Norbert ». Ce n'est pas faisable, et
+pas pour une raison technique :
 
-**Les photos** relèvent du même écart : aucune banque d'images n'est disponible.
-Les champs sont prévus, et l'absence de photo doit dégrader vers une
-illustration générée — jamais vers un cadre vide, et jamais vers une photo
-d'emprunt.
+- **Le texte d'une recette est une œuvre protégée.** La liste des ingrédients
+  bruts, prise seule, n'est pas appropriable — il n'y a pas d'originalité dans
+  « 120 g de poulet ». Mais la rédaction des étapes, le tour de main décrit, la
+  sélection et l'agencement d'un livre le sont. Recopier les recettes d'un chef
+  serait de la contrefaçon, et le dépôt est **public**.
+- **Weight Watchers est une marque, et son système de points est propriétaire.**
+  Le `CLAUDE.md` le notait déjà avant ce sprint : l'« indice Équilibre » est une
+  formule maison sur données publiques, précisément pour ne pas dépendre du leur.
+- **Aucune source libre ne couvre ce volume en français.** Wikibooks en offre
+  quelques centaines sous CC BY-SA, avec l'obligation d'attribution et de
+  partage à l'identique ; les jeux de données universitaires sont en anglais et
+  réservés à la recherche ; Marmiton et les autres l'interdisent par leurs CGU.
+
+**Ce qui est fait à la place**, et qui donne le volume demandé : composer à
+partir de **techniques**, qui n'appartiennent à personne. Saisir un filet, monter
+un gratin, mijoter une cocotte, « à la basquaise », « en persillade » : ce sont
+des noms communs de cuisine. Le générateur assemble des briques réelles
+(protéines, féculents, légumes, matières grasses, aromates par style) selon dix
+formats de plat, et **calcule** les calories au lieu de les saisir. Détails dans
+la section C7.
+
+Restent vraies, elles, les deux limites d'origine : les **photos** n'existent
+toujours pas (l'absence dégrade vers une illustration générée), et un import en
+masse depuis une source tierce passerait par l'abstraction de
+`lib/recettes/source.ts` et la table de `supabase/catalogue.sql`.
 
 ### 3. Le partage familial et le catalogue à l'échelle demandent du SQL que Claude ne peut pas appliquer
 
@@ -552,6 +574,140 @@ colonne générée `recherche` contenait une sous-requête pour déplier les
 ingrédients. Postgres refuse (« cannot use subquery in column generation
 expression ») — le copier-coller aurait échoué à la première instruction. Le
 texte cherchable passe désormais par une fonction `immutable`.
+
+---
+
+## C7 — Le catalogue à grande échelle (livré le 30/07/2026)
+
+Demandé par Yann : « au moins 5 000 recettes ». Le catalogue en compte **5 522**,
+dont 5 469 composées. Ce qui n'a **pas** été fait, et pourquoi, est écrit au
+point 2 de « Ce qui ne peut pas se faire littéralement » : ni Weight Watchers, ni
+les recettes de chefs, ni aucun texte protégé.
+
+### Ce qui est en place
+
+- **`lib/recettes/briques.ts`** : les matériaux. Vingt protéines, quinze
+  féculents, vingt-quatre légumes, sept matières grasses, vingt-huit aromates,
+  plus les bases du matin — chacun avec ses valeurs Ciqual pour 100 g, sa
+  quantité par personne, ses temps de cuisson par technique, ses affinités de
+  style et les régimes qu'il garantit.
+- **`lib/recettes/generateur.ts`** : dix formats de plat (poêlée, four,
+  papillote, mijoté, salade, bowl, soupe, gratin, wok, wrap) plus les familles du
+  matin, avec leurs patrons d'étapes. Combinatoire bornée par style.
+- **`catalogue()`** dans `lib/recettes/index.ts` : les 53 recettes écrites à la
+  main **en tête**, puis les composées.
+- Plafonds d'affichage et mémoïsations, décrits plus bas.
+
+### Les décisions à ne pas défaire
+
+**Ce catalogue ne prétend rien d'autre que ce qu'il est.** Aucune recette n'est
+attribuée à un chef, aucune ne recopie un texte existant. Les techniques
+(« saisir », « monter un gratin », « mijoter ») et les styles régionaux
+(« à la basquaise », « en persillade ») sont des noms communs de cuisine, et
+c'est tout ce que le générateur emploie.
+
+**Les 53 recettes écrites à la main restent en tête du catalogue et intactes.**
+Une recette pensée pour elle-même vaut mieux qu'un assemblage, même correct.
+L'ordre le dit, et les identifiants composés portent le préfixe `c:` — jamais
+mélangeables.
+
+**Les identifiants sont déterministes**
+(`c:mijote:poulet:riz:courgette:francaise`) et l'ordre d'énumération est fixe.
+C'est ce qui permet aux favoris, aux plans de menus et aux listes de courses de
+survivre à un rechargement : vérifié à l'écran, un favori posé sur une recette
+composée est retrouvé après reload. **Ne jamais introduire de hasard dans le
+générateur.**
+
+**Les calories sont une somme, pas une saisie.** Chaque brique porte ses valeurs
+Ciqual et sa quantité : c'est le seul endroit du projet où les calories d'une
+recette sont calculées. Les 53 recettes manuelles gardent les leurs, saisies à la
+main.
+
+**Les régimes sont l'intersection de ceux des briques.** La règle de C3 — « aucun
+régime ne se déduit d'une liste d'ingrédients » — visait le **texte libre** :
+« sauce soja » ne dit pas qu'il y a du blé dedans. Ici la donnée est structurée et
+écrite brique par brique, donc l'intersection est sûre. C'est la seule déduction
+que `briques.ts` s'autorise.
+
+**Les affinités de style sont le garde-fou contre l'absurde.** Sans elles, la
+combinatoire produit du « porridge au thon ». Les filtres par format en sont le
+prolongement : pas de salade de polenta, pas de salade au beurre, pas de gratin
+sans liant, pas de wok hors cuisine asiatique.
+
+**Le plafond de génération est par style, pas global.** Global, il remplissait
+tout le quota avec la première cuisine énumérée et le catalogue n'avait plus
+qu'un seul pays.
+
+**Les étapes sont calculées à la première lecture**, pas à la génération : cinq
+phrases pour 5 469 recettes coûtaient l'essentiel du temps de démarrage, alors
+qu'un écran de liste n'affiche que des titres. Résultat mémoïsé, parce que le
+mode cuisine relit `etapes` à chaque étape franchie.
+
+**L'affichage est plafonné à vingt-quatre recettes par moment**, avec le nombre
+restant annoncé et un bouton pour la suite. Une recherche large rend plusieurs
+milliers de résultats : les poser dans le DOM bloquerait le fil principal pour
+une liste que personne ne fait défiler jusqu'au bout. Le plafond se remet à zéro
+à chaque changement de critère.
+
+### Mesuré à l'écran, pas supposé
+
+Sur le build de production en mode démo, en attendant l'apparition des éléments
+plutôt qu'un délai fixe :
+
+| Geste | Temps |
+|---|---|
+| Ouverture de `/app/cuisine` (jusqu'à la 1re ligne) | 501 ms |
+| Frappe dans la recherche | 35 à 88 ms |
+| « Voir 24 recettes de plus » | 128 ms |
+| Génération de quatre semaines de menus | 151 ms |
+| Ouverture de `/app/cuisiner` | 495 ms |
+| Ouverture de `/app` (journal, sans catalogue) | 209 ms |
+
+La dernière ligne est la plus importante : la génération est **paresseuse**, donc
+l'écran du journal alimentaire ne la paie pas.
+
+Trois mémoïsations ont été ajoutées en chemin, chacune parce qu'un même calcul se
+répétait sur des données identiques : le texte cherchable d'une recette (une
+frappe normalisait quarante mille chaînes), les mots porteurs d'un nom
+d'ingrédient (cinq mille recettes ne contiennent qu'une soixantaine de noms
+distincts), et l'illustration d'une recette (recalculée à chaque rendu de ligne).
+
+**Le paquet livré grossit de 38 Ko** (47 → 85 Ko pour le module recettes) pour
+5 469 recettes de plus. Écrites en dur, elles auraient pesé plusieurs mégaoctets.
+
+### Vérifié avant livraison
+
+Le catalogue entier a été passé au crible par un contrôle automatisé, à chaque
+correction : identifiants et titres tous distincts (5 522 sur 5 522), bornes
+caloriques respectées, aucune étape vide, aucun ingrédient sans quantité. Puis à
+l'écran, en 390 px : recherche, dépliage, fiche d'une recette composée, favori
+survivant au rechargement, planification, mode cuisine avec minuteur déduit d'une
+étape générée. Les parcours C2 à C5 ont été rejoués sans régression.
+
+**Neuf défauts de langue corrigés en lisant les recettes produites** — c'est la
+partie du travail que le typecheck ne pouvait pas faire :
+
+1. « Mijoté de 5 % » : le raccourcissement automatique butait sur « Steak haché
+   5 % ». D'où `titreCourt`, explicite.
+2. « Crevettes décortiquées poêlé » : un participe accordé que le générateur ne
+   peut pas deviner. Les titres passent en tournure nominale (« Poêlée de »).
+3. « Salade de pain » et « faites cuire le pain complet puis laissez-le
+   refroidir » : filtres de féculents par format.
+4. « Salade au beurre » : les matières grasses portent un champ `froid`.
+5. « arrosez de huile » : les gras portent leurs formes `defini` et `partitif`,
+   écrites à la main — le genre d'un nom ne se calcule pas.
+6. « Faites revenir courgettes » : article manquant partout. `avecArticle()`, avec
+   la liste des féminins.
+7. « le pommes de terre » : le nombre se lit sur le **premier mot**, pas sur la
+   fin du nom.
+8. « champignons de paris » : `toLowerCase()` abîmait les noms propres.
+9. « 18 minutes: la chair » : en français, le deux-points prend une espace avant
+   — mon propre nettoyage typographique l'avait supprimée.
+
+**Piège du banc d'essai** : les premiers chronos étaient faux de 2,5 secondes,
+parce qu'ils englobaient mes propres `waitForTimeout`. Une « génération de quatre
+semaines à 3 262 ms » n'en prenait que 151. Mesurer un temps, c'est attendre
+l'apparition du résultat, jamais un délai arbitraire.
 
 **Piège du banc d'essai** : injecter des données dans le `localStorage` d'une
 page ouverte ne sert à rien — `AppContext` vide son debounce sur `pagehide` et
