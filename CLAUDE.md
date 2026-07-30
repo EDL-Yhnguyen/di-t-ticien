@@ -28,9 +28,17 @@ mosaïque, analyses, top/flop, recommandations — en découle. Le mode « plan
 prescrit » d'origine (cocher les composants d'une ordonnance) subsiste en
 parallèle sur `/app/plan`, pour les personnes suivies par une diététicienne.
 
-Dépôt : `EDL-Yhnguyen/di-t-ticien` (public)
-Production : https://di-t-ticien.vercel.app
-Dossier local : `C:\Users\YHN\Documents\Git\diététicien`
+Dépôt : `EDL-Yhnguyen/mamakilo` (public)
+Production : https://di-t-ticien.vercel.app — **encore l'ancienne adresse**
+Dossier local : `C:\Users\YHN\Documents\Git\mamakilo`
+
+**Renommés le 30/07/2026** : le dossier local (`diététicien` → `mamakilo`) et le
+dépôt GitHub (`di-t-ticien` → `mamakilo`). Le lien avec Vercel a survécu — il est
+indexé sur l'identifiant du dépôt, pas sur son nom — mais **le domaine de
+production n'a pas suivi** et reste `di-t-ticien.vercel.app` tant que le projet
+Vercel n'est pas renommé dans son tableau de bord. Ce n'est pas une incohérence à
+corriger dans le code. Le nom `di-t-ticien` est maintenant libre sur GitHub : la
+redirection tient tant que personne ne le réserve.
 
 **Cible : le grand public.** Le dossier d'Élodie (71 kg → 61 kg, ordonnance de
 Julie Bertolotto) a servi de cas d'école pour construire le socle ; il reste
