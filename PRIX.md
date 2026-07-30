@@ -326,9 +326,14 @@ le réafficher en grand à la caisse.
 Deux points à ne pas rater : l'écran doit **monter la luminosité au maximum** le
 temps de l'affichage — une douchette lit mal un écran sombre, et c'est le seul
 moment où l'app doit être vue de quelqu'un d'autre — et il doit fonctionner
-**hors connexion**, puisqu'on est en caisse. Les formats sont EAN-13 ou Code 128
-selon les enseignes ; `zxing-wasm` sait déjà les lire, il faudra les **dessiner**,
-ce qu'il ne fait pas.
+**hors connexion**, puisqu'on est en caisse. Les formats sont EAN-13 ou Code 128 selon les enseignes.
+
+**Rien de nouveau à installer** — vérifié le 30/07/2026 : `zxing-wasm`, déjà
+présent pour le scan, publie aussi `zxing-wasm/writer` avec son propre
+`zxing_writer.wasm`. Le même motif que `lib/decodeur.ts` s'applique : importer le
+binaire en `?url` pour qu'il entre dans le build et que le service worker le
+mette en cache, condition d'un affichage en caisse sans réseau. `npm audit`
+reste donc à zéro, critère de choix des dépendances du projet.
 
 Le numéro de carte est une donnée personnelle rattachée à une enseigne : il reste
 dans le document de l'utilisateur, il entre dans l'export et dans la suppression,
