@@ -261,6 +261,49 @@ export async function tousLesReleves(utilisateur: string): Promise<Releve[]> {
   return tous.filter((r) => r.utilisateur === utilisateur)
 }
 
+/** Le dernier prix connu d'un produit dans une enseigne donnée. */
+export interface PrixEnseigne {
+  enseigne: string
+  prixParUnite: number
+  date: string
+}
+
+/**
+ * Le prix de chaque produit dans chaque enseigne — la matrice que la
+ * répartition du panier exige.
+ *
+ * Les agrégats ne suffisent pas : ils ne retiennent que la dernière et la
+ * meilleure enseigne, ce qui répond à « où est-ce moins cher » mais pas à
+ * « combien coûterait tout mon panier chez Aldi ».
+ *
+ * Pour chaque couple produit-enseigne on garde **le relevé le plus récent** et
+ * non le plus bas : répartir sur un prix promotionnel vu il y a huit mois
+ * enverrait dans un magasin où l'écart n'existe plus.
+ */
+export async function prixParEnseigne(
+  utilisateur: string,
+): Promise<Map<string, PrixEnseigne[]>> {
+  const releves = await tousLesReleves(utilisateur)
+  const parProduit = new Map<string, Map<string, PrixEnseigne>>()
+
+  for (const releve of releves) {
+    if (!releve.enseigne) continue
+    const cle = `${releve.cle}|${releve.unite}`
+    const parMagasin = parProduit.get(cle) ?? new Map<string, PrixEnseigne>()
+    const connu = parMagasin.get(releve.enseigne)
+    if (!connu || releve.date > connu.date) {
+      parMagasin.set(releve.enseigne, {
+        enseigne: releve.enseigne,
+        prixParUnite: releve.prixParUnite,
+        date: releve.date,
+      })
+    }
+    parProduit.set(cle, parMagasin)
+  }
+
+  return new Map([...parProduit].map(([cle, m]) => [cle, [...m.values()]]))
+}
+
 /** Les tickets enregistrés, du plus récent au plus ancien. */
 export async function tickets(utilisateur: string): Promise<TicketEnregistre[]> {
   const tous = await lire<TicketEnregistre>(TICKETS, (m) => m.getAll())

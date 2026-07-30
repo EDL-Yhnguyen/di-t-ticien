@@ -110,6 +110,22 @@ function convertir(quantite: Quantite, unite: AgregatPrix['unite']): number | nu
   return quantite.valeur * facteur.vers
 }
 
+/**
+ * Combien d'unités d'agrégat représente une ligne de courses, ou `null`.
+ *
+ * Exporté parce que la répartition entre enseignes en a besoin aussi, et que
+ * deux arithmétiques différentes pour la même question donneraient deux totaux
+ * différents sur deux écrans — c'est la règle déjà posée pour `cumulerQuantites`
+ * dans `ingredients.ts`.
+ */
+export function quantiteEnUnites(
+  quantiteEcrite: string,
+  unite: AgregatPrix['unite'],
+): number | null {
+  const lue = lireQuantite(quantiteEcrite)
+  return lue === null ? null : convertir(lue, unite)
+}
+
 /* ──────────────────────────────── Chiffrer ──────────────────────────────── */
 
 function arrondir(valeur: number): number {

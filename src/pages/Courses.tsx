@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
 import {
   Barcode,
   CalendarDays,
@@ -13,6 +13,7 @@ import {
   RotateCcw,
   ShoppingBasket,
   Snowflake,
+  Store,
   Trash2,
 } from 'lucide-react'
 import { useSession } from '../context/AppContext'
@@ -41,6 +42,8 @@ import { Lien } from '../lib/router'
 import type { AgregatPrix, ArticleCourse, Emplacement, ListeCourses, Rayon } from '../lib/types'
 import { EMPLACEMENTS, LIBELLE_EMPLACEMENT, RAYONS } from '../lib/types'
 import { chiffrerListe, enseignesInteressantes } from '../lib/prix/panier'
+import { prixParEnseigne, type PrixEnseigne } from '../lib/prix/depot'
+import { enseignesConnues, repartir } from '../lib/prix/repartition'
 import { enseigneParId } from '../lib/ticket/enseignes'
 import { classes, dateCourte, nombre } from '../lib/utils'
 
@@ -60,6 +63,7 @@ export function Courses() {
   const [versement, setVersement] = useState<Versement | null>(null)
   const [retour, setRetour] = useState(false)
   const [historique, setHistorique] = useState(false)
+  const [repartition, setRepartition] = useState(false)
 
   const ouvertes = useMemo(() => listesEnCours(etat.courses), [etat.courses])
   const closes = useMemo(() => listesCloses(etat.courses), [etat.courses])
@@ -117,6 +121,38 @@ export function Courses() {
       clore(cible)
     })
     setRetour(false)
+    setChoisie(null)
+  }
+
+  /**
+   * Éclate la liste en une liste par enseigne, et clôt l'originale.
+   *
+   * Les listes produites sont **indépendantes** : on ne fait pas ses courses
+   * dans deux magasins en même temps, et une seule liste qu'on filtrerait par
+   * magasin obligerait à retrouver le bon filtre à chaque rayon.
+   *
+   * L'originale part à l'historique plutôt qu'à la corbeille — comme toute
+   * liste close, elle reste refaisable.
+   */
+  function creerListesParEnseigne(paniers: { enseigne: string; articles: ArticleCourse[] }[]) {
+    if (!liste) return
+    modifier((brouillon) => {
+      for (const panier of paniers) {
+        const fraiche = nouvelleListe(enseigneParId(panier.enseigne)?.nom ?? panier.enseigne)
+        for (const article of panier.articles) {
+          ajouterArticle(fraiche, {
+            nom: article.nom,
+            quantite: article.quantite,
+            rayon: article.rayon,
+            origine: article.origine,
+            recette: article.recettes[0],
+          })
+        }
+        brouillon.courses.push(fraiche)
+      }
+      const originale = brouillon.courses.find((l) => l.id === liste.id)
+      if (originale) clore(originale)
+    })
     setChoisie(null)
   }
 
@@ -207,6 +243,22 @@ export function Courses() {
           ) : (
             <section className="animate-rise space-y-5" style={{ animationDelay: '120ms' }}>
               <CoutEstime articles={liste.articles} agregats={etat.prix} />
+
+              {etat.prix.length > 0 && (
+                <Bouton ton="doux" pleineLargeur onClick={() => setRepartition(true)}>
+                  <Store size={17} aria-hidden="true" />
+                  Répartir entre mes enseignes
+                </Bouton>
+              )}
+
+              <Repartir
+                ouvert={repartition}
+                onFermer={() => setRepartition(false)}
+                liste={liste}
+                agregats={etat.prix}
+                utilisateur={etat.profil.id}
+                onCreerListes={creerListesParEnseigne}
+              />
 
               {bilan!.rayonsRemplis.map((rayon) => {
                 const reste = articlesDuRayon(liste, rayon).filter((a) => !a.pris).length
@@ -954,5 +1006,214 @@ function CoutEstime({
         </div>
       )}
     </Carte>
+  )
+}
+
+/**
+ * Répartir le panier entre les enseignes fréquentées.
+ *
+ * Les prix par magasin ne sont pas dans le document — les agrégats ne retiennent
+ * que la dernière et la meilleure enseigne. La matrice se lit donc à l’ouverture
+ * de la feuille, depuis IndexedDB : c’est le seul endroit qui en a besoin, et la
+ * charger d’avance annulerait le bénéfice d’avoir sorti le détail du document.
+ */
+function Repartir({
+  ouvert,
+  onFermer,
+  liste,
+  agregats,
+  utilisateur,
+  onCreerListes,
+}: {
+  ouvert: boolean
+  onFermer: () => void
+  liste: ListeCourses
+  agregats: AgregatPrix[]
+  utilisateur: string
+  onCreerListes: (paniers: { enseigne: string; articles: ArticleCourse[] }[]) => void
+}) {
+  const [matrice, setMatrice] = useState<Map<string, PrixEnseigne[]> | null>(null)
+  const [choisies, setChoisies] = useState<string[]>([])
+
+  useEffect(() => {
+    if (!ouvert) return
+    let annule = false
+    void prixParEnseigne(utilisateur).then((m) => {
+      if (annule) return
+      setMatrice(m)
+      // Les deux enseignes les mieux fournies sont cochées d’office : c’est le
+      // cas courant d’une famille, et un écran qui s’ouvre sur un choix vide
+      // demande un travail avant de montrer quoi que ce soit.
+      setChoisies((actuelles) =>
+        actuelles.length > 0 ? actuelles : enseignesConnues(m).slice(0, 2),
+      )
+    })
+    return () => {
+      annule = true
+    }
+  }, [ouvert, utilisateur])
+
+  const disponibles = useMemo(() => (matrice ? enseignesConnues(matrice) : []), [matrice])
+
+  const resultat = useMemo(
+    () =>
+      matrice && choisies.length > 0
+        ? repartir(liste.articles, agregats, matrice, choisies)
+        : null,
+    [matrice, choisies, liste.articles, agregats],
+  )
+
+  function basculer(enseigne: string) {
+    setChoisies((actuelles) =>
+      actuelles.includes(enseigne)
+        ? actuelles.filter((e) => e !== enseigne)
+        : [...actuelles, enseigne],
+    )
+  }
+
+  return (
+    <Feuille ouvert={ouvert} titre="Répartir mes courses" onFermer={onFermer}>
+      {matrice === null ? (
+        <p className="text-sm text-ink-faint">Lecture de vos prix…</p>
+      ) : disponibles.length === 0 ? (
+        <p className="text-sm text-ink-soft">
+          Aucune enseigne dans votre historique.{' '}
+          <Lien vers="/app/ticket" className="font-semibold text-primaire underline underline-offset-2">
+            Photographiez un ticket
+          </Lien>{' '}
+          pour commencer.
+        </p>
+      ) : (
+        <div className="space-y-5">
+          <div>
+            <p className="mb-2 text-sm font-semibold text-ink">Où êtes-vous prêt à aller ?</p>
+            <div className="flex flex-wrap gap-1.5">
+              {disponibles.map((enseigne) => {
+                const actif = choisies.includes(enseigne)
+                return (
+                  <button
+                    key={enseigne}
+                    type="button"
+                    aria-pressed={actif}
+                    onClick={() => basculer(enseigne)}
+                    className={classes(
+                      'rounded-full px-3.5 py-2 text-xs font-semibold transition',
+                      actif
+                        ? 'bg-primaire text-white'
+                        : 'bg-surface text-ink-soft hover:bg-sunken hover:text-ink',
+                    )}
+                  >
+                    {enseigneParId(enseigne)?.nom ?? enseigne}
+                  </button>
+                )
+              })}
+            </div>
+            <p className="mt-2 text-xs text-ink-faint">
+              Une seule enseigne cochée donne le mode « je ne vais que là ».
+            </p>
+          </div>
+
+          {resultat === null ? (
+            <p className="text-sm text-ink-soft">Cochez au moins une enseigne.</p>
+          ) : (
+            <>
+              <Carte ton={resultat.economie > 0 ? 'reussite' : 'accent'} className="p-4">
+                <div className="flex items-baseline justify-between gap-4">
+                  <span className="text-sm font-medium text-ink-soft">Total réparti</span>
+                  <span className="font-display text-2xl font-semibold text-ink tnum">
+                    {nombre(resultat.total, 2)} €
+                  </span>
+                </div>
+                <p className="mt-2 text-sm text-ink-soft">
+                  {resultat.meilleurMagasinUnique === null ? (
+                    <>
+                      Aucune de ces enseignes ne connaît tous ces produits : impossible de dire ce
+                      que la répartition fait gagner face à un magasin unique.
+                    </>
+                  ) : resultat.economie > 0 ? (
+                    <>
+                      <strong className="font-semibold text-reussite tnum">
+                        {nombre(resultat.economie, 2)} €
+                      </strong>{' '}
+                      de moins qu’en achetant tout chez{' '}
+                      {enseigneParId(resultat.meilleurMagasinUnique.enseigne)?.nom}, soit{' '}
+                      <span className="tnum">
+                        {nombre(resultat.meilleurMagasinUnique.total, 2)} €
+                      </span>
+                      .
+                    </>
+                  ) : (
+                    <>
+                      Tout acheter chez{' '}
+                      {enseigneParId(resultat.meilleurMagasinUnique.enseigne)?.nom} revient au même.
+                      Se déplacer ne rapporterait rien.
+                    </>
+                  )}
+                </p>
+              </Carte>
+
+              {resultat.paniers.map((panier) => (
+                <div key={panier.enseigne}>
+                  <TitreSection
+                    action={
+                      <span className="font-semibold text-ink tnum">
+                        {nombre(panier.total, 2)} €
+                      </span>
+                    }
+                  >
+                    {enseigneParId(panier.enseigne)?.nom ?? panier.enseigne}
+                  </TitreSection>
+                  <Carte className="divide-y divide-line">
+                    {panier.lignes.map((ligne) => (
+                      <div key={ligne.article.id} className="flex items-center gap-3 px-4 py-2.5">
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-medium text-ink">
+                            {ligne.article.nom}
+                          </span>
+                          <span className="block text-xs text-ink-faint">
+                            {ligne.article.quantite}
+                          </span>
+                        </span>
+                        <span className="shrink-0 text-sm font-semibold text-ink tnum">
+                          {nombre(ligne.cout ?? 0, 2)} €
+                        </span>
+                      </div>
+                    ))}
+                  </Carte>
+                </div>
+              ))}
+
+              {resultat.orphelines.length > 0 && (
+                <Carte className="p-4">
+                  <p className="text-sm text-ink-soft">
+                    <span className="tnum">{resultat.orphelines.length}</span> produit
+                    {resultat.orphelines.length > 1 ? 's' : ''} sans prix connu dans ces enseignes :{' '}
+                    <span className="text-ink">
+                      {resultat.orphelines.map((o) => o.article.nom).join(', ')}
+                    </span>
+                    . À prendre où vous voulez — ils ne sont comptés dans aucun total.
+                  </p>
+                </Carte>
+              )}
+
+              <Bouton
+                pleineLargeur
+                onClick={() => {
+                  onCreerListes(
+                    resultat.paniers.map((p) => ({
+                      enseigne: p.enseigne,
+                      articles: p.lignes.map((l) => l.article),
+                    })),
+                  )
+                  onFermer()
+                }}
+              >
+                Créer une liste par enseigne
+              </Bouton>
+            </>
+          )}
+        </div>
+      )}
+    </Feuille>
   )
 }
