@@ -62,12 +62,20 @@ couvre l'essentiel du besoin.
 le rapprochement de `ingredients.ts` (`cleIngredient`), qui regroupe au pluriel
 près, et à terme par une table d'alias apprise à la correction.
 
-### 4. Les promotions, cagnottes et cartes de fidélité
+### 4. Les promotions et les programmes de fidélité
 
-Chaque programme est une intégration à part, souvent sans interface publique. Le
-parseur sait déjà rattacher une **remise** au produit qui la précède et compter
-les remises de pied de ticket, ce qui donne le prix réellement payé. Le reste
-attend.
+**Se connecter au compte fidélité d'une enseigne est hors d'atteinte, et le
+restera** : aucune n'expose d'API publique, et il faudrait conserver les
+identifiants du client d'un tiers — une responsabilité de sécurité sans commune
+mesure avec ce que l'application apporterait en échange. Ce point-là du brief ne
+se fera pas.
+
+**Mais l'essentiel de la valeur ne demande aucun compte**, et c'est le sprint P5
+décrit plus bas.
+
+Ce qui existe déjà : le parseur rattache une **remise** au produit qui la précède
+et compte les remises de pied de ticket, ce qui donne le prix réellement payé —
+avantage fidélité compris, puisqu'il est imprimé sur le ticket.
 
 ---
 
@@ -300,6 +308,51 @@ achetés ressortent en orphelins — exactement l'information utile avant de par
 Les listes produites sont **indépendantes**, une par enseigne : on ne fait pas
 ses courses dans deux magasins en même temps, et une liste unique à filtrer
 obligerait à retrouver le bon filtre à chaque rayon.
+
+---
+
+## P5 — Les cartes de fidélité, sans compte enseigne
+
+Demandé par Yann le 30/07/2026, cadré et non commencé. Trois briques, par ordre
+de valeur, **toutes locales et sans API**.
+
+### 1. Porter ses cartes (le gros de la valeur)
+
+L'oubli de la carte coûte l'avantage entier. Or une carte de fidélité n'est
+qu'un code-barres : le scanner une fois avec le lecteur **déjà en place**
+(`components/Scanner.tsx`, qui sert au garde-manger), le ranger par enseigne, et
+le réafficher en grand à la caisse.
+
+Deux points à ne pas rater : l'écran doit **monter la luminosité au maximum** le
+temps de l'affichage — une douchette lit mal un écran sombre, et c'est le seul
+moment où l'app doit être vue de quelqu'un d'autre — et il doit fonctionner
+**hors connexion**, puisqu'on est en caisse. Les formats sont EAN-13 ou Code 128
+selon les enseignes ; `zxing-wasm` sait déjà les lire, il faudra les **dessiner**,
+ce qu'il ne fait pas.
+
+Le numéro de carte est une donnée personnelle rattachée à une enseigne : il reste
+dans le document de l'utilisateur, il entre dans l'export et dans la suppression,
+et il se déclare dans la politique de confidentialité — donc
+`VERSION_CONFIDENTIALITE` bouge.
+
+### 2. Suivre la cagnotte
+
+Les tickets impriment le solde (« cagnotte : 12,40 € », « vos avantages »). Le
+parseur les écarte aujourd'hui comme lignes de service. Les lire donne un solde
+par enseigne, daté, sans rien demander à personne — et un solde oublié est de
+l'argent perdu.
+
+**À ne pas confondre avec une remise** : une cagnotte créditée n'a pas baissé le
+prix payé ce jour-là. La compter dans le total du ticket casserait la somme de
+contrôle, qui est le garde-fou de tout le module.
+
+### 3. Le prix réel, avantage déduit
+
+Une fois la cagnotte suivie, la répartition entre enseignes peut tenir compte de
+ce qu'on y a déjà accumulé. **À manier avec prudence** : une cagnotte n'est pas
+de l'argent tant qu'elle n'est pas dépensée, et l'afficher comme une économie
+acquise donnerait un chiffre flatteur et faux. Elle se montre à côté du total,
+jamais dedans.
 
 ---
 
