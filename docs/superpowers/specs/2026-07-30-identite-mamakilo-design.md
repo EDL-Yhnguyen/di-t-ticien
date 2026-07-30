@@ -193,12 +193,10 @@ téléphone.
 
 ---
 
-## 6. Le coin « entre nous » et le lien iGraal
+## 6. Le lien iGraal
 
-Une page atteignable une fois connecté, jamais depuis l'accueil public.
-
-Elle porte le lien de parrainage iGraal fourni par Yann, **signalé comme lien de
-parrainage** — la transparence sur un lien rémunéré n'est pas optionnelle.
+**Décision de Yann, 30/07/2026 : le lien va sur la page publique.** Il figure en
+pied de l'accueil, et se retrouve dans l'application une fois connecté.
 
 ```
 https://fr.igraal.com/parrainage?parrain=AG_55df2aa7a0e1b&utm_medium=raf&utm_source=refer_friend
@@ -206,23 +204,51 @@ https://fr.igraal.com/parrainage?parrain=AG_55df2aa7a0e1b&utm_medium=raf&utm_sou
 
 Le lien s'ouvre dans un nouvel onglet, avec `rel="noopener noreferrer"`.
 
-### Pourquoi il n'est pas sur la page publique
+### La mention est obligatoire, pas décorative
 
-Le site tient sur le régime **« éditeur non professionnel »**
-(`EDITEUR_NON_PROFESSIONNEL = true` dans `legal.ts`), qui permet à Yann de ne
-publier ni son nom ni son adresse. Le commentaire du fichier écrit la condition :
-le drapeau tomberait « si l'application devenait payante ou publicitaire ». Un
-lien de parrainage rémunéré, sur la page publique, entre dans cette définition —
-et **nom, statut et adresse deviendraient obligatoires** dans les mentions
-légales.
+Le lien doit être **identifiable comme un lien de parrainage** au moment où on le
+voit — pas dans une page de conditions que personne n'ouvre. Une communication
+commerciale doit pouvoir être reconnue comme telle. Formulation attendue, ou
+équivalente :
 
-En revanche il ne casse **pas** la promesse de l'écran de consentement : celle-ci
-porte sur les données de santé (« ni publicité, ni revente, ni profilage ») et un
-lien statique ne les touche pas. La distinction compte, et elle doit rester
-claire dans le code comme dans les textes.
+> **Lien de parrainage** — si vous vous inscrivez par ce lien, l'éditeur du site
+> reçoit une contrepartie. Ça ne change rien pour vous.
 
-Si Yann veut un jour ce lien en public, c'est un basculement de régime à faire
-sciemment, pas un effet de bord.
+Le retirer ou l'enfouir n'est pas une option de mise en page.
+
+### Le régime d'éditeur ne change pas, et le commentaire du code doit être corrigé
+
+Le site reste en **« éditeur non professionnel »** (`EDITEUR_NON_PROFESSIONNEL =
+true`). Le critère de la LCEN est l'exercice d'une **activité professionnelle** ;
+un lien de parrainage rapportant du cashback occasionnel ne le constitue pas.
+Yann n'a donc pas à publier son nom ni son adresse.
+
+**Mais le commentaire de `legal.ts` affirme aujourd'hui autre chose** : « le
+drapeau ne tomberait que si l'application devenait payante ou publicitaire ». Le
+site porte désormais un lien rémunéré, donc ce commentaire décrit une règle que
+le site ne suit plus. **Le corriger fait partie du chantier** — un commentaire
+qui ment est pire que pas de commentaire, et celui-là garde une décision
+juridique.
+
+Nouvelle formulation à porter dans le fichier : le régime tient tant que le site
+n'est pas une activité professionnelle ; un lien de parrainage isolé et signalé
+n'y suffit pas ; **le drapeau tomberait si Mamakilo devenait payant, portait de
+la publicité vendue à des tiers, ou si les revenus d'affiliation devenaient
+réguliers et recherchés pour eux-mêmes.**
+
+### Ce que ça ne casse pas
+
+Le lien ne touche **pas** la promesse de l'écran de consentement. Celle-ci porte
+sur les données de santé — « ni publicité, ni revente, ni profilage » — et un
+lien statique ne les lit pas, ne les transmet pas, ne profile personne. La
+distinction doit rester claire dans le code comme dans les textes : **aucune
+donnée de l'utilisateur ne part vers iGraal**, et rien dans le lien ne dépend de
+ce qu'il a mangé.
+
+Corollaire à respecter : le lien est **le même pour tout le monde**, jamais
+personnalisé, jamais placé en fonction du profil ou du journal. Le jour où il le
+serait, ce serait du ciblage publicitaire sur données de santé, et là oui, la
+promesse tomberait.
 
 ---
 
@@ -295,5 +321,6 @@ complète et livrable, les points 5 à 7 sont des ajouts.
 3. Le logo présent et l'accueil réécrit.
 4. Les expressions de la marmite, avec leur règle.
 5. La photo de famille — le morceau technique.
-6. Le coin « entre nous » et iGraal.
+6. Le lien iGraal, sa mention obligatoire, et la correction du commentaire de
+   `legal.ts`.
 7. Le partage — à couper en premier si besoin.
