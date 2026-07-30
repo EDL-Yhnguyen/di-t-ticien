@@ -149,6 +149,30 @@ export function Profil() {
       </Carte>
 
       <section>
+        <TitreSection>Mon petit nom</TitreSection>
+        <Carte className="space-y-3 p-5">
+          <Champ
+            id="petit-nom"
+            label="Votre petit nom"
+            aide="Celui qu'on vous donne à la maison. L'application s'en servira pour vous parler."
+            value={etat.profil.petitNom}
+            onChange={(e) =>
+              modifier((brouillon) => {
+                brouillon.profil.petitNom = e.target.value
+              })
+            }
+            maxLength={24}
+            placeholder={etat.profil.prenom || 'Mamakilo'}
+          />
+          <p className="text-sm text-ink-soft">
+            {etat.profil.petitNom.trim()
+              ? `L'application vous dira « Bonsoir, ${etat.profil.petitNom.trim()} ».`
+              : 'Laissé vide, l’application s’en tient à votre prénom.'}
+          </p>
+        </Carte>
+      </section>
+
+      <section>
         <TitreSection>Raccourcis</TitreSection>
         <Carte className="divide-y divide-line">
           <Lien

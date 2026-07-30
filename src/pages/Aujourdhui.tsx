@@ -30,6 +30,7 @@ import {
   topFlopDuJour,
 } from '../lib/journal'
 import type { BilanRepas } from '../lib/journal'
+import { nomAffiche } from '../lib/identite'
 import { objectifCalorique } from '../lib/nutrition'
 import { VERRES_PAR_JOUR } from '../lib/plan'
 import { Lien } from '../lib/router'
@@ -46,6 +47,7 @@ import { classes, dateLongue, entier, jourISO, salutation } from '../lib/utils'
 export function Aujourdhui() {
   const { etat, modifier } = useSession()
   const date = jourISO()
+  const nom = nomAffiche(etat.profil)
   const [choisie, setChoisie] = useState<EntreeJournal | null>(null)
 
   const objectifBase = objectifCalorique({
@@ -108,7 +110,7 @@ export function Aujourdhui() {
             </p>
             <h1 className="mt-1 text-3xl font-semibold text-white">
               {salutation()}
-              {etat.profil.prenom && `, ${etat.profil.prenom}`}
+              {nom && `, ${nom}`}
             </h1>
           </div>
           {jours > 0 && (

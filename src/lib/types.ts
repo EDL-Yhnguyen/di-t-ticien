@@ -61,6 +61,12 @@ export interface Praticien {
 export interface Profil {
   id: string
   prenom: string
+  /**
+   * Le petit nom qu'on se donne en famille. Facultatif : vide, l'application
+   * retombe sur le prénom. C'est l'origine du nom du produit devenue une
+   * fonctionnalité — un surnom affectueux, pas un pseudonyme d'identification.
+   */
+  petitNom: string
   email: string
   sexe: Sexe
   age: number

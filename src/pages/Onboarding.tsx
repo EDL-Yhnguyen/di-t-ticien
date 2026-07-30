@@ -14,6 +14,7 @@ export function Onboarding() {
   const [etape, setEtape] = useState(0)
 
   const [prenom, setPrenom] = useState(etat?.profil.prenom ?? '')
+  const [petitNom, setPetitNom] = useState(etat?.profil.petitNom ?? '')
   const [sexe, setSexe] = useState<Sexe>(etat?.profil.sexe ?? 'femme')
   const [age, setAge] = useState(String(etat?.profil.age ?? ''))
   const [taille, setTaille] = useState(String(etat?.profil.tailleCm ?? ''))
@@ -40,6 +41,7 @@ export function Onboarding() {
       brouillon.profil = {
         ...brouillon.profil,
         prenom: prenom.trim(),
+        petitNom: petitNom.trim(),
         sexe,
         age: nAge,
         tailleCm: nTaille,
@@ -95,6 +97,14 @@ export function Onboarding() {
                 value={prenom}
                 onChange={(e) => setPrenom(e.target.value)}
                 autoComplete="given-name"
+              />
+              <Champ
+                id="petit-nom"
+                label="Votre petit nom (facultatif)"
+                aide="Celui qu'on vous donne à la maison. Vous pourrez le changer plus tard."
+                value={petitNom}
+                onChange={(e) => setPetitNom(e.target.value)}
+                maxLength={24}
               />
               <Champ
                 id="age"
@@ -232,6 +242,7 @@ function Recapitulatif({
     {
       id: '',
       prenom: '',
+      petitNom: '',
       email: '',
       sexe,
       age: nAge,

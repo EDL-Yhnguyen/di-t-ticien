@@ -118,6 +118,7 @@ export function profilInitial(u: Utilisateur): Profil {
   return {
     id: u.id,
     prenom: u.prenom || (elodie ? 'Élodie' : ''),
+    petitNom: '',
     email: u.email,
     sexe: 'femme',
     // Taille et âge sont les deux seules inconnues du dossier d'Élodie :
