@@ -12,6 +12,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import { useSession } from '../context/AppContext'
+import { MarmiteExpression } from '../components/MarmiteExpression'
 import { LegendeMosaique, Mosaique, couleurNutri } from '../components/Mosaique'
 import {
   BarreMacro,
@@ -501,9 +502,9 @@ function AlerteGaspillage({ stocks }: { stocks: ArticleStock[] }) {
 function JourneeVide() {
   return (
     <div className="rounded-card border border-dashed border-line px-6 py-10 text-center">
-      <p className="mb-3 text-4xl" aria-hidden="true">
-        🍽
-      </p>
+      {/* Humeur neutre, jamais déçue : l'écran est vide parce que la journée
+          commence, pas parce que la personne a mal fait. */}
+      <MarmiteExpression humeur="neutre" taille={72} className="mx-auto mb-3" />
       <h3 className="text-base font-semibold text-ink">La mosaïque est encore vide</h3>
       <p className="mx-auto mt-2 max-w-xs text-sm text-ink-soft">
         Chaque aliment que vous notez devient une tuile : sa taille dit les calories, sa couleur dit

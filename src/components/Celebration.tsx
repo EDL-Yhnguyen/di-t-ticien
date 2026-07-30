@@ -1,5 +1,6 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useApp } from '../context/AppContext'
+import { MarmiteExpression } from './MarmiteExpression'
 import { Bouton } from './ui'
 
 const COULEURS = ['var(--primaire)', 'var(--accent)', 'var(--reussite)', 'var(--alerte)']
@@ -54,15 +55,23 @@ export function Celebration() {
             transition={{ type: 'spring', stiffness: 300, damping: 24 }}
             className="relative w-full max-w-sm rounded-card border border-line bg-surface p-7 text-center shadow-lift"
           >
-            <motion.p
+            {/* Un badge récompense une constance, donc une présence : c'est
+                exactement le cas où la marmite a le droit de se réjouir. Elle
+                porte la joie, l'emoji dit lequel des badges est débloqué. */}
+            <motion.div
               initial={{ scale: 0.4, rotate: -18 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ type: 'spring', stiffness: 260, damping: 14, delay: 0.1 }}
-              className="mb-4 text-6xl"
-              aria-hidden="true"
+              className="relative mx-auto mb-4 w-fit"
             >
-              {badgeACelebrer.emoji}
-            </motion.p>
+              <MarmiteExpression humeur="complice" taille={96} />
+              <span
+                className="absolute -right-2 -bottom-1 grid size-11 place-items-center rounded-full bg-surface text-2xl shadow-lift ring-1 ring-line"
+                aria-hidden="true"
+              >
+                {badgeACelebrer.emoji}
+              </span>
+            </motion.div>
             <p className="mb-1.5 text-xs font-bold tracking-[0.16em] text-accent uppercase">
               Badge débloqué
             </p>

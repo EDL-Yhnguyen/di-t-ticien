@@ -9,7 +9,8 @@ import {
   X,
 } from 'lucide-react'
 import { useSession } from '../context/AppContext'
-import { Bouton, Carte, Etiquette, Feuille } from '../components/ui'
+import { MarmiteExpression } from '../components/MarmiteExpression'
+import { Bouton, Carte, Feuille } from '../components/ui'
 import {
   chrono,
   dureesDeLEtape,
@@ -378,22 +379,27 @@ export function BandeauCuisineEnCours() {
 
   const courante = recettes[Math.min(seance.courante, recettes.length - 1)]
 
+  // Quatre éléments sur une rangée ne tiennent pas en 390 px : la colonne du
+  // titre tombait à 118 px, et le nom de la recette à « Porri… ». « Reprendre »
+  // passe donc sous le texte tant qu'on est étroit, et revient en ligne à sm.
   return (
-    <Carte className="flex items-center gap-3 border-primaire px-4 py-3">
-      <Flame size={18} className="shrink-0 text-primaire" aria-hidden="true" />
+    <Carte className="flex flex-wrap items-center gap-x-3 gap-y-2.5 border-primaire px-4 py-3">
+      {/* Contente parce que la personne est revenue, pas parce qu'elle a bien
+          fait : un bandeau de reprise est une retrouvaille, pas un rappel à
+          l'ordre. */}
+      <MarmiteExpression humeur="contente" taille={36} />
       <span className="min-w-0 flex-1">
+        {/* L'étape rejoint le surtitre : en étiquette séparée elle disputait sa
+            largeur au titre. */}
         <span className="block text-xs font-bold tracking-[0.14em] text-primaire uppercase">
-          En cuisine
+          En cuisine · étape {(seance.etapes[seance.courante] ?? 0) + 1}
         </span>
         <span className="block truncate text-sm font-semibold text-ink">{courante.titre}</span>
       </span>
-      <Etiquette ton="neutre">
-        étape {(seance.etapes[seance.courante] ?? 0) + 1}
-      </Etiquette>
       <button
         type="button"
         onClick={() => aller('/app/mode-cuisine')}
-        className="shrink-0 rounded-full bg-primaire px-3.5 py-2 text-xs font-semibold text-white transition hover:brightness-110"
+        className="order-last w-full shrink-0 rounded-full bg-primaire px-3.5 py-2 text-xs font-semibold text-white transition hover:brightness-110 sm:order-none sm:w-auto"
       >
         Reprendre
       </button>
