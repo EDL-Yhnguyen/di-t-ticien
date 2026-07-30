@@ -51,12 +51,22 @@ export function Marque({ taille = 36 }: { taille?: number }) {
 
 type Ton = 'primaire' | 'accent' | 'doux' | 'fantome' | 'alerte'
 
+/**
+ * Les trois tons pleins portent un dégradé et un halo de leur propre couleur
+ * plutôt qu'un aplat et une ombre grise : c'est ce qui fait qu'un bouton a l'air
+ * d'éclairer la page. Le halo est recalculé par thème (`--shadow-halo` dans
+ * index.css), il n'y a donc rien à redéfinir huit fois.
+ *
+ * `active:scale-[0.97]` remplace le changement de luminosité : sur un dégradé,
+ * un `brightness` écrase les deux extrémités et le volume disparaît au moment
+ * précis où l'on appuie.
+ */
 const TON: Record<Ton, string> = {
-  primaire: 'bg-corail text-white hover:brightness-110 active:brightness-95',
-  accent: 'bg-apricot text-white hover:brightness-110 active:brightness-95',
-  doux: 'bg-surface text-ink border border-line hover:bg-sunken',
+  primaire: 'plein-primaire text-white shadow-halo hover:brightness-105 active:scale-[0.97]',
+  accent: 'plein-accent text-white shadow-halo hover:brightness-105 active:scale-[0.97]',
+  doux: 'bg-surface text-ink border border-line-fort shadow-soft hover:bg-sunken active:scale-[0.98]',
   fantome: 'text-ink-soft hover:bg-sunken hover:text-ink',
-  alerte: 'bg-berry text-white hover:brightness-110 active:brightness-95',
+  alerte: 'plein-alerte text-white shadow-halo hover:brightness-105 active:scale-[0.97]',
 }
 
 export function Bouton({
@@ -70,7 +80,8 @@ export function Bouton({
     <button
       className={classes(
         'inline-flex items-center justify-center gap-2 rounded-full px-5 py-3',
-        'font-semibold transition disabled:cursor-not-allowed disabled:opacity-45',
+        'font-semibold transition duration-150 disabled:cursor-not-allowed',
+        'disabled:opacity-45 disabled:shadow-none',
         TON[ton],
         pleineLargeur && 'w-full',
         className,
@@ -84,15 +95,32 @@ export function Bouton({
 
 /* ──────────────────────────────── Surfaces ──────────────────────────────── */
 
+type TonSurface = 'primaire' | 'accent' | 'reussite' | 'alerte'
+
+/**
+ * Le lavis d'une carte teintée est un dégradé qui s'éclaircit vers la surface :
+ * une carte lavée uniformément paraît plate, celle qui s'éclaircit vers le bas
+ * paraît éclairée. Le liséré prend la couleur du rôle à faible opacité, sinon la
+ * carte teintée n'a plus de bord du tout sur un fond de même famille.
+ */
+const LAVIS: Record<TonSurface, string> = {
+  primaire: 'lavis-primaire border-primaire/25',
+  accent: 'lavis-accent border-accent/25',
+  reussite: 'lavis-reussite border-reussite/25',
+  alerte: 'lavis-alerte border-alerte/25',
+}
+
 export function Carte({
+  ton,
   className,
   children,
   ...reste
-}: React.HTMLAttributes<HTMLDivElement>) {
+}: React.HTMLAttributes<HTMLDivElement> & { ton?: TonSurface }) {
   return (
     <div
       className={classes(
-        'rounded-card border border-line bg-surface shadow-soft',
+        'rounded-card border shadow-soft',
+        ton ? LAVIS[ton] : 'border-line bg-surface',
         className,
       )}
       {...reste}
@@ -102,6 +130,56 @@ export function Carte({
   )
 }
 
+/**
+ * Un aplat saturé qui porte un chiffre, pour les grilles de statistiques. Il
+ * existe parce qu'une carte blanche avec un chiffre coloré se lit comme une
+ * ligne de tableau ; le même chiffre en blanc sur la couleur se lit comme une
+ * réponse. `--accent-vif` est le seul aplat qui demande une encre sombre : c'est
+ * le jeton pensé pour ça, jaune ou cyan y compris.
+ */
+export function Tuile({
+  ton = 'primaire',
+  intitule,
+  valeur,
+  unite,
+  detail,
+  className,
+}: {
+  ton?: TonSurface | 'vif'
+  intitule: string
+  valeur: ReactNode
+  unite?: string
+  detail?: string
+  className?: string
+}) {
+  const fond =
+    ton === 'vif'
+      ? 'bg-accent-vif text-accent-vif-encre'
+      : `${
+          { primaire: 'plein-primaire', accent: 'plein-accent', reussite: 'plein-reussite', alerte: 'plein-alerte' }[
+            ton
+          ]
+        } text-white`
+
+  return (
+    <div className={classes('rounded-tile px-4 py-3.5 shadow-soft', fond, className)}>
+      <p className="text-[0.6875rem] font-bold tracking-[0.1em] uppercase opacity-85">
+        {intitule}
+      </p>
+      <p className="mt-1 flex items-baseline gap-1">
+        <span className="font-display text-2xl font-semibold tnum">{valeur}</span>
+        {unite && <span className="text-sm font-medium opacity-85">{unite}</span>}
+      </p>
+      {detail && <p className="mt-0.5 text-xs opacity-85">{detail}</p>}
+    </div>
+  )
+}
+
+/**
+ * Le surtitre porte un trait de couleur plutôt que d'être un simple gris : c'est
+ * lui qui rattache une section au thème, et sans lui les titres d'un écran
+ * n'avaient aucune couleur du tout.
+ */
 export function TitreSection({
   eyebrow,
   children,
@@ -112,14 +190,15 @@ export function TitreSection({
   action?: ReactNode
 }) {
   return (
-    <div className="mb-3 flex items-end justify-between gap-4">
-      <div>
+    <div className="mb-3.5 flex items-end justify-between gap-4">
+      <div className="min-w-0">
         {eyebrow && (
-          <p className="mb-1 text-xs font-bold tracking-[0.14em] text-ink-faint uppercase">
+          <p className="mb-1.5 flex items-center gap-2 text-xs font-bold tracking-[0.14em] text-primaire uppercase">
+            <span className="h-3 w-1 shrink-0 rounded-full bg-primaire" aria-hidden="true" />
             {eyebrow}
           </p>
         )}
-        <h2 className="text-xl font-semibold text-ink">{children}</h2>
+        <h2 className="text-[1.375rem] font-semibold text-ink">{children}</h2>
       </div>
       {action}
     </div>
@@ -127,23 +206,23 @@ export function TitreSection({
 }
 
 export function Etiquette({
-  ton = 'corail',
+  ton = 'primaire',
   children,
 }: {
-  ton?: 'corail' | 'apricot' | 'basil' | 'berry' | 'neutre'
+  ton?: TonSurface | 'neutre'
   children: ReactNode
 }) {
   const styles = {
-    corail: 'bg-corail-wash text-corail',
-    apricot: 'bg-apricot-wash text-apricot',
-    basil: 'bg-basil-wash text-basil',
-    berry: 'bg-berry-wash text-berry',
-    neutre: 'bg-sunken text-ink-soft',
+    primaire: 'bg-primaire-wash text-primaire ring-primaire/20',
+    accent: 'bg-accent-wash text-accent ring-accent/20',
+    reussite: 'bg-reussite-wash text-reussite ring-reussite/20',
+    alerte: 'bg-alerte-wash text-alerte ring-alerte/20',
+    neutre: 'bg-sunken text-ink-soft ring-line',
   }[ton]
   return (
     <span
       className={classes(
-        'inline-flex items-center rounded-full px-2.5 py-1',
+        'inline-flex items-center rounded-full px-2.5 py-1 ring-1 ring-inset',
         'text-[0.6875rem] font-bold tracking-[0.08em] uppercase',
         styles,
       )}
@@ -176,9 +255,13 @@ export function Champ({
         <input
           id={id}
           className={classes(
-            'w-full rounded-2xl border border-line bg-surface px-4 py-3',
-            'text-ink placeholder:text-ink-faint',
-            'focus:border-corail focus:outline-none',
+            // `line-fort` et non `line` : le bord d'un champ de saisie est un
+            // élément d'interface, que la règle 1.4.11 tient à 3:1. Le trait
+            // discret des séparations ne tenait que 1,3:1 — un champ dont on ne
+            // voit pas le contour.
+            'w-full rounded-2xl border-2 border-line-fort bg-surface px-4 py-3',
+            'text-ink transition placeholder:text-ink-faint',
+            'focus:border-primaire focus:outline-none',
             suffixe && 'pr-14',
             className,
           )}
@@ -216,10 +299,10 @@ export function ChoixListe<T extends string>({
             <label
               key={option.valeur}
               className={classes(
-                'flex cursor-pointer items-center gap-3 rounded-2xl border px-4 py-3 transition',
+                'flex cursor-pointer items-center gap-3 rounded-2xl border-2 px-4 py-3 transition',
                 actif
-                  ? 'border-corail bg-corail-wash text-ink'
-                  : 'border-line bg-surface text-ink-soft hover:bg-sunken',
+                  ? 'lavis-primaire border-primaire text-ink shadow-soft'
+                  : 'border-line-fort bg-surface text-ink-soft hover:bg-sunken',
               )}
             >
               <input
@@ -232,10 +315,10 @@ export function ChoixListe<T extends string>({
               <span
                 className={classes(
                   'grid size-5 shrink-0 place-items-center rounded-full border-2',
-                  actif ? 'border-corail' : 'border-line',
+                  actif ? 'border-primaire' : 'border-line-fort',
                 )}
               >
-                {actif && <span className="size-2.5 rounded-full bg-corail" />}
+                {actif && <span className="size-2.5 rounded-full bg-primaire" />}
               </span>
               <span className="text-sm font-medium">{option.libelle}</span>
             </label>
@@ -271,7 +354,9 @@ export function Bascule({
         onClick={() => onChange(!actif)}
         className={classes(
           'relative mt-0.5 h-7 w-12 shrink-0 rounded-full transition',
-          actif ? 'bg-corail' : 'bg-line',
+          // Éteinte, la bascule est un contrôle : son fond doit se distinguer de
+          // la surface à 3:1, ce que le trait des séparations ne fait pas.
+          actif ? 'plein-primaire shadow-halo' : 'bg-line-fort',
         )}
       >
         <motion.span
@@ -372,7 +457,10 @@ export function EtatVide({
 }) {
   return (
     <div className="px-6 py-12 text-center">
-      <p className="mb-3 text-4xl" aria-hidden="true">
+      <p
+        className="lavis-primaire mx-auto mb-4 grid size-16 place-items-center rounded-full text-3xl ring-1 ring-primaire/20 ring-inset"
+        aria-hidden="true"
+      >
         {emoji}
       </p>
       <h3 className="mb-1.5 text-lg font-semibold text-ink">{titre}</h3>
@@ -389,7 +477,7 @@ export function Chargement({ libelle = 'Chargement' }: { libelle?: string }) {
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1.1, repeat: Infinity, ease: 'linear' }}
-          className="mx-auto mb-4 size-9 rounded-full border-[3px] border-line border-t-corail"
+          className="mx-auto mb-4 size-9 rounded-full border-[3px] border-line border-t-primaire"
         />
         <p className="text-sm text-ink-soft">{libelle}…</p>
       </div>

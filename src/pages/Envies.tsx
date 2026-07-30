@@ -77,8 +77,8 @@ export function Envies() {
       </header>
 
       <Carte className="overflow-hidden">
-        <div className="bg-berry-wash px-5 py-6 text-center">
-          <p className="mb-4 text-sm text-berry">
+        <div className="bg-alerte-wash px-5 py-6 text-center">
+          <p className="mb-4 text-sm text-alerte">
             Une envie de grignoter maintenant ?
           </p>
           <Bouton ton="alerte" pleineLargeur className="py-4 text-base" onClick={() => setEtape('intensite')}>
@@ -90,7 +90,7 @@ export function Envies() {
         {etat.envies.length > 0 && (
           <div className="grid grid-cols-2 divide-x divide-line border-t border-line">
             <div className="px-5 py-4 text-center">
-              <p className="font-display text-2xl font-semibold text-basil tnum">{resistees}</p>
+              <p className="font-display text-2xl font-semibold text-reussite tnum">{resistees}</p>
               <p className="mt-0.5 text-xs font-semibold text-ink-soft">envies laissées passer</p>
             </div>
             <div className="px-5 py-4 text-center">
@@ -113,7 +113,7 @@ export function Envies() {
           <ul className="flex flex-wrap gap-2">
             {heuresARisque.map(({ heure, compte }) => (
               <li key={heure}>
-                <Etiquette ton="apricot">
+                <Etiquette ton="accent">
                   {heure} h — {compte} fois
                 </Etiquette>
               </li>
@@ -155,8 +155,8 @@ export function Envies() {
               className={classes(
                 'flex-1 rounded-2xl border-2 py-4 font-display text-xl font-semibold transition',
                 intensite === n
-                  ? 'border-berry bg-berry text-white'
-                  : 'border-line bg-surface text-ink-soft hover:border-berry/40',
+                  ? 'border-alerte bg-alerte text-white'
+                  : 'border-line bg-surface text-ink-soft hover:border-alerte/40',
               )}
             >
               {n}
@@ -190,7 +190,7 @@ export function Envies() {
                 className={classes(
                   'w-full rounded-2xl border px-3 py-3 text-sm font-medium transition',
                   declencheur === item
-                    ? 'border-corail bg-corail-wash text-corail'
+                    ? 'border-primaire bg-primaire-wash text-primaire'
                     : 'border-line bg-surface text-ink-soft hover:bg-sunken',
                 )}
               >
@@ -294,7 +294,7 @@ function Minuteur({ onFini }: { onFini: () => void }) {
           cy="100"
           r="86"
           fill="none"
-          stroke="var(--berry)"
+          stroke="var(--alerte)"
           strokeWidth="10"
           strokeLinecap="round"
           transform="rotate(-90 100 100)"
@@ -325,9 +325,9 @@ function Minuteur({ onFini }: { onFini: () => void }) {
 
 function LigneEnvie({ envie }: { envie: EnvieEntree }) {
   const etiquette = {
-    resistee: { ton: 'basil' as const, texte: 'Passée' },
+    resistee: { ton: 'reussite' as const, texte: 'Passée' },
     cedee: { ton: 'neutre' as const, texte: 'Grignoté' },
-    'collation-prevue': { ton: 'corail' as const, texte: 'Collation' },
+    'collation-prevue': { ton: 'primaire' as const, texte: 'Collation' },
   }[envie.issue]
 
   const heure = new Date(envie.horodatage).toLocaleTimeString('fr-FR', {

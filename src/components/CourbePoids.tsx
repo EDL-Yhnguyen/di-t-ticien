@@ -80,8 +80,8 @@ export function CourbePoids({
       >
         <defs>
           <linearGradient id="sousCourbe" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--corail)" stopOpacity="0.22" />
-            <stop offset="100%" stopColor="var(--corail)" stopOpacity="0" />
+            <stop offset="0%" stopColor="var(--primaire)" stopOpacity="0.22" />
+            <stop offset="100%" stopColor="var(--primaire)" stopOpacity="0" />
           </linearGradient>
         </defs>
 
@@ -113,7 +113,7 @@ export function CourbePoids({
               x2={L - MARGE.droite}
               y1={vue.y(objectifKg)}
               y2={vue.y(objectifKg)}
-              stroke="var(--basil)"
+              stroke="var(--reussite)"
               strokeWidth="1.5"
               strokeDasharray="5 5"
             />
@@ -121,7 +121,7 @@ export function CourbePoids({
               x={L - MARGE.droite}
               y={vue.y(objectifKg) - 6}
               textAnchor="end"
-              className="fill-basil text-[11px] font-semibold"
+              className="fill-reussite text-[11px] font-semibold"
             >
               Objectif
             </text>
@@ -132,7 +132,7 @@ export function CourbePoids({
         <path
           d={trace.join(' ')}
           fill="none"
-          stroke="var(--corail)"
+          stroke="var(--primaire)"
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -144,8 +144,8 @@ export function CourbePoids({
             cx={vue.x(i)}
             cy={vue.y(p.poidsKg)}
             r={i === actif ? 5.5 : 4}
-            fill={i === actif ? 'var(--corail)' : 'var(--surface)'}
-            stroke="var(--corail)"
+            fill={i === actif ? 'var(--primaire)' : 'var(--surface)'}
+            stroke="var(--primaire)"
             strokeWidth="2.5"
           />
         ))}

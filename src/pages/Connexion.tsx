@@ -36,15 +36,15 @@ export function Connexion({ mode }: { mode: 'connexion' | 'inscription' }) {
         {avisSuppression && (
           <div
             role="status"
-            className="mb-6 flex items-start gap-2 rounded-2xl bg-berry-wash px-4 py-3"
+            className="mb-6 flex items-start gap-2 rounded-2xl bg-alerte-wash px-4 py-3"
           >
-            <AlertCircle size={17} className="mt-0.5 shrink-0 text-berry" aria-hidden="true" />
-            <p className="flex-1 text-sm text-berry">{avisSuppression}</p>
+            <AlertCircle size={17} className="mt-0.5 shrink-0 text-alerte" aria-hidden="true" />
+            <p className="flex-1 text-sm text-alerte">{avisSuppression}</p>
             <button
               type="button"
               onClick={fermerAvisSuppression}
               aria-label="Masquer ce message"
-              className="grid size-6 shrink-0 place-items-center rounded-full text-berry transition hover:bg-berry/15"
+              className="grid size-6 shrink-0 place-items-center rounded-full text-alerte transition hover:bg-alerte/15"
             >
               <X size={14} />
             </button>
@@ -104,7 +104,7 @@ export function Connexion({ mode }: { mode: 'connexion' | 'inscription' }) {
             {erreur && (
               <p
                 role="alert"
-                className="flex items-start gap-2 rounded-2xl bg-berry-wash px-4 py-3 text-sm text-berry"
+                className="flex items-start gap-2 rounded-2xl bg-alerte-wash px-4 py-3 text-sm text-alerte"
               >
                 <AlertCircle size={17} className="mt-0.5 shrink-0" aria-hidden="true" />
                 {erreur}
@@ -120,7 +120,7 @@ export function Connexion({ mode }: { mode: 'connexion' | 'inscription' }) {
             {inscription ? 'Vous avez déjà un compte ?' : 'Pas encore de compte ?'}{' '}
             <Lien
               vers={inscription ? '/connexion' : '/inscription'}
-              className="font-semibold text-corail underline underline-offset-2"
+              className="font-semibold text-primaire underline underline-offset-2"
             >
               {inscription ? 'Se connecter' : 'En créer un'}
             </Lien>
@@ -128,7 +128,7 @@ export function Connexion({ mode }: { mode: 'connexion' | 'inscription' }) {
         </div>
 
         {modeDemo && (
-          <p className="mt-5 rounded-2xl bg-apricot-wash px-4 py-3 text-center text-xs text-apricot">
+          <p className="mt-5 rounded-2xl bg-accent-wash px-4 py-3 text-center text-xs text-accent">
             Mode démo : vos données restent dans ce navigateur. Renseignez les clés Supabase
             pour les synchroniser entre vos appareils.
           </p>

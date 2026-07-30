@@ -72,7 +72,7 @@ export function Accueil() {
           <Marque taille={36} />
           <span className="font-display text-xl font-semibold text-ink">Mamakilo</span>
         </span>
-        <Lien vers="/connexion" className="font-semibold text-corail">
+        <Lien vers="/connexion" className="font-semibold text-primaire">
           Se connecter
         </Lien>
       </header>
@@ -80,7 +80,7 @@ export function Accueil() {
       <main>
         <section className="mx-auto grid max-w-5xl items-center gap-10 px-5 pt-8 pb-20 md:grid-cols-2 md:gap-14 md:pt-16">
           <div className="order-2 md:order-1">
-            <p className="mb-4 text-sm font-bold tracking-[0.16em] text-apricot uppercase">
+            <p className="mb-4 text-sm font-bold tracking-[0.16em] text-accent uppercase">
               Bien manger, vivre mieux
             </p>
             <h1 className="font-display text-[2.6rem] leading-[1.05] font-semibold text-ink sm:text-6xl">
@@ -141,7 +141,7 @@ export function Accueil() {
           <ul className="grid gap-8 sm:grid-cols-2">
             {ATOUTS.map(({ Icone, titre, texte }) => (
               <li key={titre}>
-                <span className="mb-4 grid size-11 place-items-center rounded-2xl bg-corail-wash text-corail">
+                <span className="mb-4 grid size-11 place-items-center rounded-2xl bg-primaire-wash text-primaire">
                   <Icone size={21} aria-hidden="true" />
                 </span>
                 <h3 className="mb-2 text-lg font-semibold text-ink">{titre}</h3>

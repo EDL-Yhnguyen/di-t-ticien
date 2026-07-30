@@ -96,40 +96,44 @@ export function Aujourdhui() {
       {/* Le bandeau porte la seule question qui compte au moment où l'on ouvre
           l'application : combien il reste. Il sort de la gouttière du gabarit
           pour que la carte de la mosaïque vienne chevaucher la couleur. */}
-      <div className="-mx-4 -mt-5 rounded-b-[2.5rem] bg-linear-to-b from-bandeau-haut to-bandeau-bas px-4 pt-6 pb-24 md:-mx-8 md:-mt-10 md:px-8 md:pt-10">
+      <div className="bandeau -mx-4 -mt-5 rounded-b-[2.75rem] px-4 pt-6 pb-24 md:-mx-8 md:-mt-10 md:px-8 md:pt-10">
         <header className="animate-rise flex items-start justify-between gap-4">
           <div>
-            <p className="text-sm font-medium text-white/70">
+            <p className="text-sm font-semibold tracking-[0.06em] text-white/85 uppercase">
               {dateLongue(date).replace(/^\w/, (c) => c.toUpperCase())}
             </p>
-            <h1 className="mt-0.5 text-2xl font-semibold text-white">
+            <h1 className="mt-1 text-3xl font-semibold text-white">
               {salutation()}
               {etat.profil.prenom && `, ${etat.profil.prenom}`}
             </h1>
           </div>
           {jours > 0 && (
-            <p className="flex shrink-0 items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 font-display text-lg font-semibold text-white tnum">
-              <Flame size={17} className="animate-flame text-apricot" aria-hidden="true" />
+            <p className="flex shrink-0 items-center gap-1.5 rounded-full bg-white/20 px-3 py-1.5 font-display text-lg font-semibold text-white ring-1 ring-white/25 ring-inset tnum">
+              <Flame size={17} className="animate-flame text-accent-vif" aria-hidden="true" />
               {jours}
             </p>
           )}
         </header>
 
-        <div className="animate-rise mt-6" style={{ animationDelay: '60ms' }}>
+        <div className="animate-rise mt-7" style={{ animationDelay: '60ms' }}>
           <p className="flex items-baseline gap-2.5">
             <span
               className="font-display font-semibold text-white tnum"
-              style={{ fontSize: 'clamp(2.75rem, 13vw, 4rem)', lineHeight: 1 }}
+              style={{ fontSize: 'clamp(3.25rem, 16vw, 4.75rem)', lineHeight: 0.92 }}
             >
               {entier(Math.abs(reste))}
             </span>
-            <span className="text-base font-medium text-white/80">
+            <span className="text-base font-semibold text-white/90">
               kcal {reste >= 0 ? 'restantes' : 'au-dessus'}
             </span>
           </p>
-          <p className="mt-1.5 text-sm text-white/75">{resume.phrase}</p>
+          {/* Les opacités du texte sur le bandeau ne descendent plus sous 85 % :
+              en dessous, la nuance passait sous le seuil de contraste alors même
+              que le bandeau, lui, le respectait. C'est pour cette marge que
+              --bandeau-haut est calculé à 6:1 et non à 4,5:1. */}
+          <p className="mt-2 text-[0.9375rem] text-white/90">{resume.phrase}</p>
           {bonusSport > 0 && (
-            <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-white/85">
+            <p className="mt-1.5 flex items-center gap-1.5 text-sm font-medium text-white/90">
               <Dumbbell size={15} aria-hidden="true" />
               <span className="tnum">
                 {entier(objectifBase)} kcal + {entier(bonusSport)} gagnées en bougeant
@@ -137,7 +141,7 @@ export function Aujourdhui() {
             </p>
           )}
 
-          <div className="mt-4">
+          <div className="mt-5">
             <JaugeEnergie bilans={bilans} objectifKcal={objectif} surBandeau />
           </div>
         </div>
@@ -151,7 +155,7 @@ export function Aujourdhui() {
             action={
               <Lien
                 vers="/app/ajouter"
-                className="flex items-center gap-1 text-sm font-semibold text-corail"
+                className="flex items-center gap-1 text-sm font-semibold text-primaire"
               >
                 <Plus size={16} aria-hidden="true" />
                 Ajouter
@@ -177,7 +181,7 @@ export function Aujourdhui() {
           <div className="grid gap-4 border-t border-line px-5 py-4 sm:grid-cols-2">
             {top && (
               <LigneTopFlop
-                icone={<ThumbsUp size={15} className="text-basil" aria-hidden="true" />}
+                icone={<ThumbsUp size={15} className="text-reussite" aria-hidden="true" />}
                 intitule="Le top du jour"
               >
                 {top.aliment.nom}
@@ -185,7 +189,7 @@ export function Aujourdhui() {
             )}
             {flop && (
               <LigneTopFlop
-                icone={<ThumbsDown size={15} className="text-berry" aria-hidden="true" />}
+                icone={<ThumbsDown size={15} className="text-alerte" aria-hidden="true" />}
                 intitule="Le flop du jour"
               >
                 {flop.aliment.nom}
@@ -247,8 +251,8 @@ export function Aujourdhui() {
 
       {/* ── Recommandation ── */}
       <Carte className="animate-rise overflow-hidden" style={{ animationDelay: '300ms' }}>
-        <div className="bg-corail-wash px-5 py-4">
-          <p className="text-xs font-bold tracking-[0.14em] text-corail uppercase">
+        <div className="lavis-primaire border-b border-primaire/20 px-5 py-4">
+          <p className="text-xs font-bold tracking-[0.14em] text-primaire uppercase">
             Pour le {LIBELLE_MOMENT[conseil.moment].toLowerCase()}
           </p>
           <h2 className="mt-1 font-display text-xl font-semibold text-ink">{conseil.titre}</h2>
@@ -292,8 +296,11 @@ export function Aujourdhui() {
 
       {/* ── Le coach ── */}
       <Lien vers="/app/coach" className="animate-rise block" style={{ animationDelay: '330ms' }}>
-        <Carte className="flex items-center gap-3 bg-corail-wash px-5 py-4 transition hover:brightness-[0.98]">
-          <MessageCircle size={20} className="shrink-0 text-corail" aria-hidden="true" />
+        <Carte
+          ton="primaire"
+          className="flex items-center gap-3 px-5 py-4 transition hover:brightness-[0.98]"
+        >
+          <MessageCircle size={20} className="shrink-0 text-primaire" aria-hidden="true" />
           <span className="min-w-0 flex-1">
             <span className="block font-semibold text-ink">Demander à mon coach</span>
             <span className="block text-sm text-ink-soft">
@@ -308,7 +315,7 @@ export function Aujourdhui() {
       <Carte className="animate-rise p-5" style={{ animationDelay: '360ms' }}>
         <div className="mb-3 flex items-center justify-between gap-4">
           <h2 className="flex items-center gap-2 text-base font-semibold text-ink">
-            <Droplets size={18} className="text-corail" aria-hidden="true" />
+            <Droplets size={18} className="text-primaire" aria-hidden="true" />
             Hydratation
           </h2>
           <span className="text-sm font-semibold text-ink-soft tnum">
@@ -327,7 +334,7 @@ export function Aujourdhui() {
                 onClick={() => reglerEau(rempli && i === eau.verres - 1 ? i : i + 1)}
                 className={classes(
                   'h-11 flex-1 rounded-xl border-2 transition',
-                  rempli ? 'border-corail bg-corail' : 'border-line bg-sunken hover:border-corail/40',
+                  rempli ? 'border-primaire bg-primaire' : 'border-line bg-sunken hover:border-primaire/40',
                 )}
               />
             )
@@ -340,11 +347,11 @@ export function Aujourdhui() {
       <Carte className="animate-rise p-5" style={{ animationDelay: '420ms' }}>
         <div className="mb-3 flex items-center justify-between gap-4">
           <h2 className="flex items-center gap-2 text-base font-semibold text-ink">
-            <Dumbbell size={18} className="text-corail" aria-hidden="true" />
+            <Dumbbell size={18} className="text-primaire" aria-hidden="true" />
             Activité
           </h2>
           {seances.length > 0 && (
-            <span className="text-sm font-semibold text-basil tnum">
+            <span className="text-sm font-semibold text-reussite tnum">
               +{entier(bonusSport)} kcal
             </span>
           )}
@@ -547,7 +554,7 @@ function DetailEntree({
                   </span>
                 </span>
                 {kcalEconomisees > 0 && (
-                  <span className="shrink-0 text-xs font-bold text-basil tnum">
+                  <span className="shrink-0 text-xs font-bold text-reussite tnum">
                     −{entier(kcalEconomisees)} kcal
                   </span>
                 )}
@@ -560,7 +567,7 @@ function DetailEntree({
       <Bouton
         ton="fantome"
         pleineLargeur
-        className="mt-6 text-berry"
+        className="mt-6 text-alerte"
         onClick={() => onSupprimer(entree.id)}
       >
         <Trash2 size={17} aria-hidden="true" />

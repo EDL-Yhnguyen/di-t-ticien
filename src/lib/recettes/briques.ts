@@ -139,7 +139,7 @@ export const FECULENTS: Brique[] = [
   { id: 'haricot-blanc', nom: 'Haricots blancs cuits', titreCourt: 'haricots blancs', rayon: 'Épicerie', v: [105, 7, 17, 0.6], g: 150, regimes: VEGAN_SG, styles: ['francaise', 'mediterraneenne'], cuisson: { cru: 0, mijote: 20 } },
   { id: 'pain-complet', nom: 'Pain complet', titreCourt: 'pain', rayon: 'Boulangerie', v: [247, 9, 41, 3.5], g: 70, regimes: VEGAN, cuisson: { cru: 0 } },
   { id: 'galette-ble', nom: 'Galette de blé complet', titreCourt: 'galette de blé', rayon: 'Boulangerie', v: [297, 9, 48, 7], g: 60, regimes: VEGAN, styles: ['mexicaine', 'orientale'], cuisson: { cru: 0, poele: 2 } },
-  { id: 'lentille-corail', nom: 'Lentilles corail', rayon: 'Épicerie', v: [116, 8, 20, 0.4], g: 150, regimes: VEGAN_SG, styles: ['indienne', 'orientale'], cuisson: { bouilli: 15, mijote: 18 } },
+  { id: 'lentille-primaire', nom: 'Lentilles primaire', rayon: 'Épicerie', v: [116, 8, 20, 0.4], g: 150, regimes: VEGAN_SG, styles: ['indienne', 'orientale'], cuisson: { bouilli: 15, mijote: 18 } },
 ]
 
 /* ───────────────────────────── Les légumes ───────────────────────────── */

@@ -267,9 +267,10 @@ Réutiliser ces composants plutôt que de restyler du JSX brut :
 ```ts
 Marque({ taille? })                              // le logo, mêmes tracés que public/icone.svg
 Bouton({ ton?: 'primaire'|'accent'|'doux'|'fantome'|'alerte', pleineLargeur? })
-Carte(props: HTMLAttributes<HTMLDivElement>)
+Carte({ ton?: 'primaire'|'accent'|'reussite'|'alerte' })
+Tuile({ ton?: 'primaire'|'accent'|'reussite'|'alerte'|'vif', intitule })
 TitreSection({ eyebrow?, children, action? })
-Etiquette({ ton?: 'corail'|'apricot'|'basil'|'berry'|'neutre' })
+Etiquette({ ton?: 'primaire'|'accent'|'reussite'|'alerte'|'neutre' })
 Champ({ label, aide?, suffixe?, ...inputProps })
 ChoixListe<T extends string>({ label, valeur, options, onChange })
 Bascule({ label, aide?, actif, onChange })
@@ -280,27 +281,63 @@ Chargement({ libelle? })
 
 Utilitaire de classes : `classes(...)` dans `src/lib/utils.ts`.
 
-### Jetons de couleur — `src/index.css`
+### Jetons de couleur — `src/index.css` et `src/palettes.css`
 
-Mode sombre = classe `.dark` sur `<html>`. Chaque jeton est redéfini dans
-`:root`, `.dark` **et** `@theme inline` — les trois, sinon la couleur casse
-dans un des deux thèmes.
+Deux réglages indépendants qui se combinent : le **mode** (clair / sombre /
+système) est une classe `.dark` sur `<html>`, le **thème de couleur** est un
+attribut `data-theme`. Huit thèmes × deux modes.
 
-La palette est tirée du logo Mamakilo (`Modèles/logo Mamakilo.jpg`) : marmite
-corail, fond crème, encre marine du lettrage, vert des feuilles. **Aucune
-couleur du logo n'est reprise telle quelle** — le corail `#f67a5e` ne tient que
-2,4:1 sur blanc, donc ni texte ni bouton. Il reste à l'illustration ; `--corail`
-en est la version portante, assombrie jusqu'à 4,5:1 dans chacun de ses usages.
-Les deux se ressemblent assez pour que la marque reste une seule couleur à
-l'œil.
+**`src/palettes.css` est un fichier généré — ne jamais l'éditer à la main.**
+Il sort d'`outils/palettes.mjs`, qui tient les seize variantes et vérifie leurs
+contrastes :
 
-- Neutres : `ground`, `surface`, `sunken`, `ink`, `ink-soft`, `ink-faint`, `line`
-- Teintes + lavis : `corail`/`corail-wash` (primaire), `apricot`/`apricot-wash`
-  (accent, calories), `basil`/`basil-wash` (réussite), `berry`/`berry-wash` (alerte)
+```bash
+node outils/palettes.mjs            # régénère palettes.css et affiche le rapport
+node outils/palettes.mjs --verifie  # n'écrit rien, sort en 1 si un contraste échoue
+```
+
+Le générateur existe parce que la règle « toute teinte modifiée se revérifie au
+calcul de contraste » représentait une relecture à un thème, et plus de six cents
+paires à huit thèmes en clair et en sombre. Une règle de cette taille ne tient
+que si elle est exécutable. **Le lancer avant de commiter une modification de
+couleur.**
+
+Le thème par défaut, **Marmite**, occupe `:root` et `.dark` : l'application a ses
+couleurs sans qu'aucun attribut soit posé. Il est tiré du logo Mamakilo
+(`Modèles/logo Mamakilo.jpg`) : marmite corail, fond crème, encre marine du
+lettrage, vert des feuilles. **Aucune couleur du logo n'est reprise telle
+quelle** — le corail `#f67a5e` ne tient que 2,4:1 sur blanc, donc ni texte ni
+bouton. Il reste à l'illustration ; `--corail` en est la version portante,
+assombrie jusqu'à 4,5:1 dans chacun de ses usages. Les deux se ressemblent assez
+pour que la marque reste une seule couleur à l'œil.
+
+Les sept autres — Potager, Agrumes, Myrtille, Océan, Cacao, Framboise, Encre —
+vivent sous `[data-theme=…]`. Ajouter un thème demande de le déclarer **dans le
+générateur et dans `THEMES` de `src/lib/apparence.ts`** : les trois couleurs de
+la vignette de choix y sont recopiées en dur, parce qu'une vignette doit montrer
+son thème pendant qu'un autre est appliqué, donc elle ne peut pas lire les
+variables CSS courantes.
+
+- Neutres : `ground`, `surface`, `sunken`, `ink`, `ink-soft`, `ink-faint`, `line`,
+  `line-fort`
+- **Teintes nommées par leur rôle, plus par leur couleur** : `primaire`,
+  `accent` (calories), `reussite`, `alerte`, chacune avec son lavis `-wash`.
+  C'est le renommage qui a rendu les huit thèmes possibles : `corail`, `apricot`,
+  `basil` et `berry` décrivaient une teinte, et un jeton nommé « corail » qui
+  vaut du bleu en thème Océan ment à celui qui le lit. Les anciens noms ne
+  subsistent nulle part dans `src/` — ne pas les réintroduire.
+- Aplats : `.plein-primaire`, `.plein-accent`, `.plein-reussite`,
+  `.plein-alerte` (fond porteur + texte blanc), et `.shadow-halo`
 - **Toute teinte modifiée se revérifie au calcul de contraste**, sur les quatre
   fonds où elle peut atterrir : `surface`, `ground`, `sunken` et son propre lavis.
   Le fond crème est moins clair que le blanc — une valeur qui passe sur `surface`
   peut échouer sur `ground`, ce qui est arrivé au premier jet.
+- **Les jetons de données ne suivent pas le thème**, et c'est la règle centrale
+  du système : `assiette-*`, `nutri-*`, `macro-*`, `bande-*` portent du sens, pas
+  du goût. La part des légumes doit rester la même couleur que l'utilisateur
+  choisisse « Agrumes » ou « Océan », sinon la légende apprise hier ne vaut plus
+  rien aujourd'hui. Ils sont déclarés une fois dans `index.css` et validés sur
+  les fonds de **tous** les thèmes.
 - **Réservés, ne pas emprunter** : `assiette-legume`, `assiette-feculent`,
   `assiette-proteine`. Palette catégorielle validée en vision daltonienne
   (ΔE ≥ 8 en protanopie) — les trois parts se touchent, donc chaque paire doit
@@ -752,6 +789,48 @@ Vérification manuelle attendue :
 ---
 
 ## Historique du projet
+
+### 30 juillet 2026 — Huit thèmes de couleur
+
+L'apparence devient un réglage. Deux axes indépendants — la luminosité (clair /
+sombre / **système**) et la couleur (huit thèmes) — plutôt qu'un seul réglage de
+seize entrées : « je veux du violet » et « je veux du sombre le soir » sont deux
+questions différentes, et la seconde a déjà une réponse automatique.
+
+- **`outils/palettes.mjs` génère `src/palettes.css`**, seize variantes, et
+  vérifie tous les contrastes (`--verifie` sort en 1 à la moindre paire sous le
+  seuil). Le générateur ne choisit pas des couleurs mais des teintes, puis
+  descend la luminosité jusqu'à ce que le rapport passe. C'est ce qui rend
+  tenable la règle « toute teinte modifiée se revérifie » à plus de six cents
+  paires.
+- **Les jetons sont renommés par leur rôle** : `corail`→`primaire`,
+  `apricot`→`accent`, `basil`→`reussite`, `berry`→`alerte`. C'est le changement
+  qui rend les thèmes possibles — un jeton nommé « corail » qui vaut du bleu en
+  thème Océan ment à celui qui le lit. 40 fichiers touchés, presque tous
+  mécaniquement.
+- **Les couleurs de données ne suivent pas le thème.** `assiette-*`, `nutri-*`,
+  `macro-*`, `bande-*` restent déclarées une fois dans `index.css`. La part des
+  légumes doit rester verte en thème Agrumes comme en thème Océan : une légende
+  qui change avec le goût du jour ne s'apprend pas. L'écran de réglage le dit à
+  l'utilisateur plutôt que de le laisser le découvrir.
+- **`appliquerApparence()` met aussi `<meta name="theme-color">` à jour.** Sans
+  cette ligne, une PWA installée en thème Myrtille garde la barre crème du thème
+  d'origine, et la façade se voit à la jointure.
+- **Le choix vit dans `localStorage`, pas dans le document de l'utilisateur** :
+  l'accueil et la connexion doivent être thémés avant qu'un compte existe, le
+  téléphone du soir n'appelle pas le thème du bureau, et un réglage d'affichage
+  n'a pas à voyager dans un document qui porte des données de santé. La clé
+  `equilibre:theme` garde ses valeurs `clair`/`sombre` : les comptes existants
+  ne perdent pas leur réglage.
+
+**Vérifié :** `npm run build` (typecheck `src` et `api`) passe,
+`node outils/palettes.mjs --verifie` sort en 0 — 8 thèmes × 2 variantes, tous les
+contrastes tiennent, les 16 avertissements portent sur des fonds jamais utilisés.
+`@anthropic-ai/sdk` ne fuite pas dans le bundle.
+
+**Pas encore vérifié à l'écran** : les huit thèmes n'ont pas été parcourus au
+pilote Playwright en 390 px et 1280 px, contrairement à l'usage des sprints
+précédents. À faire avant de considérer le chantier clos.
 
 ### 30 juillet 2026 — Le catalogue passe à 5 522 recettes (module Cuisine, sprint C7)
 

@@ -173,7 +173,7 @@ export function Courses() {
                       className={classes(
                         'rounded-full px-3.5 py-2 text-xs font-semibold transition',
                         actif
-                          ? 'bg-corail text-white'
+                          ? 'bg-primaire text-white'
                           : 'bg-surface text-ink-soft hover:bg-sunken hover:text-ink',
                       )}
                     >
@@ -238,7 +238,7 @@ export function Courses() {
             onClick={() => creer(ouvertes.length > 0 ? `Liste ${ouvertes.length + 1}` : undefined)}
             className="flex w-full items-center gap-3 px-5 py-4 text-left transition hover:bg-sunken"
           >
-            <Plus size={18} className="shrink-0 text-corail" aria-hidden="true" />
+            <Plus size={18} className="shrink-0 text-primaire" aria-hidden="true" />
             <span className="flex-1 font-medium text-ink">Nouvelle liste</span>
             <span className="text-xs text-ink-faint">
               {ouvertes.length === 0 ? 'aucune en cours' : `${ouvertes.length} en cours`}
@@ -259,7 +259,7 @@ export function Courses() {
             vers="/app/garde-manger"
             className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken"
           >
-            <Refrigerator size={18} className="shrink-0 text-basil" aria-hidden="true" />
+            <Refrigerator size={18} className="shrink-0 text-reussite" aria-hidden="true" />
             <span className="flex-1 font-medium text-ink">Mon garde-manger</span>
           </Lien>
         </Carte>
@@ -436,7 +436,7 @@ function LigneArticle({
         <span
           className={classes(
             'grid size-6 shrink-0 place-items-center rounded-lg border-2 transition',
-            article.pris ? 'border-basil bg-basil text-white' : 'border-line',
+            article.pris ? 'border-reussite bg-reussite text-white' : 'border-line',
           )}
         >
           {article.pris && <Check size={14} strokeWidth={3.5} aria-hidden="true" />}
@@ -472,7 +472,7 @@ function LigneArticle({
         type="button"
         onClick={onSupprimer}
         aria-label={`Retirer ${article.nom} de la liste`}
-        className="grid size-9 shrink-0 place-items-center rounded-full text-ink-faint transition hover:bg-sunken hover:text-berry"
+        className="grid size-9 shrink-0 place-items-center rounded-full text-ink-faint transition hover:bg-sunken hover:text-alerte"
       >
         <Trash2 size={15} />
       </button>
@@ -523,7 +523,7 @@ function FormulaireAjout({
       />
 
       {recherche === 'echec' && (
-        <p className="text-sm text-berry">
+        <p className="text-sm text-alerte">
           Ce code-barres n’est pas dans Open Food Facts. Écrivez le nom à la main.
         </p>
       )}
@@ -560,7 +560,7 @@ function FormulaireAjout({
               className={classes(
                 'rounded-full border px-3.5 py-2 text-sm font-semibold transition',
                 r === rayon
-                  ? 'border-corail bg-corail text-white'
+                  ? 'border-primaire bg-primaire text-white'
                   : 'border-line bg-surface text-ink-soft hover:bg-sunken',
               )}
             >
@@ -644,8 +644,8 @@ function FeuilleVersement({
       </p>
 
       {dejaVerse && (
-        <p className="rounded-tile bg-apricot-wash px-4 py-3 text-sm text-ink">
-          <strong className="font-semibold text-apricot">Déjà versée — </strong>
+        <p className="rounded-tile bg-accent-wash px-4 py-3 text-sm text-ink">
+          <strong className="font-semibold text-accent">Déjà versée — </strong>
           cette semaine a déjà été ajoutée à la liste. Verser à nouveau doublera les quantités.
         </p>
       )}
@@ -670,7 +670,7 @@ function FeuilleVersement({
                 <span
                   className={classes(
                     'grid size-6 shrink-0 place-items-center rounded-lg border-2 transition',
-                    retenu ? 'border-basil bg-basil text-white' : 'border-line',
+                    retenu ? 'border-reussite bg-reussite text-white' : 'border-line',
                   )}
                 >
                   {retenu && <Check size={14} strokeWidth={3.5} aria-hidden="true" />}
@@ -688,7 +688,7 @@ function FeuilleVersement({
                       nommé : c'est ce qui rend une erreur de rapprochement
                       inoffensive. */}
                   {p.enStock && (
-                    <span className="block truncate text-xs text-basil">
+                    <span className="block truncate text-xs text-reussite">
                       déjà au {LIBELLE_EMPLACEMENT[p.enStock.emplacement].toLowerCase()} :{' '}
                       {p.enStock.nom}
                     </span>
@@ -771,7 +771,7 @@ function FeuilleRetour({
                     className={classes(
                       'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition',
                       actif
-                        ? 'border-corail bg-corail text-white'
+                        ? 'border-primaire bg-primaire text-white'
                         : 'border-line bg-surface text-ink-soft hover:bg-sunken',
                     )}
                   >
@@ -787,7 +787,7 @@ function FeuilleRetour({
                 className={classes(
                   'rounded-full border px-3 py-1.5 text-xs font-semibold transition',
                   lieux[article.id] === 'ignorer'
-                    ? 'border-berry bg-berry text-white'
+                    ? 'border-alerte bg-alerte text-white'
                     : 'border-line bg-surface text-ink-faint hover:bg-sunken',
                 )}
               >
@@ -801,8 +801,8 @@ function FeuilleRetour({
       {/* Une liste de courses ne sait pas ce qui est imprimé sur l'emballage :
           inventer une DLC donnerait une fausse sécurité, alors que c'est
           précisément ce que le garde-manger cherche à éviter. */}
-      <p className="rounded-tile bg-apricot-wash px-4 py-3 text-sm text-ink">
-        <strong className="font-semibold text-apricot">Les dates restent à noter — </strong>
+      <p className="rounded-tile bg-accent-wash px-4 py-3 text-sm text-ink">
+        <strong className="font-semibold text-accent">Les dates restent à noter — </strong>
         les courses ne les connaissent pas. Ouvrez le garde-manger pour ajouter une date limite là
         où elle compte.
       </p>

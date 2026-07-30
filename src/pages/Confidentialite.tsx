@@ -51,8 +51,8 @@ export function Confidentialite() {
         </p>
 
         {!editeurRenseigne && (
-          <Carte className="border-berry bg-berry-wash p-4">
-            <p className="text-sm text-berry">
+          <Carte className="border-alerte bg-alerte-wash p-4">
+            <p className="text-sm text-alerte">
               <strong className="font-semibold">Mentions incomplètes.</strong> L’identité de
               l’éditeur n’est pas renseignée. Elle est obligatoire avant toute mise à disposition
               du public : complétez <code className="font-mono">EDITEUR</code> dans{' '}
@@ -62,8 +62,8 @@ export function Confidentialite() {
         )}
 
         {editeurRenseigne && contactProvisoire && (
-          <Carte className="border-apricot bg-apricot-wash p-4">
-            <p className="text-sm text-apricot">
+          <Carte className="border-accent bg-accent-wash p-4">
+            <p className="text-sm text-accent">
               <strong className="font-semibold">Adresse de contact provisoire.</strong> Personne ne
               peut exercer ses droits sur une adresse qui n’existe pas. Remplacez{' '}
               <code className="font-mono">EDITEUR.contact</code> dans{' '}
@@ -74,7 +74,7 @@ export function Confidentialite() {
         )}
 
         <Carte className="flex items-start gap-3 p-5">
-          <ShieldCheck size={20} className="mt-0.5 shrink-0 text-basil" aria-hidden="true" />
+          <ShieldCheck size={20} className="mt-0.5 shrink-0 text-reussite" aria-hidden="true" />
           <p className="text-sm leading-relaxed text-ink-soft">
             Un journal alimentaire et des pesées sont des <strong>données de santé</strong>. Elles
             ne servent qu’à vous afficher votre propre suivi. Elles ne sont ni vendues, ni louées,
@@ -104,7 +104,7 @@ export function Confidentialite() {
                 Pour toute question ou pour exercer vos droits :{' '}
                 <a
                   href={`mailto:${EDITEUR.contact}`}
-                  className="font-semibold text-corail underline underline-offset-2"
+                  className="font-semibold text-primaire underline underline-offset-2"
                 >
                   {EDITEUR.contact}
                 </a>
@@ -215,7 +215,7 @@ export function Confidentialite() {
               href="https://www.cnil.fr/fr/plaintes"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-semibold text-corail underline underline-offset-2"
+              className="font-semibold text-primaire underline underline-offset-2"
             >
               CNIL
             </a>
@@ -248,7 +248,7 @@ export function Confidentialite() {
               href={HEBERGEUR_SITE.site}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-corail underline underline-offset-2"
+              className="text-primaire underline underline-offset-2"
             >
               {HEBERGEUR_SITE.site}
             </a>
@@ -259,7 +259,7 @@ export function Confidentialite() {
               href={HEBERGEUR_BASE.site}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-corail underline underline-offset-2"
+              className="text-primaire underline underline-offset-2"
             >
               {HEBERGEUR_BASE.site}
             </a>

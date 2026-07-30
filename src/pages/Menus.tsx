@@ -204,7 +204,7 @@ export function Menus() {
           <button
             type="button"
             onClick={() => setAncre(aujourdhui)}
-            className="w-full text-sm font-semibold text-corail underline underline-offset-4"
+            className="w-full text-sm font-semibold text-primaire underline underline-offset-4"
           >
             Revenir à aujourd’hui
           </button>
@@ -424,8 +424,8 @@ function ResumeSemaine({
 
   return (
     <Carte className="animate-rise overflow-hidden" style={{ animationDelay: '90ms' }}>
-      <div className="bg-corail-wash px-5 py-4">
-        <p className="text-xs font-bold tracking-[0.14em] text-corail uppercase">
+      <div className="bg-primaire-wash px-5 py-4">
+        <p className="text-xs font-bold tracking-[0.14em] text-primaire uppercase">
           {bilan.joursRemplis} jour{bilan.joursRemplis > 1 ? 's' : ''} composé
           {bilan.joursRemplis > 1 ? 's' : ''}
         </p>
@@ -514,14 +514,14 @@ function VueMois({
             onClick={() => onSemaine(lundi)}
             className={classes(
               'w-full rounded-card border bg-surface px-4 py-3.5 text-left shadow-soft transition hover:bg-sunken',
-              contientAujourdhui ? 'border-corail' : 'border-line',
+              contientAujourdhui ? 'border-primaire' : 'border-line',
             )}
           >
             <div className="flex items-baseline justify-between gap-3">
               <span className="text-sm font-semibold text-ink">
                 Semaine du {dateLongue(lundi).replace(/^\w+\s/, '')}
                 {contientAujourdhui && (
-                  <span className="ml-2 text-xs font-semibold text-corail">en cours</span>
+                  <span className="ml-2 text-xs font-semibold text-primaire">en cours</span>
                 )}
               </span>
               {bilan ? (
@@ -550,8 +550,8 @@ function VueMois({
                       total === 0
                         ? 'bg-sunken'
                         : complet
-                          ? 'bg-basil'
-                          : 'bg-apricot',
+                          ? 'bg-reussite'
+                          : 'bg-accent',
                     )}
                   />
                 )
@@ -696,18 +696,18 @@ function CarteJour({
   const ecart = total - objectif
 
   return (
-    <Carte className={classes('overflow-hidden', aujourdhui && 'border-corail')}>
+    <Carte className={classes('overflow-hidden', aujourdhui && 'border-primaire')}>
       <div className="flex items-baseline justify-between gap-3 px-5 pt-4 pb-2">
         <button type="button" onClick={onJour} className="min-w-0 text-left">
           <h2 className="font-semibold text-ink">
             {dateLongue(jour.date).replace(/^\w/, (c) => c.toUpperCase())}
-            {aujourdhui && <span className="ml-2 text-sm font-semibold text-corail">Aujourd’hui</span>}
+            {aujourdhui && <span className="ml-2 text-sm font-semibold text-primaire">Aujourd’hui</span>}
           </h2>
         </button>
         <span
           className={classes(
             'shrink-0 text-sm font-semibold tnum',
-            Math.abs(ecart) <= 150 ? 'text-basil' : 'text-ink-soft',
+            Math.abs(ecart) <= 150 ? 'text-reussite' : 'text-ink-soft',
           )}
         >
           {entier(total)} kcal
@@ -747,7 +747,7 @@ function CarteJour({
                 if (de.date === jour.date && de.moment === moment) return
                 onDeposer(de, { date: jour.date, moment })
               }}
-              className={classes('transition', survole === moment && 'bg-corail-wash')}
+              className={classes('transition', survole === moment && 'bg-primaire-wash')}
             >
               <button
                 type="button"
@@ -899,7 +899,7 @@ function FeuilleDeplacement({
                       memeCreneau
                         ? 'border-line bg-sunken text-ink-faint'
                         : occupe
-                          ? 'border-apricot bg-apricot-wash text-ink hover:brightness-95'
+                          ? 'border-accent bg-accent-wash text-ink hover:brightness-95'
                           : 'border-line bg-surface text-ink-soft hover:bg-sunken',
                     )}
                   >
@@ -954,7 +954,7 @@ function FeuilleReglages({
                 className={classes(
                   'flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm font-medium transition',
                   actif
-                    ? 'border-corail bg-corail-wash text-ink'
+                    ? 'border-primaire bg-primaire-wash text-ink'
                     : 'border-line bg-surface text-ink-soft hover:bg-sunken',
                 )}
               >
@@ -978,7 +978,7 @@ function FeuilleReglages({
               className={classes(
                 'flex-1 rounded-full border py-2 text-sm font-semibold transition',
                 nombre === n
-                  ? 'border-corail bg-corail text-white'
+                  ? 'border-primaire bg-primaire text-white'
                   : 'border-line bg-surface text-ink-soft hover:bg-sunken',
               )}
             >
@@ -1040,13 +1040,13 @@ function FeuilleCopie({
                 onClick={() => onCopier(cible)}
                 className="flex w-full items-center gap-3 rounded-card border border-line bg-surface px-4 py-3 text-left transition hover:bg-sunken"
               >
-                <CalendarDays size={17} className="shrink-0 text-corail" aria-hidden="true" />
+                <CalendarDays size={17} className="shrink-0 text-primaire" aria-hidden="true" />
                 <span className="min-w-0 flex-1 text-sm font-semibold text-ink">
                   Semaine du {dateLongue(cible).replace(/^\w+\s/, '')}
                 </span>
                 {/* Prévenir avant d'écraser : une semaine déjà composée qu'on
                     recouvre sans le savoir, c'est du travail perdu. */}
-                {occupee && <Etiquette ton="apricot">déjà composée</Etiquette>}
+                {occupee && <Etiquette ton="accent">déjà composée</Etiquette>}
               </button>
             </li>
           )
@@ -1131,7 +1131,7 @@ function FeuilleModeles({
                     type="button"
                     onClick={() => onSupprimer(modele.id)}
                     aria-label={`Supprimer le modèle ${modele.nom}`}
-                    className="shrink-0 rounded-full px-3 py-2 text-xs font-semibold text-ink-faint transition hover:bg-sunken hover:text-berry"
+                    className="shrink-0 rounded-full px-3 py-2 text-xs font-semibold text-ink-faint transition hover:bg-sunken hover:text-alerte"
                   >
                     Retirer
                   </button>
@@ -1218,7 +1218,7 @@ function FeuilleRemplacement({
                 className={classes(
                   'flex w-full items-center gap-3 rounded-card border px-4 py-3 text-left transition',
                   actuel
-                    ? 'border-corail bg-corail-wash'
+                    ? 'border-primaire bg-primaire-wash'
                     : 'border-line bg-surface hover:bg-sunken',
                 )}
               >
@@ -1230,7 +1230,7 @@ function FeuilleRemplacement({
                     {recette.kcal} kcal · {recette.minutes} min
                   </span>
                 </span>
-                {actuel && <Check size={17} className="shrink-0 text-corail" aria-hidden="true" />}
+                {actuel && <Check size={17} className="shrink-0 text-primaire" aria-hidden="true" />}
               </button>
             </li>
           )
@@ -1290,7 +1290,7 @@ function FeuilleCourses({
               Verser dans ma liste de courses
             </Bouton>
             {verse > 0 && (
-              <p className="text-sm text-basil" role="status">
+              <p className="text-sm text-reussite" role="status">
                 {verse} produit{verse > 1 ? 's' : ''} ajouté{verse > 1 ? 's' : ''}. Ce que votre
                 garde-manger couvre déjà a été laissé de côté.
               </p>

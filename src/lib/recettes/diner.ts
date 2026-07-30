@@ -104,7 +104,7 @@ export const DINERS: Recette[] = [
   },
   {
     id: 'soupe-legumes-lentilles',
-    titre: 'Soupe épaisse de légumes aux lentilles corail',
+    titre: 'Soupe épaisse de légumes aux lentilles primaire',
     moment: 'diner',
     minutes: 30,
     kcal: 375,
@@ -116,11 +116,11 @@ export const DINERS: Recette[] = [
     appareils: [
       {
         appareil: 'Autocuiseur',
-        instructions: '8 min sous pression après le sifflement, puis mixez. Les lentilles corail n’ont pas besoin de plus.',
+        instructions: '8 min sous pression après le sifflement, puis mixez. Les lentilles primaire n’ont pas besoin de plus.',
       },
     ],
     ingredients: [
-      { nom: 'Lentilles corail', quantite: '60 g crues', rayon: 'Épicerie' },
+      { nom: 'Lentilles primaire', quantite: '60 g crues', rayon: 'Épicerie' },
       { nom: 'Carottes', quantite: '2', rayon: 'Fruits et légumes' },
       { nom: 'Poireau', quantite: '1', rayon: 'Fruits et légumes' },
       { nom: 'Pomme de terre', quantite: '1', rayon: 'Fruits et légumes' },
@@ -133,7 +133,7 @@ export const DINERS: Recette[] = [
       'Laissez cuire 20 minutes à petits bouillons.',
       'Mixez à peine — la soupe doit rester épaisse pour tenir au corps.',
     ],
-    astuce: 'Les lentilles corail se délitent en cuisant : c’est elles qui épaississent la soupe.',
+    astuce: 'Les lentilles primaire se délitent en cuisant : c’est elles qui épaississent la soupe.',
     conservation: '4 jours au réfrigérateur, 3 mois au congélateur',
     saisons: ['automne', 'hiver'],
   },
@@ -169,7 +169,7 @@ export const DINERS: Recette[] = [
   },
   {
     id: 'soupe-courge-lentilles',
-    titre: 'Soupe de courge et lentilles corail',
+    titre: 'Soupe de courge et lentilles primaire',
     moment: 'diner',
     minutes: 30,
     kcal: 400,
@@ -180,7 +180,7 @@ export const DINERS: Recette[] = [
     rechauffage: 'À la casserole à feu doux, en remuant : la courge attache vite.',
     ingredients: [
       { nom: 'Courge butternut', quantite: '400 g', rayon: 'Fruits et légumes' },
-      { nom: 'Lentilles corail', quantite: '60 g crues', rayon: 'Épicerie' },
+      { nom: 'Lentilles primaire', quantite: '60 g crues', rayon: 'Épicerie' },
       { nom: 'Oignon', quantite: '1', rayon: 'Fruits et légumes' },
       { nom: 'Cumin', quantite: '1 cc', rayon: 'Épicerie' },
       { nom: 'Huile d’olive', quantite: '1 CàS', rayon: 'Épicerie' },
@@ -192,7 +192,7 @@ export const DINERS: Recette[] = [
       'Laissez cuire 20 minutes, puis mixez.',
       'Servez avec la tranche de pain grillée.',
     ],
-    astuce: 'Les lentilles corail épaississent la soupe : plus besoin de crème pour qu’elle tienne.',
+    astuce: 'Les lentilles primaire épaississent la soupe : plus besoin de crème pour qu’elle tienne.',
     conservation: '4 jours au frais',
     saisons: ['automne', 'hiver'],
   },

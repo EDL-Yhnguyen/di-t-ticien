@@ -184,7 +184,7 @@ export function App() {
 function AttenteEcran() {
   return (
     <div className="grid min-h-[50svh] place-items-center" role="status" aria-label="Chargement de l’écran">
-      <span className="size-8 animate-spin rounded-full border-[3px] border-line border-t-corail" />
+      <span className="size-8 animate-spin rounded-full border-[3px] border-line border-t-primaire" />
     </div>
   )
 }

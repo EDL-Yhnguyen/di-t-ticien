@@ -2,7 +2,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useApp } from '../context/AppContext'
 import { Bouton } from './ui'
 
-const COULEURS = ['var(--corail)', 'var(--apricot)', 'var(--basil)', 'var(--berry)']
+const COULEURS = ['var(--primaire)', 'var(--accent)', 'var(--reussite)', 'var(--alerte)']
 
 /** Trajectoires figées à la définition : un tirage aléatoire par rendu ferait sauter les confettis. */
 const CONFETTIS = Array.from({ length: 26 }, (_, i) => ({
@@ -63,7 +63,7 @@ export function Celebration() {
             >
               {badgeACelebrer.emoji}
             </motion.p>
-            <p className="mb-1.5 text-xs font-bold tracking-[0.16em] text-apricot uppercase">
+            <p className="mb-1.5 text-xs font-bold tracking-[0.16em] text-accent uppercase">
               Badge débloqué
             </p>
             <h2 className="mb-2 font-display text-2xl font-semibold text-ink">

@@ -40,7 +40,7 @@ export function NouveauMotDePasse() {
   return (
     <div className="grid min-h-svh place-items-center bg-ground px-5 py-10">
       <div className="w-full max-w-sm rounded-card border border-line bg-surface p-6 shadow-soft sm:p-7">
-        <span className="mb-5 grid size-12 place-items-center rounded-2xl bg-corail-wash text-corail">
+        <span className="mb-5 grid size-12 place-items-center rounded-2xl bg-primaire-wash text-primaire">
           <KeyRound size={22} aria-hidden="true" />
         </span>
 
@@ -78,7 +78,7 @@ export function NouveauMotDePasse() {
           {erreur && (
             <p
               role="alert"
-              className="flex items-start gap-2 rounded-2xl bg-berry-wash px-4 py-3 text-sm text-berry"
+              className="flex items-start gap-2 rounded-2xl bg-alerte-wash px-4 py-3 text-sm text-alerte"
             >
               <AlertCircle size={17} className="mt-0.5 shrink-0" aria-hidden="true" />
               {erreur}

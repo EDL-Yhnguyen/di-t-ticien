@@ -74,7 +74,7 @@ export function Consentement() {
           <ul className="mt-6 space-y-4">
             {POINTS.map(({ Icone, texte }) => (
               <li key={texte} className="flex items-start gap-3">
-                <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-xl bg-corail-wash text-corail">
+                <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-xl bg-primaire-wash text-primaire">
                   <Icone size={16} aria-hidden="true" />
                 </span>
                 <p className="text-sm leading-relaxed text-ink-soft">{texte}</p>
@@ -88,7 +88,7 @@ export function Consentement() {
               : 'Vos données sont enregistrées sur votre compte, dans une base où vous seul pouvez les lire.'}{' '}
             <Lien
               vers="/confidentialite"
-              className="font-semibold text-corail underline underline-offset-2"
+              className="font-semibold text-primaire underline underline-offset-2"
             >
               Lire la politique complète
             </Lien>
@@ -97,7 +97,7 @@ export function Consentement() {
           {erreur && (
             <p
               role="alert"
-              className="mt-4 flex items-start gap-2 rounded-2xl bg-berry-wash px-4 py-3 text-sm text-berry"
+              className="mt-4 flex items-start gap-2 rounded-2xl bg-alerte-wash px-4 py-3 text-sm text-alerte"
             >
               <AlertCircle size={17} className="mt-0.5 shrink-0" aria-hidden="true" />
               {erreur}

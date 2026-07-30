@@ -129,7 +129,7 @@ export function Ajouter() {
                   className={classes(
                     'flex w-full flex-col items-center gap-1.5 rounded-tile px-1 py-3 text-xs font-semibold transition',
                     actif
-                      ? 'bg-corail text-white'
+                      ? 'bg-primaire text-white'
                       : 'bg-surface text-ink-soft hover:bg-sunken hover:text-ink',
                   )}
                 >
@@ -146,7 +146,7 @@ export function Ajouter() {
         <p
           role="status"
           aria-live="polite"
-          className="animate-rise flex items-center gap-2.5 rounded-card bg-basil-wash px-4 py-3 text-sm font-semibold text-basil"
+          className="animate-rise flex items-center gap-2.5 rounded-card bg-reussite-wash px-4 py-3 text-sm font-semibold text-reussite"
         >
           <Check size={17} strokeWidth={3} aria-hidden="true" />
           {confirmation}
@@ -197,7 +197,7 @@ function ChoixMoment({ valeur, onChange }: { valeur: Moment; onChange: (m: Momen
               className={classes(
                 'cursor-pointer rounded-tile border px-2 py-2.5 text-center text-xs font-semibold transition',
                 actif
-                  ? 'border-corail bg-corail-wash text-corail'
+                  ? 'border-primaire bg-primaire-wash text-primaire'
                   : 'border-line bg-surface text-ink-soft hover:bg-sunken',
               )}
             >
@@ -305,7 +305,7 @@ function OngletRecherche({ onChoisir }: { onChoisir: (a: Aliment) => void }) {
           </TitreSection>
 
           {erreur ? (
-            <p className="rounded-card bg-berry-wash px-4 py-3 text-sm text-ink">{erreur}</p>
+            <p className="rounded-card bg-alerte-wash px-4 py-3 text-sm text-ink">{erreur}</p>
           ) : distants.length > 0 ? (
             <ListeAliments aliments={distants} onChoisir={onChoisir} />
           ) : (
@@ -399,7 +399,7 @@ function OngletScan({
   if (etat === 'recherche') {
     return (
       <Carte className="grid place-items-center px-5 py-14 text-center">
-        <Loader2 size={26} className="animate-spin text-corail" aria-hidden="true" />
+        <Loader2 size={26} className="animate-spin text-primaire" aria-hidden="true" />
         <p className="mt-4 text-sm text-ink-soft" role="status">
           Recherche du produit {dernierCode}…
         </p>
@@ -437,9 +437,9 @@ function OngletScan({
 /* ─────────────────────────────── Photo ─────────────────────────────── */
 
 const TON_CONFIANCE: Record<Confiance, string> = {
-  haute: 'text-basil',
+  haute: 'text-reussite',
   moyenne: 'text-ink-soft',
-  basse: 'text-apricot',
+  basse: 'text-accent',
 }
 
 const MOT_CONFIANCE: Record<Confiance, string> = {
@@ -501,7 +501,7 @@ function OngletPhoto({
       />
 
       <Carte className="px-5 py-8 text-center">
-        <span className="mx-auto mb-3 grid size-12 place-items-center rounded-full bg-corail-wash text-corail">
+        <span className="mx-auto mb-3 grid size-12 place-items-center rounded-full bg-primaire-wash text-primaire">
           <Sparkles size={22} aria-hidden="true" />
         </span>
         <h3 className="text-base font-semibold text-ink">Photographiez votre assiette</h3>
@@ -526,7 +526,7 @@ function OngletPhoto({
       </Carte>
 
       {erreur && (
-        <Carte className="border-berry/30 bg-berry-wash px-4 py-3.5">
+        <Carte className="border-alerte/30 bg-alerte-wash px-4 py-3.5">
           <p className="text-sm text-ink">{erreur.message}</p>
           {erreur.configurable && (
             <p className="mt-2 text-xs text-ink-soft">
@@ -578,7 +578,7 @@ function OngletPhoto({
                             null,
                         )
                       }}
-                      className="w-20 rounded-xl border border-line bg-surface px-2.5 py-1.5 text-right text-sm text-ink tnum focus:border-corail focus:outline-none"
+                      className="w-20 rounded-xl border border-line bg-surface px-2.5 py-1.5 text-right text-sm text-ink tnum focus:border-primaire focus:outline-none"
                     />
                     <span className="text-sm text-ink-soft">g</span>
                   </label>
@@ -588,7 +588,7 @@ function OngletPhoto({
                     onClick={() =>
                       setDetectes((liste) => liste?.filter((_, i) => i !== index) ?? null)
                     }
-                    className="shrink-0 rounded-full p-1.5 text-ink-faint transition hover:bg-sunken hover:text-berry"
+                    className="shrink-0 rounded-full p-1.5 text-ink-faint transition hover:bg-sunken hover:text-alerte"
                   >
                     <Trash2 size={16} aria-hidden="true" />
                   </button>
@@ -793,7 +793,7 @@ function FeuilleDosage({
               className={classes(
                 'rounded-full px-3 py-1.5 text-xs font-semibold transition',
                 quantite === grammes
-                  ? 'bg-corail text-white'
+                  ? 'bg-primaire text-white'
                   : 'bg-sunken text-ink-soft hover:text-ink',
               )}
             >

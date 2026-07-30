@@ -142,12 +142,16 @@ export const OPTIONS_HERBALIFE: { id: string; libelle: string; kcal: number }[] 
   { id: 'hbl-barre', libelle: 'Barre repas Formula 1', kcal: 250 },
 ]
 
-/** Chaque repas porte sa teinte : au réveil l'abricot, à midi le basilic, le soir l'corail. */
+/**
+ * Chaque repas porte l'un des quatre rôles de couleur, dans l'ordre de la
+ * journée. Ce sont des rôles et non des teintes nommées : la couleur exacte
+ * dépend du thème choisi, seule leur distinction est garantie.
+ */
 export const TEINTE_MOMENT: Record<Moment, { fond: string; texte: string; barre: string }> = {
-  'petit-dejeuner': { fond: 'bg-apricot-wash', texte: 'text-apricot', barre: 'bg-apricot' },
-  dejeuner: { fond: 'bg-basil-wash', texte: 'text-basil', barre: 'bg-basil' },
-  collation: { fond: 'bg-berry-wash', texte: 'text-berry', barre: 'bg-berry' },
-  diner: { fond: 'bg-corail-wash', texte: 'text-corail', barre: 'bg-corail' },
+  'petit-dejeuner': { fond: 'bg-accent-wash', texte: 'text-accent', barre: 'bg-accent' },
+  dejeuner: { fond: 'bg-reussite-wash', texte: 'text-reussite', barre: 'bg-reussite' },
+  collation: { fond: 'bg-alerte-wash', texte: 'text-alerte', barre: 'bg-alerte' },
+  diner: { fond: 'bg-primaire-wash', texte: 'text-primaire', barre: 'bg-primaire' },
 }
 
 export const LIBELLE_CATEGORIE: Record<Categorie, string> = {

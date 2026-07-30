@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
   AlertCircle,
   Award,
@@ -12,18 +12,17 @@ import {
   MessageCircle,
   TrendingUp,
   LogOut,
-  Moon,
   NotebookText,
   Refrigerator,
   ShieldCheck,
   ShoppingBasket,
   ShieldHalf,
   Stethoscope,
-  Sun,
   Trash2,
 } from 'lucide-react'
 import { useApp, useSession } from '../context/AppContext'
 import { Bouton, Bascule, Carte, Champ, ChoixListe, Feuille, TitreSection } from '../components/ui'
+import { ReglageApparence } from '../components/Apparence'
 import { Lien } from '../lib/router'
 import { LIBELLE_ACTIVITE, depenseJournaliere, objectifCalorique } from '../lib/nutrition'
 import { poidsActuel, type EtatUtilisateur } from '../lib/store'
@@ -31,8 +30,6 @@ import { modeDemo } from '../lib/supabase'
 import { telechargerExport } from '../lib/rgpd'
 import type { Activite, Praticien } from '../lib/types'
 import { dateComplete, entier, nombre } from '../lib/utils'
-
-const CLE_THEME = 'equilibre:theme'
 
 const PRATICIEN_VIDE: Praticien = { nom: '', role: '', email: '', telephone: '', suivi: '' }
 
@@ -45,7 +42,6 @@ export function Profil() {
   const [suppressionEnCours, setSuppressionEnCours] = useState(false)
   const [erreurSuppression, setErreurSuppression] = useState<string | null>(null)
   const [confirmationSaisie, setConfirmationSaisie] = useState('')
-  const [sombre, setSombre] = useState(() => document.documentElement.classList.contains('dark'))
 
   // Le nombre qui décide d'ouvrir l'écran : ce qui reste à prendre sur les
   // listes en cours. Le total, lui, ne dit rien une fois au magasin.
@@ -62,11 +58,6 @@ export function Profil() {
   const [brouillonPraticien, setBrouillonPraticien] = useState<Praticien>(
     praticien ?? PRATICIEN_VIDE,
   )
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', sombre)
-    localStorage.setItem(CLE_THEME, sombre ? 'sombre' : 'clair')
-  }, [sombre])
 
   const mesures = {
     poidsKg: poidsActuel(etat),
@@ -129,7 +120,7 @@ export function Profil() {
   return (
     <div className="space-y-6">
       <header className="flex items-center gap-4">
-        <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-corail-wash font-display text-2xl font-semibold text-corail">
+        <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-primaire-wash font-display text-2xl font-semibold text-primaire">
           {etat.profil.prenom.slice(0, 1).toUpperCase() || '?'}
         </span>
         <div className="min-w-0">
@@ -162,7 +153,7 @@ export function Profil() {
             vers="/app/garde-manger"
             className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken"
           >
-            <Refrigerator size={19} className="shrink-0 text-corail" aria-hidden="true" />
+            <Refrigerator size={19} className="shrink-0 text-primaire" aria-hidden="true" />
             <span className="flex-1 font-medium text-ink">Mon garde-manger</span>
             <ChevronRight size={17} className="shrink-0 text-ink-faint" aria-hidden="true" />
           </Lien>
@@ -170,7 +161,7 @@ export function Profil() {
             vers="/app/courses"
             className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken"
           >
-            <ShoppingBasket size={19} className="shrink-0 text-corail" aria-hidden="true" />
+            <ShoppingBasket size={19} className="shrink-0 text-primaire" aria-hidden="true" />
             <span className="flex-1 font-medium text-ink">Ma liste de courses</span>
             {coursesAPrendre > 0 && (
               <span className="text-sm text-ink-faint tnum">{coursesAPrendre}</span>
@@ -181,7 +172,7 @@ export function Profil() {
             vers="/app/stats"
             className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken"
           >
-            <TrendingUp size={19} className="shrink-0 text-corail" aria-hidden="true" />
+            <TrendingUp size={19} className="shrink-0 text-primaire" aria-hidden="true" />
             <span className="flex-1 font-medium text-ink">Mes statistiques</span>
             <ChevronRight size={17} className="shrink-0 text-ink-faint" aria-hidden="true" />
           </Lien>
@@ -189,7 +180,7 @@ export function Profil() {
             vers="/app/coach"
             className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken"
           >
-            <MessageCircle size={19} className="shrink-0 text-corail" aria-hidden="true" />
+            <MessageCircle size={19} className="shrink-0 text-primaire" aria-hidden="true" />
             <span className="flex-1 font-medium text-ink">Mon coach</span>
             <ChevronRight size={17} className="shrink-0 text-ink-faint" aria-hidden="true" />
           </Lien>
@@ -197,7 +188,7 @@ export function Profil() {
             vers="/app/menus"
             className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken"
           >
-            <CalendarDays size={19} className="shrink-0 text-corail" aria-hidden="true" />
+            <CalendarDays size={19} className="shrink-0 text-primaire" aria-hidden="true" />
             <span className="flex-1 font-medium text-ink">Mes menus de la semaine</span>
             <ChevronRight size={17} className="shrink-0 text-ink-faint" aria-hidden="true" />
           </Lien>
@@ -205,7 +196,7 @@ export function Profil() {
             vers="/app/sport"
             className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken"
           >
-            <Dumbbell size={19} className="shrink-0 text-corail" aria-hidden="true" />
+            <Dumbbell size={19} className="shrink-0 text-primaire" aria-hidden="true" />
             <span className="flex-1 font-medium text-ink">Mon activité physique</span>
             {etat.seances.length > 0 && (
               <span className="text-sm text-ink-faint tnum">{etat.seances.length}</span>
@@ -216,7 +207,7 @@ export function Profil() {
             vers="/app/plan"
             className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken"
           >
-            <NotebookText size={19} className="shrink-0 text-corail" aria-hidden="true" />
+            <NotebookText size={19} className="shrink-0 text-primaire" aria-hidden="true" />
             <span className="flex-1 font-medium text-ink">Mon plan alimentaire</span>
             <ChevronRight size={17} className="shrink-0 text-ink-faint" aria-hidden="true" />
           </Lien>
@@ -224,7 +215,7 @@ export function Profil() {
             vers="/app/badges"
             className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken"
           >
-            <Award size={19} className="shrink-0 text-apricot" aria-hidden="true" />
+            <Award size={19} className="shrink-0 text-accent" aria-hidden="true" />
             <span className="flex-1 font-medium text-ink">Mes badges</span>
             <span className="text-sm text-ink-faint tnum">{etat.badges.length}</span>
             <ChevronRight size={17} className="shrink-0 text-ink-faint" aria-hidden="true" />
@@ -233,7 +224,7 @@ export function Profil() {
             vers="/app/sante"
             className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken"
           >
-            <HeartPulse size={19} className="shrink-0 text-basil" aria-hidden="true" />
+            <HeartPulse size={19} className="shrink-0 text-reussite" aria-hidden="true" />
             <span className="flex-1 font-medium text-ink">Importer depuis Apple Santé</span>
             {etat.mesuresSante.length > 0 && (
               <span className="text-sm text-ink-faint tnum">{etat.mesuresSante.length} j</span>
@@ -244,7 +235,7 @@ export function Profil() {
             vers="/app/envies"
             className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken"
           >
-            <ShieldHalf size={19} className="shrink-0 text-berry" aria-hidden="true" />
+            <ShieldHalf size={19} className="shrink-0 text-alerte" aria-hidden="true" />
             <span className="flex-1 font-medium text-ink">Anti-grignotage</span>
             <ChevronRight size={17} className="shrink-0 text-ink-faint" aria-hidden="true" />
           </Lien>
@@ -252,7 +243,7 @@ export function Profil() {
             vers="/app/jeux"
             className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken"
           >
-            <Gamepad2 size={19} className="shrink-0 text-berry" aria-hidden="true" />
+            <Gamepad2 size={19} className="shrink-0 text-alerte" aria-hidden="true" />
             <span className="flex-1 font-medium text-ink">Les jeux</span>
             <ChevronRight size={17} className="shrink-0 text-ink-faint" aria-hidden="true" />
           </Lien>
@@ -263,7 +254,7 @@ export function Profil() {
               rel="noopener noreferrer"
               className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken"
             >
-              <ExternalLink size={19} className="shrink-0 text-basil" aria-hidden="true" />
+              <ExternalLink size={19} className="shrink-0 text-reussite" aria-hidden="true" />
               <span className="flex-1 font-medium text-ink">Mon suivi en ligne</span>
               <ChevronRight size={17} className="shrink-0 text-ink-faint" aria-hidden="true" />
             </a>
@@ -276,7 +267,7 @@ export function Profil() {
         <Carte className="p-5">
           {praticien ? (
             <div className="flex items-start gap-3">
-              <Stethoscope size={19} className="mt-0.5 shrink-0 text-basil" aria-hidden="true" />
+              <Stethoscope size={19} className="mt-0.5 shrink-0 text-reussite" aria-hidden="true" />
               <div className="min-w-0 space-y-0.5">
                 <p className="font-semibold text-ink">{praticien.nom || 'Sans nom'}</p>
                 {praticien.role && <p className="text-sm text-ink-soft">{praticien.role}</p>}
@@ -342,18 +333,17 @@ export function Profil() {
               }
             />
           </div>
-          <div className="border-t border-line pt-5">
-            <Bascule
-              label={sombre ? 'Thème sombre' : 'Thème clair'}
-              aide="Suit votre système par défaut."
-              actif={sombre}
-              onChange={setSombre}
-            />
-            <p className="mt-2 flex items-center gap-2 text-xs text-ink-faint">
-              {sombre ? <Moon size={13} aria-hidden="true" /> : <Sun size={13} aria-hidden="true" />}
-              Le choix est mémorisé sur cet appareil.
-            </p>
-          </div>
+        </Carte>
+      </section>
+
+      <section>
+        <TitreSection eyebrow="Apparence">Vos couleurs</TitreSection>
+        <Carte className="p-5">
+          <ReglageApparence />
+          <p className="mt-5 border-t border-line pt-4 text-xs text-ink-faint">
+            Le choix est mémorisé sur cet appareil, pas dans votre compte : l’écran d’un téléphone
+            le soir n’appelle pas le même thème que celui d’un ordinateur en plein jour.
+          </p>
         </Carte>
       </section>
 
@@ -367,7 +357,7 @@ export function Profil() {
           </p>
           {etat.consentement && (
             <p className="mt-3 flex items-start gap-2 border-t border-line pt-3 text-xs text-ink-faint">
-              <ShieldCheck size={14} className="mt-0.5 shrink-0 text-basil" aria-hidden="true" />
+              <ShieldCheck size={14} className="mt-0.5 shrink-0 text-reussite" aria-hidden="true" />
               Traitement accepté le {dateComplete(etat.consentement.accepteLe)}.
             </p>
           )}
@@ -379,7 +369,7 @@ export function Profil() {
             onClick={() => telechargerExport(etat)}
             className="flex w-full items-center gap-3 px-5 py-4 text-left transition hover:bg-sunken"
           >
-            <Download size={19} className="shrink-0 text-corail" aria-hidden="true" />
+            <Download size={19} className="shrink-0 text-primaire" aria-hidden="true" />
             <span className="min-w-0 flex-1">
               <span className="block font-medium text-ink">Exporter mes données</span>
               <span className="block text-xs text-ink-soft">
@@ -391,7 +381,7 @@ export function Profil() {
             vers="/confidentialite"
             className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken"
           >
-            <ShieldCheck size={19} className="shrink-0 text-basil" aria-hidden="true" />
+            <ShieldCheck size={19} className="shrink-0 text-reussite" aria-hidden="true" />
             <span className="flex-1 font-medium text-ink">Confidentialité et mentions légales</span>
             <ChevronRight size={17} className="shrink-0 text-ink-faint" aria-hidden="true" />
           </Lien>
@@ -400,9 +390,9 @@ export function Profil() {
             onClick={ouvrirSuppression}
             className="flex w-full items-center gap-3 px-5 py-4 text-left transition hover:bg-sunken"
           >
-            <Trash2 size={19} className="shrink-0 text-berry" aria-hidden="true" />
+            <Trash2 size={19} className="shrink-0 text-alerte" aria-hidden="true" />
             <span className="min-w-0 flex-1">
-              <span className="block font-medium text-berry">Supprimer mon compte</span>
+              <span className="block font-medium text-alerte">Supprimer mon compte</span>
               <span className="block text-xs text-ink-soft">
                 Efface définitivement vos données et votre compte.
               </span>
@@ -480,7 +470,7 @@ export function Profil() {
             <button
               type="button"
               onClick={() => telechargerExport(etat)}
-              className="font-semibold text-corail underline underline-offset-2"
+              className="font-semibold text-primaire underline underline-offset-2"
             >
               exporter vos données
             </button>
@@ -501,7 +491,7 @@ export function Profil() {
           {erreurSuppression && (
             <p
               role="alert"
-              className="flex items-start gap-2 rounded-2xl bg-berry-wash px-4 py-3 text-sm text-berry"
+              className="flex items-start gap-2 rounded-2xl bg-alerte-wash px-4 py-3 text-sm text-alerte"
             >
               <AlertCircle size={17} className="mt-0.5 shrink-0" aria-hidden="true" />
               {erreurSuppression}

@@ -147,7 +147,7 @@ export function JaugeEnergie({
               style={{ width: `${part}%` }}
               className={classes(
                 'block h-full rounded-full transition-[width] duration-500',
-                enTrop ? 'bg-berry' : surBandeau ? 'bg-white' : 'bg-corail',
+                enTrop ? 'bg-alerte' : surBandeau ? 'bg-white' : 'bg-primaire',
               )}
             />
           )
@@ -201,7 +201,10 @@ export function BarreMacro({
         aria-valuemin={0}
         aria-valuemax={cible}
         aria-label={`${libelle} : ${Math.round(valeur)} grammes sur ${cible}`}
-        className="h-1.5 overflow-hidden rounded-full bg-sunken"
+        // Une piste plus épaisse et un creux marqué : à 1,5 px sur un fond
+        // presque de la même couleur, les trois barres se lisaient comme des
+        // traits de séparation plutôt que comme des jauges.
+        className="h-2.5 overflow-hidden rounded-full bg-sunken ring-1 ring-line ring-inset"
       >
         <span
           className={classes('block h-full rounded-full transition-[width] duration-500', teinte)}

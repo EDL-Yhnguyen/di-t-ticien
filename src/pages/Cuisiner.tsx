@@ -188,7 +188,7 @@ function Filtres<T>({
               className={classes(
                 'rounded-full border px-3.5 py-2 text-sm font-semibold transition',
                 actif
-                  ? 'border-corail bg-corail text-white'
+                  ? 'border-primaire bg-primaire text-white'
                   : 'border-line bg-surface text-ink-soft hover:bg-sunken',
               )}
             >
@@ -258,7 +258,7 @@ function CarteRecette({ proposition }: { proposition: RecetteRealisable }) {
             <span
               className={classes(
                 'font-display text-xl font-semibold tnum',
-                part >= 0.99 ? 'text-basil' : part >= 0.6 ? 'text-apricot' : 'text-ink-soft',
+                part >= 0.99 ? 'text-reussite' : part >= 0.6 ? 'text-accent' : 'text-ink-soft',
               )}
             >
               {Math.round(part * 100)} %
@@ -269,7 +269,7 @@ function CarteRecette({ proposition }: { proposition: RecetteRealisable }) {
 
         {sauve.length > 0 && (
           <p className="mt-3 flex flex-wrap items-center gap-2">
-            <Etiquette ton="basil">
+            <Etiquette ton="reussite">
               <Leaf size={12} className="mr-1" aria-hidden="true" />
               Sauve {sauve.map((a) => a.nom).join(', ')}
             </Etiquette>
@@ -285,7 +285,7 @@ function CarteRecette({ proposition }: { proposition: RecetteRealisable }) {
           <ul className="space-y-1.5">
             {couverts.map(({ ingredient, article }) => (
               <li key={ingredient.nom} className="flex items-start gap-2 text-sm">
-                <Check size={15} className="mt-0.5 shrink-0 text-basil" aria-hidden="true" />
+                <Check size={15} className="mt-0.5 shrink-0 text-reussite" aria-hidden="true" />
                 <span className="min-w-0 flex-1 text-ink">
                   {ingredient.quantite} {ingredient.nom}
                   {/* Le rapprochement est affiché, jamais supposé : c'est ce
@@ -308,7 +308,7 @@ function CarteRecette({ proposition }: { proposition: RecetteRealisable }) {
                   <li key={ingredient.nom} className="flex items-start gap-2 text-sm">
                     <ShoppingBasket
                       size={15}
-                      className="mt-0.5 shrink-0 text-apricot"
+                      className="mt-0.5 shrink-0 text-accent"
                       aria-hidden="true"
                     />
                     <span className="min-w-0 flex-1 text-ink-soft">
@@ -355,7 +355,7 @@ function CarteRecette({ proposition }: { proposition: RecetteRealisable }) {
           <ol className="space-y-2">
             {recette.etapes.map((etape, index) => (
               <li key={etape} className="flex gap-2.5 text-sm text-ink">
-                <span className="grid size-5 shrink-0 place-items-center rounded-full bg-corail-wash text-[0.6875rem] font-bold text-corail tnum">
+                <span className="grid size-5 shrink-0 place-items-center rounded-full bg-primaire-wash text-[0.6875rem] font-bold text-primaire tnum">
                   {index + 1}
                 </span>
                 <span className="min-w-0 flex-1">{etape}</span>

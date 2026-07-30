@@ -96,7 +96,7 @@ export function Coach() {
             type="button"
             onClick={effacer}
             aria-label="Effacer la conversation"
-            className="grid size-9 shrink-0 place-items-center rounded-full text-ink-faint transition hover:bg-sunken hover:text-berry"
+            className="grid size-9 shrink-0 place-items-center rounded-full text-ink-faint transition hover:bg-sunken hover:text-alerte"
           >
             <Trash2 size={17} />
           </button>
@@ -106,7 +106,7 @@ export function Coach() {
       {messages.length === 0 ? (
         <Carte className="animate-rise p-5" style={{ animationDelay: '60ms' }}>
           <h2 className="flex items-center gap-2 text-base font-semibold text-ink">
-            <MessageCircle size={18} className="shrink-0 text-corail" aria-hidden="true" />
+            <MessageCircle size={18} className="shrink-0 text-primaire" aria-hidden="true" />
             Par où commencer
           </h2>
           <p className="mt-2 text-sm text-ink-soft">
@@ -138,7 +138,7 @@ export function Coach() {
                 className={classes(
                   'max-w-[85%] rounded-card px-4 py-3 text-sm whitespace-pre-wrap',
                   message.role === 'utilisateur'
-                    ? 'bg-corail text-white'
+                    ? 'bg-primaire text-white'
                     : 'border border-line bg-surface text-ink',
                 )}
               >
@@ -155,7 +155,7 @@ export function Coach() {
             {[0, 1, 2].map((i) => (
               <span
                 key={i}
-                className="size-1.5 animate-pulse rounded-full bg-corail"
+                className="size-1.5 animate-pulse rounded-full bg-primaire"
                 style={{ animationDelay: `${i * 160}ms` }}
               />
             ))}
@@ -165,9 +165,9 @@ export function Coach() {
       )}
 
       {erreur && (
-        <Carte className="border-berry/40 bg-berry-wash p-4">
+        <Carte className="border-alerte/40 bg-alerte-wash p-4">
           <p className="flex items-start gap-2 text-sm text-ink">
-            <AlertCircle size={17} className="mt-0.5 shrink-0 text-berry" aria-hidden="true" />
+            <AlertCircle size={17} className="mt-0.5 shrink-0 text-alerte" aria-hidden="true" />
             <span>{erreur.message}</span>
           </p>
         </Carte>
@@ -205,7 +205,7 @@ export function Coach() {
           type="submit"
           disabled={brouillon.trim() === '' || enCours}
           aria-label="Envoyer la question"
-          className="grid size-11 shrink-0 place-items-center rounded-full bg-corail text-white transition disabled:opacity-40"
+          className="grid size-11 shrink-0 place-items-center rounded-full bg-primaire text-white transition disabled:opacity-40"
         >
           <Send size={18} />
         </button>
@@ -213,7 +213,7 @@ export function Coach() {
 
       <Carte className="p-5">
         <h2 className="flex items-center gap-2 text-base font-semibold text-ink">
-          <Info size={18} className="shrink-0 text-corail" aria-hidden="true" />
+          <Info size={18} className="shrink-0 text-primaire" aria-hidden="true" />
           Ce que le coach n’est pas
         </h2>
         <p className="mt-2 text-sm text-ink-soft">
@@ -264,7 +264,7 @@ function Accord({ onAccepter }: { onAccepter: () => void }) {
           l’identique. Vous pouvez revenir sur cet accord depuis votre profil.
         </p>
 
-        <Lien vers="/confidentialite" className="mt-3 block text-sm font-semibold text-corail">
+        <Lien vers="/confidentialite" className="mt-3 block text-sm font-semibold text-primaire">
           Lire la politique de confidentialité
         </Lien>
 

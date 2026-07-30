@@ -81,7 +81,7 @@ export function Sante() {
         </p>
       </header>
 
-      <Carte className="animate-rise border-apricot/30 bg-apricot-wash p-5">
+      <Carte className="animate-rise border-accent/30 bg-accent-wash p-5">
         <h2 className="text-sm font-bold text-ink">Ce n’est pas une synchronisation</h2>
         <p className="mt-1.5 text-sm text-ink-soft">
           Aucun navigateur ne peut lire l’app Santé directement — c’est une limite d’iOS, pas
@@ -100,7 +100,7 @@ export function Sante() {
               'Revenez ici et choisissez le fichier export.xml qu’il contient.',
             ].map((etape, i) => (
               <li key={etape} className="flex gap-3">
-                <span className="grid size-6 shrink-0 place-items-center rounded-full bg-corail text-xs font-bold text-white tnum">
+                <span className="grid size-6 shrink-0 place-items-center rounded-full bg-primaire text-xs font-bold text-white tnum">
                   {i + 1}
                 </span>
                 <span className="text-sm text-ink-soft">{etape}</span>
@@ -149,7 +149,7 @@ export function Sante() {
               className="mt-3 h-1.5 overflow-hidden rounded-full bg-sunken"
             >
               <span
-                className="block h-full rounded-full bg-corail transition-[width]"
+                className="block h-full rounded-full bg-primaire transition-[width]"
                 style={{ width: `${progression * 100}%` }}
               />
             </div>
@@ -161,7 +161,7 @@ export function Sante() {
               aria-live="polite"
               className={classes(
                 'mt-3 rounded-tile px-3.5 py-2.5 text-sm',
-                phase === 'erreur' ? 'bg-berry-wash text-ink' : 'bg-basil-wash text-ink',
+                phase === 'erreur' ? 'bg-alerte-wash text-ink' : 'bg-reussite-wash text-ink',
               )}
             >
               {message}
@@ -195,7 +195,7 @@ export function Sante() {
                 },
               ].map(({ Icone, valeur, libelle }) => (
                 <Carte key={libelle} className="px-3 py-4 text-center">
-                  <Icone size={18} className="mx-auto text-corail" aria-hidden="true" />
+                  <Icone size={18} className="mx-auto text-primaire" aria-hidden="true" />
                   <p className="mt-2 font-display text-xl font-semibold text-ink tnum">{valeur}</p>
                   <p className="mt-0.5 text-xs text-ink-soft">{libelle}</p>
                 </Carte>

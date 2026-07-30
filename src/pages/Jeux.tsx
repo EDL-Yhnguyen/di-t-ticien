@@ -69,7 +69,7 @@ export function Jeux() {
                     <span className="mt-0.5 block text-sm text-ink-soft">{jeu.resume}</span>
                   </span>
                   {record > 0 && (
-                    <Etiquette ton="apricot">
+                    <Etiquette ton="accent">
                       {record} {jeu.unite}
                     </Etiquette>
                   )}
@@ -166,7 +166,7 @@ function Memo() {
         </p>
         {record > 0 && (
           <p className="flex items-center gap-1.5 text-sm text-ink-soft">
-            <Trophy size={15} className="text-apricot" aria-hidden="true" />
+            <Trophy size={15} className="text-accent" aria-hidden="true" />
             Record : <strong className="font-semibold text-ink tnum">{record}</strong>
           </p>
         )}
@@ -183,9 +183,9 @@ function Memo() {
             className={classes(
               'grid aspect-square place-items-center rounded-2xl text-3xl transition',
               carte.trouvee
-                ? 'bg-basil-wash'
+                ? 'bg-reussite-wash'
                 : carte.retournee
-                  ? 'bg-corail-wash'
+                  ? 'bg-primaire-wash'
                   : 'bg-sunken hover:bg-line',
             )}
           >
@@ -202,8 +202,8 @@ function Memo() {
       </div>
 
       {fini && (
-        <div className="mt-5 rounded-tile bg-basil-wash px-4 py-4 text-center">
-          <p className="font-semibold text-basil">
+        <div className="mt-5 rounded-tile bg-reussite-wash px-4 py-4 text-center">
+          <p className="font-semibold text-reussite">
             Terminé en {coups} coups
             {record > 0 && coups < record && ' — nouveau record !'}
           </p>
@@ -376,11 +376,11 @@ function Quiz() {
             className={classes(
               'flex-1 rounded-2xl border-2 py-4 font-semibold transition',
               reponse === null
-                ? 'border-line bg-surface text-ink hover:border-corail'
+                ? 'border-line bg-surface text-ink hover:border-primaire'
                 : valeur === question.reponse
-                  ? 'border-basil bg-basil-wash text-basil'
+                  ? 'border-reussite bg-reussite-wash text-reussite'
                   : reponse === valeur
-                    ? 'border-berry bg-berry-wash text-berry'
+                    ? 'border-alerte bg-alerte-wash text-alerte'
                     : 'border-line bg-surface text-ink-faint',
             )}
           >
@@ -394,7 +394,7 @@ function Quiz() {
           <p
             className={classes(
               'mb-4 rounded-tile px-4 py-3.5 text-sm',
-              correcte ? 'bg-basil-wash text-ink' : 'bg-apricot-wash text-ink',
+              correcte ? 'bg-reussite-wash text-ink' : 'bg-accent-wash text-ink',
             )}
           >
             <strong className="font-semibold">{correcte ? 'Exact. ' : 'Pas tout à fait. '}</strong>
@@ -448,7 +448,7 @@ function Souffle() {
         <motion.div
           animate={{ scale: enCours ? PHASES[phase].echelle : 0.8 }}
           transition={{ duration: enCours ? PHASES[phase].duree : 0.6, ease: 'easeInOut' }}
-          className="absolute size-52 rounded-full bg-corail-wash"
+          className="absolute size-52 rounded-full bg-primaire-wash"
         />
         <div className="relative">
           <p className="font-display text-2xl font-semibold text-ink">

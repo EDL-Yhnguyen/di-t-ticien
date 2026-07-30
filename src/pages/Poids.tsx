@@ -71,7 +71,7 @@ export function Poids() {
             </p>
           </div>
           {perdus > 0.05 && (
-            <p className="flex items-center gap-1.5 rounded-full bg-basil-wash px-3 py-1.5 text-sm font-semibold text-basil tnum">
+            <p className="flex items-center gap-1.5 rounded-full bg-reussite-wash px-3 py-1.5 text-sm font-semibold text-reussite tnum">
               <TrendingDown size={16} aria-hidden="true" />−{nombre(perdus)} kg
             </p>
           )}
@@ -91,7 +91,7 @@ export function Poids() {
           aria-label="Progression vers le poids visé"
         >
           <div
-            className="h-full rounded-full bg-basil transition-[width] duration-700"
+            className="h-full rounded-full bg-reussite transition-[width] duration-700"
             style={{ width: `${Math.max(2, part * 100)}%` }}
           />
         </div>
@@ -104,7 +104,7 @@ export function Poids() {
             <button
               type="button"
               onClick={() => setTableauOuvert(true)}
-              className="flex items-center gap-1.5 text-sm font-semibold text-corail"
+              className="flex items-center gap-1.5 text-sm font-semibold text-primaire"
             >
               <Table2 size={16} aria-hidden="true" />
               Tableau
@@ -148,8 +148,8 @@ export function Poids() {
             <strong className="font-semibold text-ink">{dateLongue(t.dateEstimee)}</strong>.
           </p>
           {rythmeLent(t, etat.profil.activite) && (
-            <p className="mt-4 rounded-tile bg-apricot-wash px-4 py-3.5 text-sm text-ink">
-              <strong className="font-semibold text-apricot">Ce rythme est lent — </strong>
+            <p className="mt-4 rounded-tile bg-accent-wash px-4 py-3.5 text-sm text-ink">
+              <strong className="font-semibold text-accent">Ce rythme est lent — </strong>
               c’est mécanique : en restant assise la journée, vous dépensez{' '}
               {entier(t.depenseKcal)} kcal, et manger encore moins passerait sous le seuil qui
               couvre vos besoins. Trente minutes de marche par jour ajouteraient environ{' '}
@@ -222,7 +222,7 @@ export function Poids() {
                     {ecart === null ? (
                       <span className="text-ink-faint">—</span>
                     ) : (
-                      <span className={ecart <= 0 ? 'text-basil' : 'text-ink-soft'}>
+                      <span className={ecart <= 0 ? 'text-reussite' : 'text-ink-soft'}>
                         {ecart > 0 ? '+' : '−'}
                         {nombre(Math.abs(ecart))}
                       </span>

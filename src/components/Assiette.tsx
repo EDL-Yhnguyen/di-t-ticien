@@ -40,10 +40,10 @@ const COULEUR: Partial<Record<Categorie, string>> = {
   legume: 'var(--assiette-legume)',
   feculent: 'var(--assiette-feculent)',
   proteine: 'var(--assiette-proteine)',
-  laitier: 'var(--corail)',
-  fruit: 'var(--berry)',
-  'matiere-grasse': 'var(--apricot)',
-  boisson: 'var(--basil)',
+  laitier: 'var(--primaire)',
+  fruit: 'var(--alerte)',
+  'matiere-grasse': 'var(--accent)',
+  boisson: 'var(--reussite)',
 }
 
 export const COULEUR_CATEGORIE = COULEUR

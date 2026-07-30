@@ -8,8 +8,10 @@
       name="description"
       content="Notez ce que vous mangez, suivez votre poids et vos envies de grignotage. Une mosaïque qui se remplit, pas un compteur qui culpabilise."
     />
-    <meta name="theme-color" content="#FDF6EE" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#171D26" media="(prefers-color-scheme: dark)" />
+    <!-- Une seule balise, mise à jour par appliquerApparence() : avec huit thèmes,
+         deux valeurs figées par préférence système afficheraient la barre du
+         navigateur en crème pendant que l'application est en violet. -->
+    <meta name="theme-color" content="#FDF6EE" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/icone.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/icone-180.png" />
@@ -25,16 +27,34 @@
   </head>
   <body>
     <div id="root"></div>
-    <!-- Appliqué avant le premier rendu : sans ça, un thème sombre choisi dans
-         les réglages provoque un flash clair au chargement. -->
+    <!-- Appliqué avant le premier rendu : sans ça, un thème sombre ou coloré
+         choisi dans les réglages provoque un flash de l'autre thème au
+         chargement. Ces quelques lignes sont volontairement dupliquées avec
+         src/lib/apparence.ts : elles doivent tourner avant le premier octet de
+         JavaScript applicatif, donc elles ne peuvent pas l'importer. Les noms des
+         deux clés et la liste des thèmes sont la seule chose à garder d'accord. -->
     <script>
       ;(function () {
         try {
-          var choix = localStorage.getItem('equilibre:theme')
+          var mode = localStorage.getItem('equilibre:theme')
           var sombre =
-            choix === 'sombre' ||
-            (choix !== 'clair' && matchMedia('(prefers-color-scheme: dark)').matches)
+            mode === 'sombre' ||
+            (mode !== 'clair' && matchMedia('(prefers-color-scheme: dark)').matches)
           if (sombre) document.documentElement.classList.add('dark')
+
+          var theme = localStorage.getItem('equilibre:palette')
+          var connus = [
+            'potager',
+            'agrumes',
+            'myrtille',
+            'ocean',
+            'cacao',
+            'framboise',
+            'encre',
+          ]
+          // « marmite » est le défaut et vit dans :root, sans attribut.
+          if (theme && connus.indexOf(theme) !== -1)
+            document.documentElement.setAttribute('data-theme', theme)
         } catch (e) {}
       })()
     </script>

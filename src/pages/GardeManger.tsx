@@ -178,7 +178,7 @@ export function GardeManger() {
                 className={classes(
                   'flex flex-1 flex-col items-center gap-1 rounded-tile border px-2 py-3 transition',
                   actif
-                    ? 'border-corail bg-corail-wash text-corail'
+                    ? 'border-primaire bg-primaire-wash text-primaire'
                     : 'border-line bg-surface text-ink-soft hover:bg-sunken',
                 )}
               >
@@ -238,11 +238,11 @@ export function GardeManger() {
 
 /* ──────────────────────────────── Lignes ──────────────────────────────── */
 
-const TON_URGENCE: Record<Urgence, 'berry' | 'apricot' | 'neutre'> = {
-  perime: 'berry',
-  aujourdhui: 'berry',
-  demain: 'apricot',
-  semaine: 'apricot',
+const TON_URGENCE: Record<Urgence, 'alerte' | 'accent' | 'neutre'> = {
+  perime: 'alerte',
+  aujourdhui: 'alerte',
+  demain: 'accent',
+  semaine: 'accent',
   ok: 'neutre',
 }
 
@@ -264,7 +264,7 @@ function LigneUrgence({ article, echeance: e }: { article: ArticleStock; echeanc
     <div className="flex items-center gap-3 px-5 py-3.5">
       <AlertTriangle
         size={18}
-        className={classes('shrink-0', e.sanitaire ? 'text-berry' : 'text-apricot')}
+        className={classes('shrink-0', e.sanitaire ? 'text-alerte' : 'text-accent')}
         aria-hidden="true"
       />
       <span className="min-w-0 flex-1">
@@ -314,7 +314,7 @@ function LigneArticle({
         type="button"
         onClick={onSupprimer}
         aria-label={`Retirer ${article.nom}`}
-        className="grid size-9 shrink-0 place-items-center rounded-full text-ink-faint transition hover:bg-sunken hover:text-berry"
+        className="grid size-9 shrink-0 place-items-center rounded-full text-ink-faint transition hover:bg-sunken hover:text-alerte"
       >
         <Trash2 size={16} />
       </button>
@@ -402,7 +402,7 @@ function FormulaireArticle({
         />
 
         {recherche === 'echec' && (
-          <p className="text-sm text-berry">
+          <p className="text-sm text-alerte">
             Ce code-barres n’est pas dans Open Food Facts. Écrivez le nom à la main.
           </p>
         )}
@@ -515,7 +515,7 @@ function ChoixChips<T extends string>({
               className={classes(
                 'rounded-full border px-3.5 py-2 text-sm font-semibold transition',
                 actif
-                  ? 'border-corail bg-corail text-white'
+                  ? 'border-primaire bg-primaire text-white'
                   : 'border-line bg-surface text-ink-soft hover:bg-sunken',
               )}
             >

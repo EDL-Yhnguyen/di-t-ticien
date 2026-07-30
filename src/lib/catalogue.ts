@@ -215,7 +215,7 @@ const EMOJI_MOMENT: Record<Moment, string> = {
 /** Un lavis uni, pas un dégradé entre deux teintes : en thème sombre, mêler
  * deux lavis donnait un vert-brun boueux qui ne ressemblait à aucune couleur de
  * la palette. */
-const FONDS = ['bg-corail-wash', 'bg-apricot-wash', 'bg-basil-wash', 'bg-berry-wash']
+const FONDS = ['bg-primaire-wash', 'bg-accent-wash', 'bg-reussite-wash', 'bg-alerte-wash']
 
 /** Somme des caractères : suffisant pour répartir, et stable d'une session à l'autre. */
 function empreinte(texte: string): number {

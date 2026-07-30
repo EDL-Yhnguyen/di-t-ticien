@@ -58,7 +58,7 @@ export function AuJournal({
               }}
               className={classes(
                 'flex-1 rounded-full py-2 text-sm font-semibold transition tnum',
-                actif ? 'bg-corail text-white' : 'bg-surface text-ink-soft hover:text-ink',
+                actif ? 'bg-primaire text-white' : 'bg-surface text-ink-soft hover:text-ink',
               )}
             >
               {part.libelle} portion

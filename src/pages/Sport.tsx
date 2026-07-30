@@ -98,21 +98,21 @@ export function Sport() {
           <Carte className="divide-y divide-line">
             {duJour.map((seance) => (
               <div key={seance.id} className="flex items-center gap-3 px-5 py-3.5">
-                <Dumbbell size={18} className="shrink-0 text-corail" aria-hidden="true" />
+                <Dumbbell size={18} className="shrink-0 text-primaire" aria-hidden="true" />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-semibold text-ink">{seance.libelle}</span>
                   <span className="block text-xs text-ink-soft tnum">
                     {seance.minutes} min · {LIBELLE_INTENSITE[seance.intensite].split(' —')[0]}
                   </span>
                 </span>
-                <span className="shrink-0 font-display text-lg font-semibold text-basil tnum">
+                <span className="shrink-0 font-display text-lg font-semibold text-reussite tnum">
                   {entier(seance.kcal)}
                 </span>
                 <button
                   type="button"
                   onClick={() => supprimer(seance.id)}
                   aria-label={`Retirer ${seance.libelle}`}
-                  className="grid size-9 shrink-0 place-items-center rounded-full text-ink-faint transition hover:bg-sunken hover:text-berry"
+                  className="grid size-9 shrink-0 place-items-center rounded-full text-ink-faint transition hover:bg-sunken hover:text-alerte"
                 >
                   <Trash2 size={16} />
                 </button>
@@ -127,7 +127,7 @@ export function Sport() {
         <TitreSection
           eyebrow="Cette semaine"
           action={
-            serie > 1 ? <Etiquette ton="apricot">{serie} jours d’affilée</Etiquette> : undefined
+            serie > 1 ? <Etiquette ton="accent">{serie} jours d’affilée</Etiquette> : undefined
           }
         >
           Votre régularité
@@ -146,7 +146,7 @@ export function Sport() {
                   <div
                     className={classes(
                       'w-full rounded-t-lg transition-all',
-                      jour.minutes > 0 ? 'bg-corail' : 'bg-line',
+                      jour.minutes > 0 ? 'bg-primaire' : 'bg-line',
                     )}
                     style={{ height: `${hauteur}%` }}
                   />
@@ -154,7 +154,7 @@ export function Sport() {
                 <span
                   className={classes(
                     'text-xs font-semibold',
-                    aujourdhui ? 'text-corail' : 'text-ink-faint',
+                    aujourdhui ? 'text-primaire' : 'text-ink-faint',
                   )}
                 >
                   {JOURS_COURTS[index]}
@@ -173,7 +173,7 @@ export function Sport() {
           </div>
           <div className="h-2 overflow-hidden rounded-full bg-sunken">
             <div
-              className="h-full rounded-full bg-basil transition-all"
+              className="h-full rounded-full bg-reussite transition-all"
               style={{ width: `${Math.min(100, semaine.partRecommandation * 100)}%` }}
             />
           </div>
@@ -184,7 +184,7 @@ export function Sport() {
       {/* ── Ce que vaut l'estimation ── */}
       <Carte className="animate-rise p-5" style={{ animationDelay: '240ms' }}>
         <h2 className="flex items-center gap-2 text-base font-semibold text-ink">
-          <Info size={18} className="shrink-0 text-corail" aria-hidden="true" />
+          <Info size={18} className="shrink-0 text-primaire" aria-hidden="true" />
           Ces calories sont estimées
         </h2>
         <p className="mt-2 text-sm text-ink-soft">
@@ -282,7 +282,7 @@ function FeuilleSaisie({
                   className={classes(
                     'shrink-0 rounded-full px-3.5 py-2 text-sm font-semibold transition',
                     actif
-                      ? 'bg-corail text-white'
+                      ? 'bg-primaire text-white'
                       : 'bg-sunken text-ink-soft hover:text-ink',
                   )}
                 >
@@ -306,7 +306,7 @@ function FeuilleSaisie({
                   className={classes(
                     'rounded-full border px-3.5 py-2 text-sm font-medium transition',
                     actif
-                      ? 'border-corail bg-corail-wash text-ink'
+                      ? 'border-primaire bg-primaire-wash text-ink'
                       : 'border-line bg-surface text-ink-soft hover:bg-sunken',
                   )}
                 >
@@ -333,7 +333,7 @@ function FeuilleSaisie({
             step={5}
             value={minutes}
             onChange={(e) => setMinutes(Number(e.target.value))}
-            className="w-full accent-corail"
+            className="w-full accent-primaire"
           />
           <div className="mt-2 flex gap-1.5">
             {[15, 30, 45, 60, 90].map((m) => (
@@ -344,7 +344,7 @@ function FeuilleSaisie({
                 onClick={() => setMinutes(m)}
                 className={classes(
                   'flex-1 rounded-full py-1.5 text-xs font-semibold transition tnum',
-                  minutes === m ? 'bg-corail text-white' : 'bg-sunken text-ink-soft hover:text-ink',
+                  minutes === m ? 'bg-primaire text-white' : 'bg-sunken text-ink-soft hover:text-ink',
                 )}
               >
                 {m}
@@ -365,7 +365,7 @@ function FeuilleSaisie({
                   className={classes(
                     'flex cursor-pointer items-center gap-3 rounded-2xl border px-4 py-3 transition',
                     actif
-                      ? 'border-corail bg-corail-wash text-ink'
+                      ? 'border-primaire bg-primaire-wash text-ink'
                       : 'border-line bg-surface text-ink-soft hover:bg-sunken',
                   )}
                 >
@@ -379,10 +379,10 @@ function FeuilleSaisie({
                   <span
                     className={classes(
                       'grid size-5 shrink-0 place-items-center rounded-full border-2',
-                      actif ? 'border-corail' : 'border-line',
+                      actif ? 'border-primaire' : 'border-line',
                     )}
                   >
-                    {actif && <span className="size-2.5 rounded-full bg-corail" />}
+                    {actif && <span className="size-2.5 rounded-full bg-primaire" />}
                   </span>
                   <span className="text-sm font-medium">{LIBELLE_INTENSITE[i]}</span>
                 </label>

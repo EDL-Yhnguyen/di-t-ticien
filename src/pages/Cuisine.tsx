@@ -206,7 +206,7 @@ export function Cuisine() {
           d'où ce raccourci en tête, avant les filtres. */}
       <Lien vers="/app/menus">
         <Carte className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken">
-          <CalendarDays size={20} className="shrink-0 text-corail" aria-hidden="true" />
+          <CalendarDays size={20} className="shrink-0 text-primaire" aria-hidden="true" />
           <span className="min-w-0 flex-1">
             <span className="block font-semibold text-ink">Composer ma semaine</span>
             <span className="block text-sm text-ink-soft">
@@ -221,7 +221,7 @@ export function Cuisine() {
           qu'on voudrait. C'est la question du soir de semaine devant le frigo. */}
       <Lien vers="/app/cuisiner">
         <Carte className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken">
-          <Refrigerator size={20} className="shrink-0 text-basil" aria-hidden="true" />
+          <Refrigerator size={20} className="shrink-0 text-reussite" aria-hidden="true" />
           <span className="min-w-0 flex-1">
             <span className="block font-semibold text-ink">Cuisiner ce que j’ai</span>
             <span className="block text-sm text-ink-soft">
@@ -274,7 +274,7 @@ export function Cuisine() {
                 }}
                 placeholder="Un plat, ou un ingrédient à écouler…"
                 aria-label="Chercher une recette"
-                className="w-full rounded-2xl border border-line bg-surface py-3 pr-4 pl-11 text-ink placeholder:text-ink-faint focus:border-corail focus:outline-none"
+                className="w-full rounded-2xl border border-line bg-surface py-3 pr-4 pl-11 text-ink placeholder:text-ink-faint focus:border-primaire focus:outline-none"
               />
             </div>
 
@@ -317,7 +317,7 @@ export function Cuisine() {
                 <button
                   type="button"
                   onClick={toutEffacer}
-                  className="text-sm font-semibold text-corail underline underline-offset-4"
+                  className="text-sm font-semibold text-primaire underline underline-offset-4"
                 >
                   Tout effacer
                 </button>
@@ -363,7 +363,7 @@ export function Cuisine() {
                         [moment]: limite + PAS_AFFICHAGE,
                       }))
                     }
-                    className="mt-2 w-full rounded-card border border-line bg-surface py-2.5 text-sm font-semibold text-corail transition hover:bg-sunken"
+                    className="mt-2 w-full rounded-card border border-line bg-surface py-2.5 text-sm font-semibold text-primaire transition hover:bg-sunken"
                   >
                     Voir {Math.min(PAS_AFFICHAGE, recettes.length - limite)} recettes de plus
                     <span className="text-ink-faint tnum"> ({recettes.length - limite} restantes)</span>
@@ -488,8 +488,8 @@ function LigneRecette({
           className={classes(
             'grid size-9 place-items-center rounded-full border transition',
             favori
-              ? 'border-berry bg-berry-wash text-berry'
-              : 'border-line text-ink-faint hover:border-berry hover:text-berry',
+              ? 'border-alerte bg-alerte-wash text-alerte'
+              : 'border-line text-ink-faint hover:border-alerte hover:text-alerte',
           )}
         >
           <Heart size={16} strokeWidth={2.4} fill={favori ? 'currentColor' : 'none'} aria-hidden="true" />
@@ -506,8 +506,8 @@ function LigneRecette({
           className={classes(
             'grid size-9 place-items-center rounded-full border transition',
             dansLePanier
-              ? 'border-basil bg-basil text-white'
-              : 'border-line text-ink-faint hover:border-corail hover:text-corail',
+              ? 'border-reussite bg-reussite text-white'
+              : 'border-line text-ink-faint hover:border-primaire hover:text-primaire',
           )}
         >
           {dansLePanier ? (
@@ -723,7 +723,7 @@ function Puce({
       className={classes(
         'rounded-full border px-3.5 py-2 text-xs font-semibold transition',
         actif
-          ? 'border-corail bg-corail text-white'
+          ? 'border-primaire bg-primaire text-white'
           : 'border-line bg-surface text-ink-soft hover:bg-sunken hover:text-ink',
       )}
     >
@@ -795,15 +795,15 @@ function FicheRecette({
         <EtiquetteBande bande={bande} />
         <Etiquette ton="neutre">{recette.minutes} min</Etiquette>
         <Etiquette ton="neutre">{LIBELLE_DIFFICULTE[difficulte]}</Etiquette>
-        {recette.cuisine && <Etiquette ton="apricot">{LIBELLE_CUISINE[recette.cuisine]}</Etiquette>}
-        {recette.tags.includes('economique') && <Etiquette ton="basil">Petit budget</Etiquette>}
+        {recette.cuisine && <Etiquette ton="accent">{LIBELLE_CUISINE[recette.cuisine]}</Etiquette>}
+        {recette.tags.includes('economique') && <Etiquette ton="reussite">Petit budget</Etiquette>}
         <button
           type="button"
           onClick={onFavori}
           aria-pressed={favori}
           className={classes(
             'ml-auto inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition',
-            favori ? 'border-berry bg-berry-wash text-berry' : 'border-line text-ink-soft hover:bg-sunken',
+            favori ? 'border-alerte bg-alerte-wash text-alerte' : 'border-line text-ink-soft hover:bg-sunken',
           )}
         >
           <Heart size={14} strokeWidth={2.4} fill={favori ? 'currentColor' : 'none'} aria-hidden="true" />
@@ -815,7 +815,7 @@ function FicheRecette({
         <div>
           <div className="flex flex-wrap gap-2">
             {regimes.map((r) => (
-              <Etiquette key={r} ton="basil">
+              <Etiquette key={r} ton="reussite">
                 {LIBELLE_REGIME[r]}
               </Etiquette>
             ))}
@@ -909,7 +909,7 @@ function FicheRecette({
         <ol className="space-y-3">
           {recette.etapes.map((etape, i) => (
             <li key={etape} className="flex gap-3 text-sm text-ink">
-              <span className="grid size-6 shrink-0 place-items-center rounded-full bg-corail-wash text-xs font-bold text-corail tnum">
+              <span className="grid size-6 shrink-0 place-items-center rounded-full bg-primaire-wash text-xs font-bold text-primaire tnum">
                 {i + 1}
               </span>
               <span className="pt-0.5">{etape}</span>
@@ -979,20 +979,20 @@ function FicheRecette({
 
       <div className="flex flex-wrap gap-2">
         {recette.couvre.map((c) => (
-          <Etiquette key={c} ton="basil">
+          <Etiquette key={c} ton="reussite">
             {LIBELLE_CATEGORIE[c]}
           </Etiquette>
         ))}
         {recette.tags.map((t) => (
-          <Etiquette key={t} ton="corail">
+          <Etiquette key={t} ton="primaire">
             {LIBELLE_TAG[t]}
           </Etiquette>
         ))}
       </div>
 
       {recette.astuce && (
-        <p className="rounded-tile bg-apricot-wash px-4 py-3.5 text-sm text-ink">
-          <strong className="font-semibold text-apricot">Le truc en plus — </strong>
+        <p className="rounded-tile bg-accent-wash px-4 py-3.5 text-sm text-ink">
+          <strong className="font-semibold text-accent">Le truc en plus — </strong>
           {recette.astuce}
         </p>
       )}
@@ -1079,7 +1079,7 @@ function ApercuCourses({
               Verser dans ma liste de courses
             </Bouton>
             {verse > 0 && (
-              <p className="text-sm text-basil" role="status">
+              <p className="text-sm text-reussite" role="status">
                 {verse} produit{verse > 1 ? 's' : ''} ajouté{verse > 1 ? 's' : ''} — les quantités
                 déjà présentes ont été cumulées.
               </p>
@@ -1154,7 +1154,7 @@ function LigneCourse({
       <span
         className={classes(
           'grid size-6 shrink-0 place-items-center rounded-lg border-2 transition',
-          coche ? 'border-basil bg-basil text-white' : 'border-line',
+          coche ? 'border-reussite bg-reussite text-white' : 'border-line',
         )}
       >
         {coche && <Check size={14} strokeWidth={3.5} aria-hidden="true" />}

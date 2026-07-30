@@ -259,7 +259,7 @@ const FORMATS: Format[] = [
     tags: ['batch', 'une-casserole', 'economique'],
     conservation: '4 jours au réfrigérateur, 3 mois au congélateur',
     rechauffage: 'À la casserole en remuant. Au micro-ondes en une fois, le centre reste froid.',
-    feculents: (b) => ['lentille-corail', 'pois-casse', 'pomme-terre', 'patate-douce', 'riz', 'haricot-blanc'].includes(b.id),
+    feculents: (b) => ['lentille-primaire', 'pois-casse', 'pomme-terre', 'patate-douce', 'riz', 'haricot-blanc'].includes(b.id),
     titre: ({ legume, feculent, proteine, style }) =>
       `Soupe de ${legume}, ${feculent} et ${proteine} ${TOURNURE[style]}`,
     etapes: (c) => [

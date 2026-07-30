@@ -63,7 +63,7 @@ export function Stats() {
             titre="Rien à mesurer pour l’instant"
             action={
               <Lien vers="/app/ajouter">
-                <span className="text-sm font-semibold text-corail">Noter un repas</span>
+                <span className="text-sm font-semibold text-primaire">Noter un repas</span>
               </Lien>
             }
           >
@@ -153,7 +153,7 @@ export function Stats() {
                     )}
                     <span className="h-2 flex-1 overflow-hidden rounded-full bg-sunken">
                       <span
-                        className="block h-full rounded-full bg-corail"
+                        className="block h-full rounded-full bg-primaire"
                         style={{ width: `${Math.round(ligne.part * 100)}%` }}
                       />
                     </span>
@@ -175,7 +175,7 @@ export function Stats() {
             <TitreSection
               eyebrow="Activité"
               action={
-                <Lien vers="/app/sport" className="text-sm font-semibold text-corail">
+                <Lien vers="/app/sport" className="text-sm font-semibold text-primaire">
                   Détail
                 </Lien>
               }
@@ -210,7 +210,7 @@ export function Stats() {
           {/* ── Poids ── */}
           <Lien vers="/app/poids" className="animate-rise block" style={{ animationDelay: '360ms' }}>
             <Carte className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken">
-              <Scale size={20} className="shrink-0 text-corail" aria-hidden="true" />
+              <Scale size={20} className="shrink-0 text-primaire" aria-hidden="true" />
               <span className="min-w-0 flex-1">
                 <span className="block font-semibold text-ink">Votre poids</span>
                 <span className="block text-sm text-ink-soft tnum">
@@ -259,7 +259,7 @@ function Bloc({
 }) {
   return (
     <div className="rounded-tile bg-sunken px-3 py-3 text-center">
-      <span className="mx-auto mb-1 grid size-7 place-items-center text-corail" aria-hidden="true">
+      <span className="mx-auto mb-1 grid size-7 place-items-center text-primaire" aria-hidden="true">
         {icone}
       </span>
       <p className="font-display text-lg font-semibold text-ink tnum">{valeur}</p>
@@ -306,7 +306,7 @@ function Barres({ jours }: { jours: { date: string; kcal: number; objectif: numb
                 <span
                   className={classes(
                     'block w-full rounded-t transition-all',
-                    jour.suivi ? (dansLaCible ? 'bg-basil' : 'bg-corail') : 'bg-line',
+                    jour.suivi ? (dansLaCible ? 'bg-reussite' : 'bg-primaire') : 'bg-line',
                   )}
                   style={jour.suivi ? { height: `${hauteur}%` } : { height: '2px' }}
                 />

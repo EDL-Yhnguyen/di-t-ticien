@@ -123,7 +123,7 @@ export function ModeCuisine() {
               aria-hidden="true"
               className={classes(
                 'h-1 flex-1 rounded-full transition',
-                i < etape ? 'bg-basil' : i === etape ? 'bg-corail' : 'bg-line',
+                i < etape ? 'bg-reussite' : i === etape ? 'bg-primaire' : 'bg-line',
               )}
             />
           ))}
@@ -143,7 +143,7 @@ export function ModeCuisine() {
                 onClick={() => changerDeRecette(i)}
                 className={classes(
                   'shrink-0 rounded-full px-3.5 py-2 text-xs font-semibold transition',
-                  i === index ? 'bg-corail text-white' : 'bg-surface text-ink-soft hover:bg-sunken',
+                  i === index ? 'bg-primaire text-white' : 'bg-surface text-ink-soft hover:bg-sunken',
                 )}
               >
                 {r.titre.length > 22 ? `${r.titre.slice(0, 21)}…` : r.titre}
@@ -163,7 +163,7 @@ export function ModeCuisine() {
 
       {/* ── L'étape, en grand ── */}
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center px-4 py-8">
-        <p className="mb-4 font-display text-6xl font-semibold text-corail tnum">{etape + 1}</p>
+        <p className="mb-4 font-display text-6xl font-semibold text-primaire tnum">{etape + 1}</p>
         {/* Une taille qui se lit à cinquante centimètres, debout, sans lunettes
             de lecture : c'est la distance réelle entre un plan de travail et un
             téléphone posé contre le mur. */}
@@ -185,8 +185,8 @@ export function ModeCuisine() {
         )}
 
         {recette.astuce && derniere && (
-          <p className="mt-6 rounded-tile bg-apricot-wash px-4 py-3.5 text-sm text-ink">
-            <strong className="font-semibold text-apricot">Le truc en plus — </strong>
+          <p className="mt-6 rounded-tile bg-accent-wash px-4 py-3.5 text-sm text-ink">
+            <strong className="font-semibold text-accent">Le truc en plus — </strong>
             {recette.astuce}
           </p>
         )}
@@ -282,20 +282,20 @@ function LigneMinuteur({
         'overflow-hidden',
         // Un minuteur échu doit se voir depuis l'autre bout de la cuisine :
         // le son peut être coupé, et les mains mouillées n'acquittent pas vite.
-        minuteur.sonne && 'border-berry bg-berry-wash',
+        minuteur.sonne && 'border-alerte bg-alerte-wash',
       )}
     >
       <div className="flex items-center gap-3 px-4 py-3">
         {minuteur.sonne ? (
-          <Flame size={20} className="shrink-0 animate-pulse text-berry" aria-hidden="true" />
+          <Flame size={20} className="shrink-0 animate-pulse text-alerte" aria-hidden="true" />
         ) : (
-          <Timer size={20} className="shrink-0 text-corail" aria-hidden="true" />
+          <Timer size={20} className="shrink-0 text-primaire" aria-hidden="true" />
         )}
         <span className="min-w-0 flex-1">
           <span
             className={classes(
               'block font-display text-2xl font-semibold tnum',
-              minuteur.sonne ? 'text-berry' : 'text-ink',
+              minuteur.sonne ? 'text-alerte' : 'text-ink',
             )}
             role={minuteur.sonne ? 'status' : undefined}
           >
@@ -313,7 +313,7 @@ function LigneMinuteur({
       </div>
       {!minuteur.sonne && (
         <div className="h-1 bg-sunken">
-          <div className="h-full bg-corail transition-[width]" style={{ width: `${part * 100}%` }} />
+          <div className="h-full bg-primaire transition-[width]" style={{ width: `${part * 100}%` }} />
         </div>
       )}
     </Carte>
@@ -341,7 +341,7 @@ function PlanDeBataille({ recettes }: { recettes: ReturnType<typeof recettesDeLa
       <ol className="space-y-2">
         {plan.ordre.map((recette, rang) => (
           <li key={recette.id} className="flex items-start gap-3 rounded-tile bg-sunken px-3.5 py-3">
-            <span className="grid size-6 shrink-0 place-items-center rounded-full bg-corail text-xs font-bold text-white tnum">
+            <span className="grid size-6 shrink-0 place-items-center rounded-full bg-primaire text-xs font-bold text-white tnum">
               {rang + 1}
             </span>
             <span className="min-w-0 flex-1">
@@ -379,10 +379,10 @@ export function BandeauCuisineEnCours() {
   const courante = recettes[Math.min(seance.courante, recettes.length - 1)]
 
   return (
-    <Carte className="flex items-center gap-3 border-corail px-4 py-3">
-      <Flame size={18} className="shrink-0 text-corail" aria-hidden="true" />
+    <Carte className="flex items-center gap-3 border-primaire px-4 py-3">
+      <Flame size={18} className="shrink-0 text-primaire" aria-hidden="true" />
       <span className="min-w-0 flex-1">
-        <span className="block text-xs font-bold tracking-[0.14em] text-corail uppercase">
+        <span className="block text-xs font-bold tracking-[0.14em] text-primaire uppercase">
           En cuisine
         </span>
         <span className="block truncate text-sm font-semibold text-ink">{courante.titre}</span>
@@ -393,7 +393,7 @@ export function BandeauCuisineEnCours() {
       <button
         type="button"
         onClick={() => aller('/app/mode-cuisine')}
-        className="shrink-0 rounded-full bg-corail px-3.5 py-2 text-xs font-semibold text-white transition hover:brightness-110"
+        className="shrink-0 rounded-full bg-primaire px-3.5 py-2 text-xs font-semibold text-white transition hover:brightness-110"
       >
         Reprendre
       </button>

@@ -1,64 +1,40 @@
 @import 'tailwindcss';
 
-/* Le thème sombre est piloté par une classe sur <html>, initialisée depuis la
-   préférence système puis modifiable dans les réglages. */
+/* Les huit thèmes, en clair et en sombre. Fichier généré : voir
+   outils/palettes.mjs. Le thème « marmite » y occupe :root et .dark, donc
+   l'application a ses couleurs même si aucun thème n'est choisi. */
+@import './palettes.css';
+
+/* Le thème sombre est piloté par une classe sur <html>, le thème de couleur par
+   l'attribut data-theme. Les deux se combinent : huit palettes × deux modes. */
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* ─────────────────────────────────────────────────────────────
-   Palette
-   Tirée du logo Mamakilo : la marmite corail, le fond crème,
-   l'encre marine du lettrage, le vert des feuilles. L'abricot dit
-   les calories, la groseille dit « envie de grignoter ».
+   Jetons qui ne changent pas avec le thème
 
-   Le corail du logo (#f67a5e) n'apparaît nulle part tel quel : il ne
-   tient que 2,4:1 sur blanc, donc ni texte ni bouton. Il vit dans
-   l'illustration ; --corail est sa version portante, assombrie
-   jusqu'à 4,5:1 partout où elle sert. Les deux se ressemblent assez
-   pour que la marque reste une seule couleur à l'œil.
+   Ceux-ci portent du sens, pas du goût : les redéfinir par thème
+   ferait dire autre chose à la même couleur d'un thème à l'autre.
+   Ils sont validés une fois, sur les fonds de tous les thèmes, par
+   outils/palettes.mjs.
    ───────────────────────────────────────────────────────────── */
 :root {
-  --ground: #fdf6ee;
-  --surface: #ffffff;
-  --sunken: #f8f0e6;
-  --ink: #232d3a;
-  --ink-soft: #5b6675;
-  --ink-faint: #7e8794;
-  --line: #e8dccd;
-
-  --corail: #c33f22;
-  --corail-wash: #fff1ec;
-  --apricot: #a85908;
-  --apricot-wash: #fdefe3;
-  --basil: #3e7a3f;
-  --basil-wash: #eaf6e6;
-  --berry: #bd2b62;
-  --berry-wash: #fde3ec;
-
-  --shadow-soft: 0 1px 2px rgb(35 45 58 / 0.04), 0 8px 24px -12px rgb(35 45 58 / 0.16);
-  --shadow-lift: 0 2px 4px rgb(35 45 58 / 0.05), 0 18px 40px -18px rgb(35 45 58 / 0.28);
-
   /* Les trois parts de l'assiette forment une palette catégorielle : elles se
      touchent, donc chaque paire doit rester distinguable en vision daltonienne.
      Ces valeurs sont validées, pas choisies à l'œil — vert et orange voisins,
      le réflexe naturel, tombaient à ΔE 5,1 en protanopie (seuil : 8).
-     Elles sont distinctes des jetons d'interface, dont la contrainte est le
-     contraste du texte et non la séparation entre voisins. */
+     Elles ne suivent pas le thème : la part des légumes doit rester la même
+     couleur que l'utilisateur choisisse « Agrumes » ou « Océan », sinon la
+     légende apprise hier ne vaut plus rien aujourd'hui. */
   --assiette-legume: #1a6e3e;
   --assiette-feculent: #c97b14;
   --assiette-proteine: #6535bf;
 
-  /* Le bandeau de tête porte toujours du texte blanc : il lui faut donc rester
-     sombre dans les deux thèmes. Le jeton --corail, lui, s'éclaircit en mode
-     sombre pour rester lisible en texte — les deux usages divergent. */
-  --bandeau-haut: #c33f22;
-  --bandeau-bas: #a33018;
-
   /* ── Nutri-Score ──────────────────────────────────────────────
      Ce ne sont pas des couleurs d'interface : c'est l'échelle officielle
      française, celle imprimée sur les emballages. Un utilisateur la
-     reconnaît avant même de lire la lettre — la redessiner à notre goût
-     détruirait précisément ce qui la rend lisible. Elles ne servent qu'à
-     dire la qualité d'un aliment, jamais à habiller un bouton.
+     reconnaît avant même de lire la lettre — la redessiner à notre goût,
+     ou la faire changer avec le thème, détruirait précisément ce qui la
+     rend lisible.
 
      Chaque teinte porte son encre : le vert foncé et le rouge tiennent du
      texte blanc, le vert clair, le jaune et l'orange demandent du texte
@@ -82,43 +58,18 @@
   /* Les trois macronutriments. Ils ont leurs propres jetons plutôt que
      d'emprunter ceux de l'assiette : « légume » et « lipide » ne veulent pas
      dire la même chose, et un vert sur la barre des graisses ferait lire
-     l'inverse du sens voulu. Les trois barres ne se touchent pas, la
-     contrainte est donc le contraste sur fond clair, pas la séparation entre
-     voisines. */
+     l'inverse du sens voulu. */
   --macro-proteines: #6535bf;
   --macro-glucides: #b06a10;
   --macro-lipides: #1f74a8;
 }
 
 .dark {
-  --ground: #171d26;
-  --surface: #1f2733;
-  --sunken: #28323f;
-  --ink: #f2f0ec;
-  --ink-soft: #b3bcc7;
-  --ink-faint: #818c99;
-  --line: #33404f;
-
-  --corail: #ff8f74;
-  --corail-wash: #3a2019;
-  --apricot: #f5a03f;
-  --apricot-wash: #3d2a13;
-  --basil: #6fc46f;
-  --basil-wash: #1b2f1c;
-  --berry: #f57fa8;
-  --berry-wash: #3b1725;
-
-  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px -12px rgb(0 0 0 / 0.6);
-  --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.35), 0 18px 40px -18px rgb(0 0 0 / 0.7);
-
   /* Réétagées pour le fond sombre, revalidées séparément : un thème sombre
      n'est pas l'inversion du thème clair. */
   --assiette-legume: #22a97f;
   --assiette-feculent: #c28520;
   --assiette-proteine: #9d72e4;
-
-  --bandeau-haut: #8f3a22;
-  --bandeau-bas: #5e2312;
 
   /* Les cinq teintes sont remontées juste assez pour tenir sur un fond
      sombre sans cesser d'être reconnaissables. L'encre passe au sombre
@@ -143,6 +94,39 @@
   --macro-lipides: #58a8d8;
 }
 
+/* ─────────────────────────────────────────────────────────────
+   Relief
+
+   Les ombres sont teintées du primaire du thème plutôt que grises :
+   c'est ce qui fait qu'une carte a l'air posée sur la couleur du
+   thème et non collée sur un fond blanc. `color-mix` les recalcule
+   toute seule quand le thème change — sans elle, il faudrait
+   écrire seize jeux d'ombres à la main.
+   ───────────────────────────────────────────────────────────── */
+:root {
+  --ombre-teinte: color-mix(in oklab, var(--primaire) 22%, transparent);
+  --ombre-teinte-forte: color-mix(in oklab, var(--primaire) 34%, transparent);
+
+  --shadow-soft: 0 1px 2px var(--ombre-teinte), 0 10px 26px -14px var(--ombre-teinte-forte);
+  --shadow-lift: 0 2px 6px var(--ombre-teinte), 0 22px 48px -20px var(--ombre-teinte-forte);
+  /* Le halo des boutons et du bouton central : une ombre franchement colorée,
+     posée sous l'élément, qui donne l'impression que la couleur éclaire le
+     fond. */
+  --shadow-halo:
+    0 2px 6px color-mix(in oklab, var(--primaire) 40%, transparent),
+    0 14px 30px -12px color-mix(in oklab, var(--primaire) 55%, transparent);
+}
+
+.dark {
+  /* Sur un fond sombre, une ombre colorée disparaît : c'est le noir qui creuse.
+     Le halo, lui, reste coloré — il éclaire au lieu de creuser. */
+  --ombre-teinte: rgb(0 0 0 / 0.34);
+  --ombre-teinte-forte: rgb(0 0 0 / 0.62);
+  --shadow-halo:
+    0 2px 6px color-mix(in oklab, var(--primaire) 30%, transparent),
+    0 14px 32px -12px color-mix(in oklab, var(--primaire) 40%, transparent);
+}
+
 @theme inline {
   --color-ground: var(--ground);
   --color-surface: var(--surface);
@@ -151,15 +135,19 @@
   --color-ink-soft: var(--ink-soft);
   --color-ink-faint: var(--ink-faint);
   --color-line: var(--line);
+  --color-line-fort: var(--line-fort);
 
-  --color-corail: var(--corail);
-  --color-corail-wash: var(--corail-wash);
-  --color-apricot: var(--apricot);
-  --color-apricot-wash: var(--apricot-wash);
-  --color-basil: var(--basil);
-  --color-basil-wash: var(--basil-wash);
-  --color-berry: var(--berry);
-  --color-berry-wash: var(--berry-wash);
+  /* Quatre rôles, pas quatre couleurs. Les jetons s'appelaient --corail,
+     --apricot, --basil et --berry ; avec huit thèmes, un nom de teinte est faux
+     sept fois sur huit — « bg-corail » rendait un bleu dans le thème Océan. */
+  --color-primaire: var(--primaire);
+  --color-primaire-wash: var(--primaire-wash);
+  --color-accent: var(--accent);
+  --color-accent-wash: var(--accent-wash);
+  --color-reussite: var(--reussite);
+  --color-reussite-wash: var(--reussite-wash);
+  --color-alerte: var(--alerte);
+  --color-alerte-wash: var(--alerte-wash);
 
   --color-assiette-legume: var(--assiette-legume);
   --color-assiette-feculent: var(--assiette-feculent);
@@ -190,11 +178,12 @@
   --font-display: 'Faustina', Georgia, 'Times New Roman', serif;
   --font-sans: 'Figtree', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
 
-  --radius-card: 1.5rem;
-  --radius-tile: 1rem;
+  --radius-card: 1.75rem;
+  --radius-tile: 1.125rem;
 
   --shadow-soft: var(--shadow-soft);
   --shadow-lift: var(--shadow-lift);
+  --shadow-halo: var(--shadow-halo);
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -229,7 +218,7 @@
   h2,
   h3 {
     font-family: var(--font-display);
-    letter-spacing: -0.015em;
+    letter-spacing: -0.02em;
   }
 
   /* Chiffres alignés verticalement : indispensable dès qu'un poids ou un
@@ -239,7 +228,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--corail);
+    outline: 2px solid var(--primaire);
     outline-offset: 2px;
     border-radius: 4px;
   }
@@ -269,6 +258,96 @@
   }
   .safe-top {
     padding-top: max(env(safe-area-inset-top), 0px);
+  }
+
+  /* ── Le bandeau de tête ──────────────────────────────────────
+     Trois couches plutôt qu'un aplat : un dégradé diagonal entre les
+     deux jetons du bandeau, et deux halos radiaux qui posent une
+     lumière en haut à droite et une ombre en bas à gauche. C'est ce
+     qui distingue une surface d'un rectangle rempli — et le retour
+     « le design n'est pas très coloré » portait précisément sur des
+     aplats sans épaisseur.
+     ────────────────────────────────────────────────────────────── */
+  .bandeau {
+    background-image:
+      /* L'accent *vif* et non l'accent porteur : celui-ci doit rester lisible en
+         texte, donc il est sombre, et un halo sombre sur une couleur sombre ne
+         se voit pas. C'est précisément l'usage pour lequel --accent-vif existe. */
+      radial-gradient(
+        120% 90% at 88% 0%,
+        color-mix(in oklab, var(--accent-vif) 52%, transparent) 0%,
+        transparent 64%
+      ),
+      radial-gradient(
+        100% 80% at 0% 100%,
+        color-mix(in oklab, black 26%, transparent) 0%,
+        transparent 70%
+      ),
+      linear-gradient(152deg, var(--bandeau-haut) 0%, var(--bandeau-bas) 100%);
+  }
+
+  /* Un aplat de rôle en dégradé : les boutons et les tuiles pleines. Le
+     dégradé part de la couleur et l'assombrit de 14 %, ce qui suffit à
+     donner du volume sans inventer une seconde teinte à valider. */
+  .plein-primaire {
+    background-image: linear-gradient(
+      160deg,
+      var(--primaire) 0%,
+      color-mix(in oklab, var(--primaire) 82%, black) 100%
+    );
+  }
+  .plein-accent {
+    background-image: linear-gradient(
+      160deg,
+      var(--accent) 0%,
+      color-mix(in oklab, var(--accent) 82%, black) 100%
+    );
+  }
+  .plein-reussite {
+    background-image: linear-gradient(
+      160deg,
+      var(--reussite) 0%,
+      color-mix(in oklab, var(--reussite) 82%, black) 100%
+    );
+  }
+  .plein-alerte {
+    background-image: linear-gradient(
+      160deg,
+      var(--alerte) 0%,
+      color-mix(in oklab, var(--alerte) 82%, black) 100%
+    );
+  }
+
+  /* Le lavis d'une carte teintée, avec un fondu vers la surface : une carte
+     entièrement lavée paraît plate, une carte qui s'éclaircit vers le bas
+     paraît éclairée. */
+  .lavis-primaire {
+    background-image: linear-gradient(
+      168deg,
+      var(--primaire-wash) 0%,
+      color-mix(in oklab, var(--primaire-wash) 45%, var(--surface)) 100%
+    );
+  }
+  .lavis-accent {
+    background-image: linear-gradient(
+      168deg,
+      var(--accent-wash) 0%,
+      color-mix(in oklab, var(--accent-wash) 45%, var(--surface)) 100%
+    );
+  }
+  .lavis-reussite {
+    background-image: linear-gradient(
+      168deg,
+      var(--reussite-wash) 0%,
+      color-mix(in oklab, var(--reussite-wash) 45%, var(--surface)) 100%
+    );
+  }
+  .lavis-alerte {
+    background-image: linear-gradient(
+      168deg,
+      var(--alerte-wash) 0%,
+      color-mix(in oklab, var(--alerte-wash) 45%, var(--surface)) 100%
+    );
   }
 }
 
