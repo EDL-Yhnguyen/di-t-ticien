@@ -252,14 +252,61 @@ le document déjà couvert par la mention Supabase.
 
 ---
 
+## Chiffrer et répartir (P3 et P4)
+
+### Le total est un plancher, annoncé comme tel
+
+`lib/prix/panier.ts` chiffre chaque ligne au dernier prix connu. Ce qu'il ne sait
+pas faire, il le compte à part : produit jamais vu, quantité illisible
+(« quelques brins »), ou unité incompatible. L'écran écrit alors « au moins
+45 €, six lignes non chiffrées » plutôt qu'un total rond.
+
+Ce n'est pas de la prudence décorative : un total à 62 € qui en fait 90 en caisse
+fait perdre confiance dans **tout** le module, y compris dans les chiffres justes.
+Un plancher reste vrai, et se resserre tout seul à mesure qu'on lit des tickets.
+
+**On ne déduit jamais un poids d'un libellé.** « 200 g d'emmental » face à un
+historique à la pièce supposerait connaître le poids du paquet acheté la dernière
+fois, que rien n'enregistre.
+
+**Une seule arithmétique pour les deux écrans** : `quantiteEnUnites` est exportée
+de `panier.ts` et réemployée par la répartition. Deux conversions différentes
+donneraient deux totaux différents sur deux écrans — c'est la règle déjà posée
+pour `cumulerQuantites` dans `ingredients.ts`.
+
+### La répartition se compare au meilleur magasin unique
+
+`lib/prix/repartition.ts` envoie chaque ligne au moins cher parmi les enseignes
+cochées. Trois décisions portent l'honnêteté du chiffre annoncé :
+
+- **La matrice produit × magasin se lit dans les relevés**, pas dans les agrégats
+  — ceux-ci ne retiennent que la dernière et la meilleure enseigne. Pour chaque
+  couple on garde **le relevé le plus récent et non le plus bas** : répartir sur
+  une promotion vue il y a huit mois enverrait dans un magasin où l'écart n'existe
+  plus.
+- **L'économie se compare au meilleur magasin unique**, jamais au pire ni à une
+  moyenne. La vraie alternative de quelqu'un qui hésite, c'est de tout acheter au
+  même endroit ; comparer au pire gonflerait le chiffre sans décrire aucun choix
+  réel.
+- **Elle n'est annoncée que si ce magasin connaît tous les produits chiffrés.**
+  Sinon on comparerait un panier complet à un panier incomplet, et l'économie
+  serait un artefact de ce qui manque. L'écran le dit plutôt que d'afficher un
+  nombre.
+
+**Le mode « je ne vais que chez X » n'a pas de code séparé** : c'est la même
+fonction avec une seule enseigne candidate. Les produits qu'on n'y a jamais
+achetés ressortent en orphelins — exactement l'information utile avant de partir.
+
+Les listes produites sont **indépendantes**, une par enseigne : on ne fait pas
+ses courses dans deux magasins en même temps, et une liste unique à filtrer
+obligerait à retrouver le bon filtre à chaque rayon.
+
+---
+
 ## Ce qui reste
 
-- **P3 — chiffrer la liste de courses** : prix estimé par ligne et total avant de
-  partir, à partir des agrégats, en disant clairement quand un prix est inconnu
-  plutôt qu'en l'inventant.
-- **P4 — répartir entre enseignes** : une liste par magasin, l'économie annoncée,
-  et le mode « je ne vais que chez X ». La répartition ne portera que sur les
-  produits dont le prix est connu dans plusieurs enseignes.
+- **P3 et P4 n'ont pas été vérifiés au pilote**, seulement au typecheck et au
+  build. P1 et P2 l'ont été.
 - **La table d'alias apprise** : rapprocher `EMMENT.CARR 250G` d'« emmental » se
   fait aujourd'hui au pluriel près seulement.
 - **La quantité n'est pas corrigeable** dans l'écran de correction, seulement le
