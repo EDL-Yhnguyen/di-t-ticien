@@ -828,9 +828,31 @@ questions différentes, et la seconde a déjà une réponse automatique.
 contrastes tiennent, les 16 avertissements portent sur des fonds jamais utilisés.
 `@anthropic-ai/sdk` ne fuite pas dans le bundle.
 
-**Pas encore vérifié à l'écran** : les huit thèmes n'ont pas été parcourus au
-pilote Playwright en 390 px et 1280 px, contrairement à l'usage des sprints
-précédents. À faire avant de considérer le chantier clos.
+**Vérifié à l'écran** au pilote Playwright sur le build de production en mode
+démo, parcours inscription → consentement → onboarding → aujourd'hui → cuisine →
+profil, **aucune erreur console** :
+
+- Les **seize combinaisons** contrôlées dans le document : `--primaire`,
+  `--ground`, `--surface`, `--ink` et `--accent` diffèrent bien d'un thème à
+  l'autre, et **`--assiette-legume` et `--nutri-a` sont identiques partout** —
+  la règle des couleurs de données tient, mesurée et pas supposée.
+- Le parcours réel d'un clic sur une vignette : `data-theme` posé,
+  `equilibre:palette` enregistré, `<meta name="theme-color">` passé à la couleur
+  de fond du thème choisi, et le tout retrouvé après rechargement complet.
+- Rendu contrôlé en **390 px et 1280 px** — la grille des vignettes passe de 2 à
+  4 colonnes — sur Marmite, Océan clair, Encre sombre, Framboise et Myrtille.
+  Sur Framboise, la bande « Équilibré » reste bleue et l'icône du garde-manger
+  verte au milieu d'un thème rose : c'est la démonstration à l'œil de ce que le
+  contrôle des jetons dit en chiffres.
+- Aucun reste des anciens noms de jetons dans `src/`. Les seules couleurs
+  écrites en dur hors des vignettes sont les tracés du logo dans `Marque` —
+  voulu, la marque ne change pas avec le thème.
+
+**Un défaut corrigé en vérifiant** : `<meta name="apple-mobile-web-app-capable">`
+seule déclenchait un avertissement à chaque page sur les navigateurs récents. La
+balise standard `mobile-web-app-capable` a été ajoutée **à côté**, pas à la
+place : l'ancienne est celle que lisent les iOS antérieurs à 16.4, et la retirer
+ferait perdre le plein écran sur ces appareils sans que rien ne le signale.
 
 ### 30 juillet 2026 — Le catalogue passe à 5 522 recettes (module Cuisine, sprint C7)
 

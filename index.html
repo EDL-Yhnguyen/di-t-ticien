@@ -15,7 +15,13 @@
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/icone.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/icone-180.png" />
+    <!-- Les deux, et pas seulement la seconde : la balise `apple-` est celle que
+         lisent les iOS antérieurs à 16.4, et c'est la moitié du parc installé
+         d'une PWA. La standard fait taire l'avertissement des navigateurs
+         récents ; retirer l'autre ferait perdre le plein écran sur les anciens
+         iPhone, sans que rien ne le signale. -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Mamakilo" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
