@@ -139,6 +139,14 @@ export function Confidentialite() {
               <strong>Les coordonnées d’un praticien</strong>, si vous choisissez de les saisir.
               Elles restent dans votre compte et ne sont transmises à personne.
             </li>
+            <li>
+              <strong>Vos tickets de caisse</strong>, si vous en photographiez. L’image est lue{' '}
+              <strong>sur votre appareil</strong> et n’est jamais envoyée nulle part ; elle n’est
+              pas conservée non plus. Ce qui en est tiré — produit, prix, enseigne, date — reste
+              dans la mémoire de votre navigateur. Seul un résumé par produit (dernier prix, prix
+              moyen, meilleur prix et son enseigne) rejoint votre compte, afin de le retrouver d’un
+              appareil à l’autre.
+            </li>
           </ul>
           <p>
             Aucune donnée n’est collectée à votre insu : tout ce qui figure ci-dessus a été saisi

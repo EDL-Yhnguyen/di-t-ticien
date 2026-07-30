@@ -1,5 +1,6 @@
 import { supprimerCompte as supprimerCompteAuth } from './auth'
 import { VERSION_CONFIDENTIALITE } from './legal'
+import { toutEffacer as toutEffacerPrix, tousLesReleves } from './prix/depot'
 import { effacerDonnees, type EtatUtilisateur } from './store'
 import type { Consentement } from './types'
 import { jourISO } from './utils'
@@ -33,17 +34,32 @@ const LISEZ_MOI =
   'dans n’importe quel éditeur de texte et se recharge dans n’importe quel outil ' +
   'acceptant du JSON.'
 
-export function documentExport(etat: EtatUtilisateur) {
+/**
+ * Le document exporté.
+ *
+ * `relevesPrix` n'est pas dans `etat` et doit pourtant y figurer : les relevés
+ * de tickets vivent en IndexedDB pour ne pas alourdir le document synchronisé
+ * (voir `lib/prix/depot.ts`), mais ce sont des données personnelles conservées
+ * par l'application. L'article 20 porte sur **tout** ce qu'elle détient, pas sur
+ * ce qui se trouve dans un stockage plutôt qu'un autre. Les oublier ferait d'un
+ * choix technique une amputation du droit.
+ */
+export function documentExport(etat: EtatUtilisateur, relevesPrix: unknown[] = []) {
   return {
     _format: 'equilibre-export-v1',
     _exporteLe: new Date().toISOString(),
     _lisezMoi: LISEZ_MOI,
     ...etat,
+    relevesPrix,
   }
 }
 
-export function telechargerExport(etat: EtatUtilisateur): void {
-  const contenu = JSON.stringify(documentExport(etat), null, 2)
+export async function telechargerExport(etat: EtatUtilisateur): Promise<void> {
+  // Un dépôt local indisponible (navigation privée, quota) ne doit pas empêcher
+  // l'export du reste : un export partiel annoncé vaut mieux qu'un droit qui
+  // échoue en silence.
+  const releves = await tousLesReleves(etat.profil.id).catch(() => [])
+  const contenu = JSON.stringify(documentExport(etat, releves), null, 2)
   const url = URL.createObjectURL(new Blob([contenu], { type: 'application/json' }))
   const lien = document.createElement('a')
   lien.href = url
@@ -72,5 +88,10 @@ export interface ResultatSuppression {
  */
 export async function toutSupprimer(userId: string): Promise<ResultatSuppression> {
   await effacerDonnees(userId)
+  // Les relevés de prix ne sont pas dans le document : sans cette ligne, ils
+  // survivraient à la suppression du compte dans le navigateur, et « supprimer
+  // mes données » serait faux sans que rien ne le dise. Une base locale
+  // absente n'est pas un échec de suppression — il n'y avait rien à effacer.
+  await toutEffacerPrix(userId).catch(() => {})
   return { compteSupprime: await supprimerCompteAuth(userId) }
 }

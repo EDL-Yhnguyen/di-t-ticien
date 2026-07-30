@@ -3,6 +3,7 @@ import { estCompteElodie } from './auth'
 import { supabase } from './supabase'
 import { jourISO } from './utils'
 import type {
+  AgregatPrix,
   Aliment,
   ArticleStock,
   Consentement,
@@ -69,6 +70,20 @@ export interface EtatUtilisateur {
    * dans le caddie.
    */
   courses: ListeCourses[]
+  /**
+   * Ce que les tickets de caisse ont appris sur les prix — **les agrégats
+   * seulement**.
+   *
+   * Le détail vit en IndexedDB, hors de ce document, et `lib/prix/depot.ts`
+   * explique pourquoi : cinq mille relevés par an pèsent près d'un mégaoctet,
+   * et ce document est cloné en entier à chaque écriture puis renvoyé en entier
+   * à Supabase. C'est la seule exception à la règle du document unique, et elle
+   * tient parce qu'un agrégat par produit reste de l'ordre de la dizaine de Ko.
+   *
+   * Ce tableau se **recalcule** depuis les relevés, il ne s'entretient pas :
+   * voir `lib/prix/agregats.ts`.
+   */
+  prix: AgregatPrix[]
   /**
    * Identifiants des recettes mises de côté.
    *
@@ -138,6 +153,7 @@ export function etatInitial(u: Utilisateur): EtatUtilisateur {
     cuisine: null,
     stocks: [],
     courses: [],
+    prix: [],
     favoris: [],
     conversation: [],
     consentementCoach: null,
@@ -246,6 +262,7 @@ function fusionner(
     cuisine: partiel.cuisine ?? null,
     stocks: partiel.stocks ?? [],
     courses: partiel.courses ?? [],
+    prix: partiel.prix ?? [],
     favoris: partiel.favoris ?? [],
     conversation: partiel.conversation ?? [],
     consentementCoach: partiel.consentementCoach ?? null,

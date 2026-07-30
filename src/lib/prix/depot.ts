@@ -255,6 +255,12 @@ export async function relevesDuProduit(libelle: string, utilisateur: string): Pr
     .sort((a, b) => b.date.localeCompare(a.date))
 }
 
+/** Tous les relevés d'un compte. Sert au recalcul complet des agrégats. */
+export async function tousLesReleves(utilisateur: string): Promise<Releve[]> {
+  const tous = await lire<Releve>(RELEVES, (m) => m.getAll())
+  return tous.filter((r) => r.utilisateur === utilisateur)
+}
+
 /** Les tickets enregistrés, du plus récent au plus ancien. */
 export async function tickets(utilisateur: string): Promise<TicketEnregistre[]> {
   const tous = await lire<TicketEnregistre>(TICKETS, (m) => m.getAll())

@@ -406,6 +406,45 @@ export interface ListeCourses {
   plansVerses?: string[]
 }
 
+/* ──────────────────────────────── Prix ──────────────────────────────── */
+
+/**
+ * Ce qu'on retient d'un produit, une fois tous ses relevés dépouillés.
+ *
+ * **C'est la seule chose qui entre dans le document de l'utilisateur.** Le
+ * détail — chaque ligne de chaque ticket — vit en IndexedDB (`lib/prix/depot.ts`,
+ * qui explique pourquoi). Un agrégat pèse une centaine d'octets et une famille
+ * en accumule quelques centaines : le document reste du même ordre qu'avant,
+ * donc le `structuredClone` de chaque écriture aussi.
+ *
+ * Les prix sont **ramenés à l'unité de comparaison** : euros par kilo pour ce
+ * qui se pèse, par pièce pour le reste. Comparer deux prix payés sans ça ne
+ * veut rien dire.
+ */
+export interface AgregatPrix {
+  /** La forme de rapprochement du libellé (`cleIngredient`). C'est la clé. */
+  cle: string
+  /** Le libellé du relevé le plus récent — celui qu'on affiche. */
+  libelle: string
+  unite: 'piece' | 'kg' | 'l'
+  dernier: number
+  derniereDate: string
+  derniereEnseigne: string | null
+  /**
+   * Le prix le plus bas jamais constaté, et où.
+   *
+   * C'est le chiffre qui donne sa valeur à l'historique : « tu l'as déjà payé
+   * 1,69 € chez Aldi » est une information actionnable, là où un prix moyen ne
+   * dit que le passé.
+   */
+  meilleur: number
+  meilleureEnseigne: string | null
+  meilleureDate: string
+  moyen: number
+  /** Le nombre de relevés derrière ces chiffres — de quoi juger leur solidité. */
+  releves: number
+}
+
 export type Emplacement = 'frigo' | 'placard' | 'congelateur'
 
 export const EMPLACEMENTS: Emplacement[] = ['frigo', 'placard', 'congelateur']

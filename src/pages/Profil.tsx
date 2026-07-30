@@ -19,6 +19,7 @@ import {
   ShoppingBasket,
   ShieldHalf,
   Stethoscope,
+  Tag,
   Trash2,
 } from 'lucide-react'
 import { useApp, useSession } from '../context/AppContext'
@@ -166,6 +167,17 @@ export function Profil() {
             <span className="flex-1 font-medium text-ink">Ma liste de courses</span>
             {coursesAPrendre > 0 && (
               <span className="text-sm text-ink-faint tnum">{coursesAPrendre}</span>
+            )}
+            <ChevronRight size={17} className="shrink-0 text-ink-faint" aria-hidden="true" />
+          </Lien>
+          <Lien
+            vers="/app/prix"
+            className="flex items-center gap-3 px-5 py-4 transition hover:bg-sunken"
+          >
+            <Tag size={19} className="shrink-0 text-primaire" aria-hidden="true" />
+            <span className="flex-1 font-medium text-ink">Mes prix</span>
+            {etat.prix.length > 0 && (
+              <span className="text-sm text-ink-faint tnum">{etat.prix.length}</span>
             )}
             <ChevronRight size={17} className="shrink-0 text-ink-faint" aria-hidden="true" />
           </Lien>

@@ -13,7 +13,7 @@
  * redemande son consentement à tout le monde — ne la toucher que si le texte
  * change sur le fond (nouvelle donnée collectée, nouveau destinataire).
  */
-export const VERSION_CONFIDENTIALITE = '2026-07-29'
+export const VERSION_CONFIDENTIALITE = '2026-07-30'
 
 export interface Editeur {
   /** Nom et prénom, ou raison sociale. Facultatif pour un éditeur non professionnel. */

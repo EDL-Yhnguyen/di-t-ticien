@@ -9,6 +9,7 @@ import { POIDS_PREMIER_USAGE, lireImage, premierUsage } from '../lib/ticket/ocr'
 import { analyserTicket, controler } from '../lib/ticket/parseur'
 import type { LigneTicket, TicketLu } from '../lib/ticket/types'
 import { enregistrerTicket } from '../lib/prix/depot'
+import { recalculer } from '../lib/prix/agregats'
 import { classes, dateComplete, identifiant, jourISO, nombre } from '../lib/utils'
 
 /**
@@ -27,7 +28,7 @@ import { classes, dateComplete, identifiant, jourISO, nombre } from '../lib/util
 type Etape = 'depart' | 'lecture' | 'correction' | 'enregistre'
 
 export function Ticket() {
-  const { etat } = useSession()
+  const { etat, modifier } = useSession()
   const entree = useRef<HTMLInputElement>(null)
 
   const [etape, setEtape] = useState<Etape>('depart')
@@ -127,6 +128,13 @@ export function Ticket() {
     if (!ticket) return
     try {
       const resultat = await enregistrerTicket(ticket, etat.profil.id, dateTicket)
+      // Le dépouillement repart de tous les relevés plutôt que de corriger les
+      // agrégats existants : une moyenne entretenue à l'incrément dérive
+      // silencieusement, et une moyenne fausse a l'air d'une moyenne.
+      const agregats = await recalculer(etat.profil.id)
+      modifier((brouillon) => {
+        brouillon.prix = agregats
+      })
       setBilan(resultat)
       setEtape('enregistre')
     } catch (e) {

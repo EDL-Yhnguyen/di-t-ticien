@@ -205,6 +205,8 @@ api/
 | `/app/garde-manger` | `GardeManger.tsx` | frigo, placards, congélateur, dates limites |
 | `/app/cuisiner` | `Cuisiner.tsx` | ce que le stock permet de cuisiner |
 | `/app/courses` | `Courses.tsx` | listes de courses, cochage enregistré, retour de courses |
+| `/app/ticket` | `Ticket.tsx` | photo d'un ticket de caisse, OCR local, correction ligne à ligne |
+| `/app/prix` | `Prix.tsx` | historique des prix par produit, meilleur prix et son enseigne |
 | `/app/mode-cuisine` | `ModeCuisine.tsx` | **hors gabarit** : une étape à la fois, minuteurs, batch |
 | `/app/coach` | `Coach.tsx` | coach conversationnel (accord préalable) |
 | `/app/stats` | `Stats.tsx` | tendances sur 7 / 30 / 90 jours |
@@ -611,6 +613,32 @@ Sprint C2, livré le 30/07/2026 ; les décisions détaillées sont dans
 - **Le retour de courses n'invente aucune date limite.** Les articles entrent au
   garde-manger sans DLC ni DDM, et l'écran le dit.
 
+## Les prix
+
+Module « Tickets et prix », livré le 30/07/2026. **Le programme complet, les
+quatre points du brief qui ne peuvent pas se faire, et les pièges rencontrés sont
+dans `PRIX.md`.** À lire avant d'y toucher. L'essentiel à ne pas défaire :
+
+- **Les relevés de prix ne vont pas dans le document `jsonb`.** C'est la seule
+  exception à la règle du document unique, et elle est motivée : cinq mille
+  relevés par an pèsent près d'un mégaoctet, or `modifier()` clone le document
+  entier à chaque écriture et `enregistrer()` le renvoie entier à Supabase. Le
+  détail vit en IndexedDB (`lib/prix/depot.ts`), **seuls les agrégats par
+  produit** entrent dans `EtatUtilisateur.prix`. Ne pas rapatrier le détail « pour
+  simplifier » : ce serait une latence sur l'écran des courses.
+- **Les agrégats se recalculent, ils ne s'entretiennent pas.** Une moyenne
+  corrigée à l'incrément dérive, et une moyenne fausse a l'air d'une moyenne.
+- **Le ticket porte sa propre somme de contrôle.** Le total imprimé est confronté
+  à l'addition des lignes ; tant que ça ne retombe pas, l'écran le dit et
+  n'affirme rien. C'est ce qui rend un OCR local digne de confiance.
+- **Aucun prix n'est deviné.** Une ligne illisible reste `null`, jamais `0` —
+  zéro deviendrait le « meilleur prix jamais vu » du produit.
+- **`worker.format: 'es'` dans `vite.config.ts` ne se retire pas.** Sans cette
+  ligne, Vite émet le worker OCR en IIFE, le navigateur refuse de le charger, et
+  la panne n'existe **qu'en production**, sans message d'erreur.
+- **L'OCR est local et le restera tant qu'aucune IA payante n'est décidée.**
+  L'image ne part nulle part et n'est pas conservée.
+
 ## Le catalogue de recettes
 
 `src/lib/recettes/` — un fichier par moment de repas, réunis par `index.ts`
@@ -812,6 +840,44 @@ Vérification manuelle attendue :
 ---
 
 ## Historique du projet
+
+### 30 juillet 2026 — Tickets de caisse et historique de prix
+
+Premier module « Prix ». Yann a demandé une application de courses intelligente ;
+j'avais recommandé un projet séparé, **il a tranché pour un module de Mamakilo**,
+et ses trois contraintes lui donnent raison : tout gratuit, aucune IA payante,
+usage familial. Décisions détaillées dans `PRIX.md`.
+
+- **L'OCR tourne dans le navigateur** (`tesseract-wasm`, 2 paquets, `npm audit`
+  toujours à 0). Aucune image ne sort de l'appareil, aucun modèle payant. Le
+  moteur et le modèle français sont servis depuis notre domaine, donc mis en
+  cache par le service worker : un ticket se photographie dans un magasin sans
+  réseau.
+- **Le seuillage est adaptatif**, par image intégrale. Un seuil global choisirait
+  une valeur unique pour une photo dont l'éclairage varie du simple au triple et
+  effacerait la moitié à l'ombre ; l'image intégrale ramène la moyenne locale à
+  quatre lectures par pixel, là où la fenêtre naïve demanderait dix milliards
+  d'additions.
+- **Le ticket est son propre juge** : le total imprimé contre l'addition des
+  lignes. C'est ce qui permet de se passer d'un modèle payant sans enregistrer
+  une base de prix silencieusement fausse.
+- **Les relevés vivent en IndexedDB**, hors du document. Voir « Les prix ».
+- **`VERSION_CONFIDENTIALITE` passe au 30/07/2026** — nouvelle catégorie de
+  données. L'export emporte les relevés locaux et la suppression les efface :
+  sans ça, un choix de stockage amputerait un droit.
+
+**Vérifié** au pilote sur le build de production en mode démo, 390 px, clair et
+sombre : deux tickets de deux enseignes lus de bout en bout, addition retombant
+au centime sur les totaux imprimés, agrégats contrôlés **dans le document**
+(emmental 2,45 € chez Carrefour Market, meilleur 1,89 € chez Aldi, moyenne
+2,17 €), et l'écran des prix rendu conforme. Banc d'essai du parseur : 25
+contrôles. Contraste minimal mesuré en sombre : 5,24:1. Aucune erreur console.
+
+**Quatre défauts corrigés en vérifiant**, dont deux qu'aucun typecheck ne voit :
+le worker émis en IIFE (panne de production pure, sans message d'erreur), un
+reste flottant sur les montants, tous les produits au poids marqués douteux à
+tort, et une tuile qui comptait les enseignes sur une donnée qui ne le permettait
+pas.
 
 ### 30 juillet 2026 — Huit thèmes de couleur
 
