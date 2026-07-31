@@ -24,11 +24,30 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Mamakilo" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Les polices sont servies depuis notre domaine, et ce n'est pas qu'une
+         question de vitesse : une police chargée depuis fonts.gstatic.com
+         transmet l'adresse IP du visiteur à Google, qui devient un destinataire
+         de données — or DESTINATAIRES, dans src/lib/legal.ts, ne l'a jamais
+         listé. Sur un site qui traite des données de santé, la politique de
+         confidentialité doit être vraie. Voir outils/polices.mjs.
+
+         Seuls les deux sous-ensembles latins sont préchargés. Les latin-ext ne
+         se téléchargent que si un caractère les appelle, ce que gèrent les
+         unicode-range de src/polices.css ; les précharger ferait payer 34 Ko à
+         tout le monde pour des lettres que le français n'emploie pas. -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Faustina:wght@400..700&family=Figtree:wght@400..900&display=swap"
-      rel="stylesheet"
+      rel="preload"
+      href="/polices/figtree-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/polices/faustina-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
     />
   </head>
   <body>

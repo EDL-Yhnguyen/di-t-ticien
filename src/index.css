@@ -1,5 +1,11 @@
 @import 'tailwindcss';
 
+/* Faustina et Figtree, servies depuis notre domaine. Fichier généré : voir
+   outils/polices.mjs, qui explique pourquoi elles ne viennent plus de Google —
+   une police chargée depuis fonts.gstatic.com transmet l'adresse IP du visiteur
+   à un destinataire que la politique de confidentialité ne déclare pas. */
+@import './polices.css';
+
 /* Les huit thèmes, en clair et en sombre. Fichier généré : voir
    outils/palettes.mjs. Le thème « marmite » y occupe :root et .dark, donc
    l'application a ses couleurs même si aucun thème n'est choisi. */

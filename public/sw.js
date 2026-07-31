@@ -10,10 +10,16 @@
 // Changer ce nom purge les caches précédents à l'activation : c'est ce qui
 // débarrasse les installations existantes de l'ancienne icône et de l'ancienne
 // coquille au moment du passage à Mamakilo.
-const VERSION = 'mamakilo-v1'
+//
+// **v2 le 31/07/2026, et cette bascule-là compte plus que les autres.** Le cache
+// `mamakilo-v1-polices` contient des réponses de fonts.gstatic.com, obtenues du
+// temps où les polices venaient de Google. Elles ne sont plus demandées, donc
+// elles ne seraient jamais remplacées : sans changement de version, chaque PWA
+// déjà installée garderait indéfiniment des fichiers d'un tiers dont on vient de
+// se séparer.
+const VERSION = 'mamakilo-v2'
 const COQUILLE = `${VERSION}-coquille`
 const RESSOURCES = `${VERSION}-ressources`
-const POLICES = `${VERSION}-polices`
 
 self.addEventListener('install', (evenement) => {
   evenement.waitUntil(
@@ -131,19 +137,29 @@ self.addEventListener('fetch', (evenement) => {
     return
   }
 
-  // Polices Google : servies depuis le cache, rafraîchies en arrière-plan.
-  if (url.hostname.endsWith('gstatic.com') || url.hostname.endsWith('googleapis.com')) {
+  // Les polices, servies depuis `public/polices/` et non depuis Google.
+  //
+  // Elles ne portent pas d'empreinte de build, donc la règle des `/assets/` ne
+  // les couvre pas — mais leur contenu est figé : un `.woff2` ne change qu'avec
+  // une exécution d'`outils/polices.mjs`, et son renouvellement passe alors par
+  // `VERSION`, comme le moteur OCR et les photos de plats.
+  //
+  // Le cache d'abord, sans rafraîchissement en arrière-plan : la stratégie
+  // précédente relançait une requête vers Google **à chaque affichage** pour
+  // remplacer un fichier qui n'avait pas bougé. Elle avait sa raison d'être
+  // quand la ressource appartenait à un tiers susceptible de la faire évoluer ;
+  // elle n'en a plus depuis que c'est la nôtre.
+  if (url.origin === self.location.origin && url.pathname.startsWith('/polices/')) {
     evenement.respondWith(
-      caches.match(requete).then((cache) => {
-        const reseau = fetch(requete)
-          .then((reponse) => {
+      caches.match(requete).then(
+        (cache) =>
+          cache ??
+          fetch(requete).then((reponse) => {
             const copie = reponse.clone()
-            caches.open(POLICES).then((c) => c.put(requete, copie))
+            caches.open(RESSOURCES).then((c) => c.put(requete, copie))
             return reponse
-          })
-          .catch(() => cache)
-        return cache ?? reseau
-      }),
+          }),
+      ),
     )
   }
 })

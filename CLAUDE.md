@@ -372,6 +372,48 @@ variables CSS courantes.
 - Rayons : `rounded-card` (1.5rem), `rounded-tile` (1rem)
 - Polices : `--font-display` (Faustina, d'office sur h1/h2/h3), `--font-sans` (Figtree)
 
+### Les polices — `outils/polices.mjs` et `public/polices/`
+
+**Faustina et Figtree sont servies depuis notre domaine, et elles doivent le
+rester.** Elles venaient de `fonts.googleapis.com` jusqu'au 31/07/2026 ; les
+rapatrier a réglé trois choses d'un coup, dont une qui n'était pas négociable :
+
+- **Google était un destinataire de données non déclaré.** Charger une police
+  depuis `fonts.gstatic.com` transmet l'adresse IP du visiteur, qui est une
+  donnée personnelle ; le RGPD demande de nommer ses destinataires (art. 13) et
+  `DESTINATAIRES` ne listait pas Google. Sur un site qui traite des données de
+  santé, la politique de confidentialité doit être vraie. Le tribunal régional de
+  Munich a condamné exactement cette intégration en janvier 2022
+  (LG München I, 3 O 17493/20).
+- **Le premier affichage ne dépend plus d'un tiers** : la feuille de style de
+  Google bloquait le rendu derrière un DNS, un TLS et deux allers-retours sur une
+  origine que rien n'avait préchargée.
+- **L'hors-ligne est complet dès la première visite.** Le service worker mettait
+  bien les réponses de Google en cache, mais encore fallait-il les avoir obtenues.
+
+`src/polices.css` est **généré — ne jamais l'éditer à la main** ; il sort de
+`node outils/polices.mjs`, comme `src/palettes.css` sort du générateur de
+palettes. Trois règles à ne pas défaire :
+
+- **Les deux licences OFL restent dans `public/polices/`.** C'est la contrepartie
+  de la redistribution, au même titre que l'attribution des photos de Commons.
+  Le script échoue si elles manquent ou si leur contenu n'y ressemble pas — le
+  premier jet avait téléchargé une page « 404 » de quatorze octets et l'avait
+  annoncée comme licence présente.
+- **Seuls les sous-ensembles latins sont préchargés.** Les `latin-ext` ne se
+  téléchargent que si un caractère les appelle ; les précharger ferait payer
+  34 Ko à tout le monde pour des lettres que le français n'emploie pas.
+- **`/polices/` n'est pas en `immutable`** dans `vercel.json`, contrairement à
+  `/assets/` : ces fichiers ne portent pas d'empreinte de build, donc un an de
+  cache figé rendrait toute correction impossible sans les renommer. Trente jours,
+  et le service worker fait le reste.
+
+**La bascule du service worker à `mamakilo-v2` fait partie du changement.** Le
+cache `mamakilo-v1-polices` contenait des réponses de `gstatic.com` qui n'étaient
+plus demandées, donc plus jamais remplacées : sans changement de version, chaque
+PWA déjà installée aurait gardé indéfiniment les fichiers du tiers dont on venait
+de se séparer.
+
 ---
 
 ## Le journal alimentaire
@@ -965,6 +1007,49 @@ Vérification manuelle attendue :
 ---
 
 ## Historique du projet
+
+### 31 juillet 2026 — Les polices quittent Google
+
+L'application appelait `fonts.googleapis.com` à chaque premier affichage. Le
+service worker mettait les réponses en cache, donc l'hors-ligne tenait après une
+visite, et le sujet ressemblait à une question de performance. Il n'en était pas
+une.
+
+**Une police chargée depuis `fonts.gstatic.com` transmet l'adresse IP du
+visiteur à Google.** Une adresse IP est une donnée personnelle, Google devient
+alors un destinataire, et `DESTINATAIRES` dans `legal.ts` ne l'a jamais listé —
+sur une application qui traite des données de santé, et dont le `CLAUDE.md` pose
+que « tout nouveau destinataire se déclare au moment où on l'ajoute au code, pas
+après ». Le tribunal régional de Munich a condamné cette intégration en janvier
+2022 (LG München I, 3 O 17493/20).
+
+Deux issues : déclarer Google, ou cesser de l'appeler. La seconde était la bonne,
+et c'est le geste que le projet avait déjà fait deux fois — le `.wasm` de zxing
+et le moteur OCR sont servis depuis notre domaine, pour cette raison écrite noir
+sur blanc dans ce fichier.
+
+- **`outils/polices.mjs`** rapatrie les quatre `.woff2` (deux familles, deux
+  sous-ensembles) et génère `src/polices.css`. Faustina et Figtree sont sous
+  **SIL Open Font License 1.1** : les deux licences vivent dans
+  `public/polices/`, et le script refuse de réussir sans elles.
+- **Le service worker passe en `mamakilo-v2`** pour purger le cache de polices
+  Google des installations existantes, qui n'aurait jamais été remplacé
+  autrement.
+- **Deux `<link rel="preload">`** pour les sous-ensembles latins, à la place des
+  deux `preconnect` et de la feuille de style bloquante.
+
+**Vérifié au pilote sur le build de production**, 390 px : `document.fonts`
+donne Faustina et Figtree en `loaded`, les largeurs de texte diffèrent bien de
+celles des polices de repli, et les deux `latin-ext` restent en `unloaded` —
+c'est la preuve que les `unicode-range` font leur travail. Surtout,
+`performance.getEntriesByType('resource')` compte **dix requêtes, zéro vers un
+tiers**. Aucune erreur console.
+
+**Un défaut corrigé en vérifiant** : le contrôle de licence du script se
+contentait d'un `existsSync`, et avait donc annoncé « licence présente » sur une
+page « 404: Not Found » de quatorze octets récupérée depuis une URL périmée. Un
+fichier nommé `OFL.txt` qui ne contient pas la licence est pire que pas de
+fichier — il fait croire que la question est réglée.
 
 ### 31 juillet 2026 — Le filet automatisé
 
