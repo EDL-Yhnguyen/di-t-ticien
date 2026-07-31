@@ -1,11 +1,15 @@
 # Reprise — Mamakilo
 
-Dernière séance : 2026-07-31 · dernier commit : `b0f3694` *les polices quittent
-Google, et avec elles un destinataire non déclaré*
+Dernière séance : 2026-08-01 · dernier commit : *le filet s'étend aux quatre
+modules à conséquences*
 
-> **Rien n'est poussé.** La branche est en avance de cinq commits sur
+> **Rien n'est poussé.** La branche est en avance de six commits sur
 > `origin/main`, dont deux d'un autre chantier. Un push redéploie la production ;
 > il attend une validation de Yann.
+>
+> **Un arbitrage attend aussi**, décrit dans `CLAUDE.md`, section « Ce qui attend
+> un arbitrage » : `ouvertLe` déclenche une alerte *sanitaire* sur toute
+> l'épicerie, donc « à jeter » sur un paquet de pâtes ouvert depuis huit jours.
 
 ## Où on en est
 
@@ -50,6 +54,19 @@ bascule, elles l'auraient gardé indéfiniment.
 
 Vérifié au pilote sur le build de production : **dix requêtes, zéro vers un
 tiers**.
+
+### Quatrième chantier — le filet s'étend (1er août)
+
+**250 tests.** Quatre modules de plus, choisis pour ce qu'une erreur y coûte :
+`peremption.ts` (DLC contre DDM), `coach.ts` (les verdicts affichés, et la règle
+de ton devenue contrainte), `menu.ts` (dates et mémoire partagée), `ics.ts` (le
+fichier qui part chez Google Agenda sans qu'on voie ce qu'il devient).
+
+**Le découpage de `@supabase/supabase-js` n'a pas été fait, et c'est délibéré** :
+il demande de réécrire `supabase.ts` et `auth.ts`, que l'autre chantier venait de
+toucher. À reprendre une fois son chantier email atterri — le premier affichage
+pèse 218 Ko compressés, dont la bibliothèque Supabase entière alors que
+l'application n'en utilise que l'authentification et un `upsert`.
 
 ## La prochaine action
 
@@ -127,3 +144,8 @@ code ne peut deviner cette valeur. Le connecteur MCP servait l'autre projet
   tourné dans ce répertoire le même jour, sans worktree ; toute mesure prise sans
   vérifier que l'arbre ne porte que ses propres fichiers est fausse. C'est la
   règle du `CLAUDE.md` du workspace, § 40, et elle s'est appliquée deux fois.
+- **Ne pas poser un seuil de test à l'estime.** « Plus de 60 recettes distinctes
+  sur 112 repas » avait l'air prudent ; la mesure donne 112 sur 112. Le seuil
+  aurait laissé passer une régression divisant la diversité par deux. Mesurer
+  d'abord, écrire le seuil ensuite, et noter la mesure à côté.
+- **Ne pas toucher `supabase.ts` ni `auth.ts` tant que le chantier email tourne.**
