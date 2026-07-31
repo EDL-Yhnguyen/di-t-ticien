@@ -943,7 +943,7 @@ npm run verifier   # tests, contrastes des 8 thèmes, typecheck src + api, build
 Elle enchaîne, dans cet ordre de coût croissant :
 
 ```bash
-npm test                          # vitest run — 145 tests sur la logique pure
+npm test                          # vitest run — 250 tests sur la logique pure
 node outils/palettes.mjs --verifie # sort en 1 si un contraste échoue
 npm run build                     # tsc -b (src) && tsc -p tsconfig.api.json && vite build
 ```
@@ -968,6 +968,27 @@ chaque séance de travail a trouvé des défauts « invisibles au typecheck » :
 | `cuisson.test.ts` | durées déduites du texte des étapes, bornes, compte à rebours |
 | `ticket/parseur.test.ts` | lots, poids, remises, réparations, **la somme de contrôle** |
 | `recettes/catalogue.test.ts` | **le déterminisme des identifiants** |
+| `peremption.test.ts` | **DLC contre DDM**, produit entamé, congélation, tous les rayons |
+| `coach.test.ts` | seuils des verdicts, rôle d'une alternative, **la règle de ton** |
+| `menu.test.ts` | arithmétique des dates, mémoire partagée, échange de repas, modèles |
+| `ics.test.ts` | pliage à 75 **octets**, échappement, heures flottantes, UID stables |
+
+Trois d'entre eux méritent un mot, parce qu'ils protègent autre chose qu'un
+calcul :
+
+- **`peremption.test.ts`** couvre la logique aux conséquences les plus lourdes du
+  projet : un côté fait manger un produit qui ne l'est plus, l'autre fait jeter ce
+  qu'on prétendait sauver. Son dernier test, `le cas qui mérite une décision de
+  Yann`, **fixe un comportement sans le valider** — voir « Ce qui attend un
+  arbitrage » plus bas.
+- **`coach.test.ts`** vérifie qu'aucune phrase produite n'emploie de mot de
+  jugement, dans aucune branche. La règle « on décrit, on propose, on n'accuse
+  pas » était une intention dans un commentaire ; c'est maintenant une contrainte.
+- **`menu.test.ts`** teste un module qui tire au sort (`ALEA` vaut 0,22). Il ne
+  compare donc jamais à une semaine attendue, seulement à des propriétés :
+  **mesuré le 01/08/2026, quatre semaines générées d'affilée donnent 112 recettes
+  distinctes sur 112 repas**, douze fois de suite. Le seuil du test est posé à
+  100, pour tomber sur une régression et pas sur un tirage.
 
 **Le test du catalogue est le plus important du lot.** Les favoris, les plans de
 menus et les listes de courses ne gardent pas des recettes mais leurs
@@ -1006,7 +1027,62 @@ Vérification manuelle attendue :
 
 ---
 
+## Ce qui attend un arbitrage
+
+### `ouvertLe` déclenche une alerte sanitaire sur toute l'épicerie
+
+`peremption.ts` marque `sanitaire: true` **quelle que soit la nature du
+produit** dès qu'`ouvertLe` est renseigné. Sur une brique de lait, c'est
+exactement la règle qui protège : une DLC imprimée ne vaut que pour un emballage
+fermé.
+
+Sur un pot de moutarde ou un paquet de pâtes — rayon Épicerie, sept jours —
+l'écran annonce « à jeter » sur un produit qui se garde des mois. Le module met
+lui-même en garde contre cet effet : « sinon on fait jeter ce qu'on prétend
+sauver ». Et une alerte sanitaire qui se déclenche sur des pâtes apprend à
+ignorer les alertes sanitaires, ce qui coûte le jour où c'est du poulet.
+
+La correction demanderait de séparer les rayons où l'ouverture est un fait
+sanitaire (crèmerie, boucherie-poissonnerie, surgelés décongelés, fruits et
+légumes coupés) de ceux où elle ne touche que le goût (épicerie, boulangerie).
+**C'est un arbitrage de sécurité alimentaire : il se tranche avec Yann.** Le
+comportement actuel est fixé par un test qui dit explicitement qu'il ne le valide
+pas — `src/lib/peremption.test.ts`, dernier bloc.
+
+---
+
 ## Historique du projet
+
+### 1er août 2026 — Le filet s'étend aux modules à conséquences
+
+Quatre modules de plus, choisis pour ce qu'une erreur y coûte et non pour leur
+difficulté. 145 tests deviennent 250.
+
+- **`peremption.ts`** — la DLC contre la DDM, `ouvertLe` qui avance une échéance
+  mais ne la recule jamais, les durées de congélation par rayon. Vingt et un
+  tests, tous verts du premier coup : le module est juste. Il a en revanche fait
+  apparaître un arbitrage, décrit ci-dessus.
+- **`coach.ts`** — les seuils de verdict à leurs bornes, le rôle conservé par une
+  alternative, et surtout **la règle de ton passée du commentaire à la
+  contrainte** : aucune phrase produite, dans aucune branche, n'emploie de mot de
+  jugement.
+- **`menu.ts`** — quarante et un tests dont l'arithmétique des dates aux endroits
+  qui cassent (changement d'heure, passage d'année, 29 février, mois qui ne
+  commence pas un lundi), et l'échange de repas qui ne doit jamais détruire une
+  case.
+- **`ics.ts`** — le fichier partait chez Google Agenda et Apple Calendrier sans
+  qu'on voie jamais ce qu'ils en font. Il avait été « inspecté ligne à ligne » une
+  fois, à la main, au sprint C4 ; ces propriétés sont maintenant écrites.
+
+**Deux attentes fausses corrigées en écrivant** : `Il reste 1 800 kcal` est un
+titre, pas une phrase, et exiger d'un titre un point final est une faute de
+typographie — pas un défaut du code. Et le seuil de diversité du planificateur,
+posé à « plus de 60 recettes distinctes sur 112 repas », ne prouvait rien : la
+mesure donne **112 sur 112, douze fois de suite**.
+
+**Une mesure vaut mieux qu'une intuition, y compris pour écrire un test.** Le
+seuil arbitraire aurait laissé passer une régression qui aurait divisé la
+diversité par deux.
 
 ### 31 juillet 2026 — Les polices quittent Google
 
