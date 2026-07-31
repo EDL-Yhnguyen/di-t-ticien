@@ -1,9 +1,9 @@
 # Reprise — Mamakilo
 
-Dernière séance : 2026-07-31 · dernier commit : `231d3cd` *un filet automatisé,
-et deux défauts silencieux du parseur de tickets*
+Dernière séance : 2026-07-31 · dernier commit : `b0f3694` *les polices quittent
+Google, et avec elles un destinataire non déclaré*
 
-> **Rien n'est poussé.** La branche est en avance de trois commits sur
+> **Rien n'est poussé.** La branche est en avance de cinq commits sur
 > `origin/main`, dont deux d'un autre chantier. Un push redéploie la production ;
 > il attend une validation de Yann.
 
@@ -37,6 +37,19 @@ couvrent est dans `CLAUDE.md`, section « Vérifier avant de livrer ».
 Les écrans livrés ce jour-là par l'autre chantier (`MotDePasseOublie.tsx`,
 `NouveauMotDePasse.tsx`) **ne sont pas couverts** : rien de l'interface ne l'est,
 c'est une décision et non un reste à faire.
+
+### Troisième chantier — les polices quittent Google
+
+Livré et commité (`b0f3694`). Faustina et Figtree sont désormais servies depuis
+`public/polices/`, générées par `node outils/polices.mjs`. Ce n'était pas une
+question de performance : charger une police depuis `fonts.gstatic.com`
+transmettait l'adresse IP de chaque visiteur à Google, destinataire que
+`DESTINATAIRES` n'a jamais listé. Le service worker passe en `mamakilo-v2` pour
+purger l'ancien cache de polices Google des PWA déjà installées — sans cette
+bascule, elles l'auraient gardé indéfiniment.
+
+Vérifié au pilote sur le build de production : **dix requêtes, zéro vers un
+tiers**.
 
 ## La prochaine action
 
