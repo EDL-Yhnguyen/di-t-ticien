@@ -1,7 +1,11 @@
 # Reprise — Mamakilo
 
-Dernière séance : 2026-07-31 · dernier commit : `83e495f` *retrouver son compte
-quand le mot de passe est oublié*
+Dernière séance : 2026-07-31 · dernier commit : `231d3cd` *un filet automatisé,
+et deux défauts silencieux du parseur de tickets*
+
+> **Rien n'est poussé.** La branche est en avance de trois commits sur
+> `origin/main`, dont deux d'un autre chantier. Un push redéploie la production ;
+> il attend une validation de Yann.
 
 ## Où on en est
 
