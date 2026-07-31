@@ -115,7 +115,13 @@ export function Accueil() {
           </div>
 
           <div className="order-1 md:order-2">
-            <div className="relative mx-auto max-w-sm">
+            {/* L'assiette plafonne plus bas tant que le héros tient sur une
+                colonne. Sans ça elle atteint ses 384 px vers 424 px de viewport,
+                grandit de 34 px d'un coup, et pousse « Créer mon compte » sous
+                le pli : mesuré à 430 px, le bouton n'était plus visible qu'à
+                24 px sur 56. Le plafond redevient max-w-sm à md:, où les deux
+                colonnes lui rendent la place. */}
+            <div className="relative mx-auto max-w-[16rem] md:max-w-sm">
               <Assiette parts={parts} className="w-full drop-shadow-xl" />
               <motion.p
                 key={etape}
