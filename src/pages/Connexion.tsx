@@ -3,6 +3,7 @@ import { AlertCircle, X } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { Bouton, Champ, Marque } from '../components/ui'
 import { Lien } from '../lib/router'
+import { exigeEmailReel } from '../lib/auth'
 import { modeDemo } from '../lib/supabase'
 
 export function Connexion({ mode }: { mode: 'connexion' | 'inscription' }) {
@@ -78,16 +79,26 @@ export function Connexion({ mode }: { mode: 'connexion' | 'inscription' }) {
               />
             )}
 
+            {/* Le libellé suit le mode : en mode synchronisé un pseudo est
+                refusé à l'envoi, et promettre le contraire fait saisir deux
+                fois. */}
             <Champ
               id="identifiant"
-              label="Identifiant"
+              label={exigeEmailReel ? 'Adresse e-mail' : 'Identifiant'}
+              type={exigeEmailReel ? 'email' : 'text'}
               value={identifiant}
               onChange={(e) => setIdentifiant(e.target.value)}
-              autoComplete="username"
+              autoComplete={exigeEmailReel ? 'email' : 'username'}
               autoCapitalize="none"
               spellCheck={false}
               required
-              aide={inscription ? 'Un e-mail ou un pseudo, au choix.' : undefined}
+              aide={
+                inscription
+                  ? exigeEmailReel
+                    ? 'Elle sert à confirmer le compte et à le récupérer en cas d’oubli.'
+                    : 'Un e-mail ou un pseudo, au choix.'
+                  : undefined
+              }
             />
 
             <Champ
@@ -115,6 +126,19 @@ export function Connexion({ mode }: { mode: 'connexion' | 'inscription' }) {
               {enCours ? 'Un instant…' : inscription ? 'Créer mon compte' : 'Se connecter'}
             </Bouton>
           </form>
+
+          {/* Sous le bouton et non au-dessus : c'est le recours de celui pour
+              qui la connexion vient d'échouer, pas une étape du parcours. */}
+          {!inscription && !modeDemo && (
+            <p className="mt-4 text-center text-sm">
+              <Lien
+                vers="/mot-de-passe-oublie"
+                className="font-semibold text-ink-soft underline underline-offset-2 transition hover:text-ink"
+              >
+                Mot de passe oublié ?
+              </Lien>
+            </p>
+          )}
 
           <p className="mt-5 text-center text-sm text-ink-soft">
             {inscription ? 'Vous avez déjà un compte ?' : 'Pas encore de compte ?'}{' '}

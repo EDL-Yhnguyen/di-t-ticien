@@ -11,6 +11,7 @@ import { Connexion } from './pages/Connexion'
 import { Consentement } from './pages/Consentement'
 import { Onboarding } from './pages/Onboarding'
 import { NouveauMotDePasse } from './pages/NouveauMotDePasse'
+import { MotDePasseOublie } from './pages/MotDePasseOublie'
 import { Aujourdhui } from './pages/Aujourdhui'
 import { consentementAJour } from './lib/rgpd'
 
@@ -86,11 +87,22 @@ const ECRANS_A_PRECHARGER = [
 ]
 
 export function App() {
-  const { utilisateur, etat, chargement, erreurChargement, reessayerChargement } = useApp()
+  const {
+    utilisateur,
+    etat,
+    chargement,
+    erreurChargement,
+    reessayerChargement,
+    recuperationMotDePasse,
+  } = useApp()
   const { chemin, aller } = useRoutage()
 
   const connecte = Boolean(utilisateur && etat)
-  const publique = chemin === '/' || chemin === '/connexion' || chemin === '/inscription'
+  const publique =
+    chemin === '/' ||
+    chemin === '/connexion' ||
+    chemin === '/inscription' ||
+    chemin === '/mot-de-passe-oublie'
 
   // Redirections d'accès, une fois l'état chargé.
   useEffect(() => {
@@ -139,8 +151,19 @@ export function App() {
   if (!connecte || !etat) {
     if (chemin === '/connexion') return <Connexion mode="connexion" />
     if (chemin === '/inscription') return <Connexion mode="inscription" />
+    if (chemin === '/mot-de-passe-oublie') return <MotDePasseOublie />
+    // Un lien de réinitialisation périmé revient sans session : on ramène là
+    // où un nouveau lien se demande, plutôt que sur un écran de connexion qui
+    // n'expliquerait rien.
+    if (chemin === '/nouveau-mot-de-passe') return <MotDePasseOublie />
     return <Accueil />
   }
+
+  // Avant toutes les autres gardes : cette session vient d'un lien reçu par
+  // e-mail et ne vaut que pour remplacer le mot de passe. Laisser passer vers
+  // le consentement ou l'onboarding ouvrirait l'application à quelqu'un qui
+  // n'a prouvé que l'accès à une boîte aux lettres.
+  if (recuperationMotDePasse) return <NouveauMotDePasse motif="recuperation" />
 
   // Trois passages obligés avant d'atteindre l'application. Le consentement
   // précède l'onboarding : c'est ce dernier qui demande les premières données

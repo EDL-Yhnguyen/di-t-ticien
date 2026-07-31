@@ -10,6 +10,7 @@ import {
 } from 'react'
 import * as auth from '../lib/auth'
 import type { Utilisateur } from '../lib/auth'
+import { arriveeParLienDeRecuperation } from '../lib/supabase'
 import { charger, enregistrer, type EtatUtilisateur } from '../lib/store'
 import { badgesADebloquer, type Badge } from '../lib/badges'
 import { toutSupprimer, type ResultatSuppression } from '../lib/rgpd'
@@ -27,6 +28,14 @@ interface Application {
    */
   erreurEnregistrement: string | null
   reessayerEnregistrement: () => void
+  /**
+   * Vrai quand la session en cours vient d'un lien de réinitialisation reçu
+   * par e-mail. Cette session est **ouverte mais provisoire** : elle ne sert
+   * qu'à choisir un nouveau mot de passe, et l'écran correspondant passe avant
+   * toutes les autres gardes.
+   */
+  recuperationMotDePasse: boolean
+  finRecuperation: () => void
   /** Badge tout juste débloqué, à célébrer puis à refermer. */
   badgeACelebrer: Badge | null
   fermerCelebration: () => void
@@ -56,6 +65,12 @@ export function FournisseurApp({ children }: { children: ReactNode }) {
   const [chargement, setChargement] = useState(true)
   const [erreurChargement, setErreurChargement] = useState<string | null>(null)
   const [erreurEnregistrement, setErreurEnregistrement] = useState<string | null>(null)
+  // La valeur initiale vient du fragment d'URL, lu avant que le client
+  // Supabase ne l'efface. L'abonnement plus bas rattrape le flux PKCE, où le
+  // jeton s'échange après le premier rendu.
+  const [recuperationMotDePasse, setRecuperationMotDePasse] = useState(
+    arriveeParLienDeRecuperation,
+  )
   const [badgeACelebrer, setBadgeACelebrer] = useState<Badge | null>(null)
   const [avisSuppression, setAvisSuppression] = useState<string | null>(null)
   const [tentative, setTentative] = useState(0)
@@ -111,6 +126,11 @@ export function FournisseurApp({ children }: { children: ReactNode }) {
       annule = true
     }
   }, [ouvrirSession, tentative])
+
+  // Supabase reconnaît le lien de réinitialisation pendant l'initialisation du
+  // client, donc parfois avant ce premier rendu : l'abonnement ne remplace pas
+  // la lecture du fragment d'URL, il la complète.
+  useEffect(() => auth.surRecuperation(() => setRecuperationMotDePasse(true)), [])
 
   /**
    * Toute modification passe par ici : on applique la recette, on détecte les
@@ -193,6 +213,9 @@ export function FournisseurApp({ children }: { children: ReactNode }) {
     setUtilisateur(null)
     setEtat(null)
     setErreurEnregistrement(null)
+    // Sans cette remise à zéro, quitter l'écran de réinitialisation par la
+    // déconnexion y ramènerait en boucle.
+    setRecuperationMotDePasse(false)
   }, [])
 
   const supprimerCompte = useCallback(async (): Promise<ResultatSuppression> => {
@@ -228,6 +251,8 @@ export function FournisseurApp({ children }: { children: ReactNode }) {
       reessayerChargement,
       erreurEnregistrement,
       reessayerEnregistrement,
+      recuperationMotDePasse,
+      finRecuperation: () => setRecuperationMotDePasse(false),
       badgeACelebrer,
       fermerCelebration: () => setBadgeACelebrer(null),
       modifier,
@@ -246,6 +271,7 @@ export function FournisseurApp({ children }: { children: ReactNode }) {
       reessayerChargement,
       erreurEnregistrement,
       reessayerEnregistrement,
+      recuperationMotDePasse,
       badgeACelebrer,
       modifier,
       seConnecter,

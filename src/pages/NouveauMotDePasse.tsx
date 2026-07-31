@@ -2,19 +2,33 @@ import { useState, type FormEvent } from 'react'
 import { AlertCircle, KeyRound } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { changerMotDePasse } from '../lib/auth'
+import { useRoutage } from '../lib/router'
 import { Bouton, Champ } from '../components/ui'
 
 /**
- * Passage obligé pour le compte pré-créé d'Élodie : il est livré avec le mot
- * de passe « ELO », que tout le monde peut deviner sur un site ouvert aux
+ * Le choix d'un mot de passe, pour deux situations qui demandent le même geste.
+ *
+ * `provisoire` : passage obligé pour le compte pré-créé d'Élodie, livré avec le
+ * mot de passe « ELO » que tout le monde peut deviner sur un site ouvert aux
  * inscriptions. On ne laisse pas des données de santé derrière ça.
+ *
+ * `recuperation` : arrivée par le lien reçu par e-mail. La session est ouverte
+ * mais provisoire — tant que le mot de passe n'est pas remplacé, elle ne donne
+ * accès à rien d'autre, et l'écran passe avant toutes les autres gardes.
  */
-export function NouveauMotDePasse() {
-  const { etat, modifier } = useApp()
+export function NouveauMotDePasse({
+  motif = 'provisoire',
+}: {
+  motif?: 'provisoire' | 'recuperation'
+}) {
+  const { etat, modifier, finRecuperation } = useApp()
+  const { aller } = useRoutage()
   const [motDePasse, setMotDePasse] = useState('')
   const [confirmation, setConfirmation] = useState('')
   const [erreur, setErreur] = useState<string | null>(null)
   const [enCours, setEnCours] = useState(false)
+
+  const recuperation = motif === 'recuperation'
 
   async function envoyer(e: FormEvent) {
     e.preventDefault()
@@ -28,6 +42,14 @@ export function NouveauMotDePasse() {
     setEnCours(true)
     try {
       await changerMotDePasse(motDePasse)
+      if (recuperation) {
+        // La garde de récupération se lève seulement une fois le mot de passe
+        // réellement remplacé : sinon un rechargement rouvrirait une session
+        // provisoire sur l'ancien.
+        finRecuperation()
+        aller('/app', { remplacer: true })
+        return
+      }
       modifier((brouillon) => {
         brouillon.profil.motDePasseAChanger = false
       })
@@ -45,12 +67,21 @@ export function NouveauMotDePasse() {
         </span>
 
         <h1 className="mb-1.5 font-display text-2xl font-semibold text-ink">
-          Choisissez votre mot de passe
+          {recuperation ? 'Choisissez un nouveau mot de passe' : 'Choisissez votre mot de passe'}
         </h1>
         <p className="mb-6 text-sm text-ink-soft">
-          {etat?.profil.prenom ? `${etat.profil.prenom}, votre` : 'Votre'} compte a été créé avec un
-          mot de passe provisoire. Remplacez-le maintenant : votre poids et vos repas ne
-          regardent que vous.
+          {recuperation ? (
+            <>
+              Votre lien est reconnu. Ce nouveau mot de passe remplacera l’ancien sur tous vos
+              appareils.
+            </>
+          ) : (
+            <>
+              {etat?.profil.prenom ? `${etat.profil.prenom}, votre` : 'Votre'} compte a été créé
+              avec un mot de passe provisoire. Remplacez-le maintenant : votre poids et vos repas
+              ne regardent que vous.
+            </>
+          )}
         </p>
 
         <form onSubmit={envoyer} className="space-y-4">

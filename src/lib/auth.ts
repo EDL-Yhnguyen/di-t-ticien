@@ -317,6 +317,60 @@ export async function changerMotDePasse(nouveau: string): Promise<void> {
 }
 
 /**
+ * Demande l'envoi du lien de réinitialisation.
+ *
+ * **Ne dit jamais si l'adresse est connue.** L'écran affiche la même phrase
+ * dans les deux cas : un formulaire public qui répondrait « compte inconnu »
+ * dirait qui suit un régime, et c'est une donnée de santé.
+ *
+ * Les comptes historiques enregistrés sous un pseudo (`pseudo@equilibre.local`)
+ * sont hors d'atteinte — le domaine ne reçoit rien. L'écran le dit plutôt que
+ * de faire attendre un e-mail qui n'arrivera jamais.
+ */
+export async function demanderReinitialisation(identifiant: string): Promise<void> {
+  if (!supabase) {
+    throw new ErreurAuth(
+      'En mode démo, aucun e-mail ne part : les comptes n’existent que dans ce navigateur.',
+    )
+  }
+
+  if (!estEmail(identifiant)) {
+    throw new ErreurAuth(
+      'Entrez l’adresse e-mail de votre compte. Un compte créé avec un pseudo ne peut pas être récupéré par e-mail.',
+    )
+  }
+
+  const { error } = await supabase.auth.resetPasswordForEmail(versEmail(identifiant), {
+    // L'origine est lue dans la page plutôt que fixée : l'application répond
+    // sur deux domaines (mamakilo et l'ancien di-t-ticien), et le lien doit
+    // ramener là d'où part la demande.
+    redirectTo: `${window.location.origin}/nouveau-mot-de-passe`,
+  })
+
+  // La limite de débit est la seule erreur qui puisse se dire sans trahir
+  // l'existence du compte. Le reste part en console, où il sert au diagnostic.
+  if (error) {
+    if (/rate limit/i.test(error.message)) throw new ErreurAuth(traduireErreur(error.message))
+    console.error('[auth] réinitialisation :', error)
+  }
+}
+
+/**
+ * Prévient quand Supabase reconnaît un lien de réinitialisation.
+ *
+ * Complète `arriveeParLienDeRecuperation` : celle-ci couvre le cas ordinaire
+ * (le jeton est dans le fragment d'URL au chargement), l'événement couvre le
+ * flux PKCE, où le jeton s'échange après coup.
+ */
+export function surRecuperation(reagir: () => void): () => void {
+  if (!supabase) return () => {}
+  const { data } = supabase.auth.onAuthStateChange((evenement) => {
+    if (evenement === 'PASSWORD_RECOVERY') reagir()
+  })
+  return () => data.subscription.unsubscribe()
+}
+
+/**
  * Les messages de Supabase et de PostgREST sont en anglais et parlent de
  * politiques RLS et de contraintes SQL. Ils ne sont jamais montrés tels quels :
  * on traduit ce qu'on reconnaît, et on retombe sur une phrase neutre pour le
