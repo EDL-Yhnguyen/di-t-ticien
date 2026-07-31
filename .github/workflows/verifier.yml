@@ -1,0 +1,67 @@
+# Le filet automatisé du projet.
+#
+# Il existe parce que `npm run build` en local ne dit pas tout : il réutilise
+# `node_modules` et ne relit jamais le lockfile, là où Vercel installe avec
+# `npm ci` et refuse un `package.json` désaccordé de son `package-lock.json`.
+# C'est ce trou qui a laissé passer la panne de déploiement du 29/07/2026,
+# parfaite en local.
+#
+# L'ordre des étapes est celui du coût croissant : les tests répondent en trois
+# secondes, le contrôle des contrastes en une, le build en trois de plus. Un
+# échec de test n'a pas à attendre la compilation pour se voir.
+
+name: Vérifier
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verifier:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # `npm ci` et non `npm install` : c'est la commande de Vercel, et la seule
+      # qui échoue quand le lockfile ne correspond plus.
+      - name: Installer les dépendances
+        run: npm ci
+
+      # Le critère de choix des dépendances du projet, et il se vérifie plutôt
+      # qu'il ne se suppose. `--omit=dev` : une faille dans Vitest ne met
+      # personne en danger, elle ne part pas dans le navigateur.
+      - name: Aucune vulnérabilité en production
+        run: npm audit --omit=dev --audit-level=low
+
+      - name: Tests
+        run: npm test
+
+      # Sort en 1 à la moindre paire de couleurs sous le seuil de contraste.
+      # Huit thèmes × deux modes : c'est la seule façon de tenir la règle « toute
+      # teinte modifiée se revérifie » à plus de six cents paires.
+      - name: Contrastes des huit thèmes
+        run: node outils/palettes.mjs --verifie
+
+      # `tsc -b` sur src, `tsc -p tsconfig.api.json` sur les fonctions
+      # serverless, puis la compilation Vite.
+      - name: Typecheck et build
+        run: npm run build
+
+      # La clé d'API vit dans une fonction serverless et ne doit jamais entrer
+      # dans le bundle servi au navigateur. Le contrôle est documenté dans
+      # CLAUDE.md ; ici il s'exécute.
+      - name: Le SDK Anthropic ne fuite pas dans le bundle
+        run: |
+          if grep -rl "@anthropic-ai" dist/assets/ 2>/dev/null | grep -q .; then
+            echo "::error::Le SDK Anthropic est parti dans le bundle client."
+            exit 1
+          fi
+          echo "Aucune trace du SDK Anthropic dans dist/assets/."

@@ -68,6 +68,24 @@ const PARTOUT_DE_SERVICE = ['WWW.', 'HTTP', '@', 'FACTURE']
 
 const REMISES = ['REMISE', 'REDUCTION', 'RÉDUCTION', 'BON DE', 'AVANTAGE', 'IMMEDIATE', 'OFFERT']
 
+/**
+ * Les mentions de remise se cherchent **par mots entiers**.
+ *
+ * C'est le même piège que « N° DE » plus haut, et il était encore là : cherché
+ * en sous-chaîne, « BON DE » se déclenche sur « JAMBON DE PARIS ». Le jambon
+ * cessait alors d'être un produit et son prix était *retranché* de la ligne du
+ * dessus — deux erreurs pour une, sur l'un des libellés les plus courants d'un
+ * ticket français. Seul le contrôle du total le rattrapait, en envoyant corriger
+ * un ticket parfaitement photographié.
+ *
+ * `comparable` ne laisse passer que des lettres, des chiffres, l'espace, `@` et
+ * le point : entourer les deux côtés d'une espace suffit à border les mots, sans
+ * expression régulière à construire pour chaque entrée.
+ */
+function contientMotEntier(texte: string, mot: string): boolean {
+  return ` ${texte} `.includes(` ${mot} `)
+}
+
 /* ──────────────────────────────── Nettoyage ──────────────────────────────── */
 
 /** Espaces multiples et bords, rien d'autre : le texte lu ne se réécrit pas. */
@@ -99,7 +117,7 @@ function estService(texte: string): boolean {
 
 function estRemise(texte: string): boolean {
   const c = comparable(texte)
-  return REMISES.some((mot) => c.includes(comparable(mot)))
+  return REMISES.some((mot) => contientMotEntier(c, comparable(mot)))
 }
 
 /**
@@ -295,7 +313,7 @@ export function analyserTicket(lignesOCR: LigneOCR[]): TicketLu {
       precedente.quantite = Number(`${poids[1]}.${poids[2]}`)
       precedente.unite = poids[3].toLowerCase() === 'l' ? 'l' : 'kg'
       precedente.prixUnitaire = Number(`${poids[4]}.${poids[5]}`)
-      appliquerTotalLigne(precedente, texte)
+      appliquerTotalLigne(precedente, texte.slice(poids[0].length))
       continue
     }
 
@@ -307,7 +325,7 @@ export function analyserTicket(lignesOCR: LigneOCR[]): TicketLu {
       }
       precedente.quantite = Number(multiple[1])
       precedente.prixUnitaire = Number(`${multiple[2]}.${multiple[3]}`)
-      appliquerTotalLigne(precedente, texte)
+      appliquerTotalLigne(precedente, texte.slice(multiple[0].length))
       continue
     }
 
@@ -397,9 +415,16 @@ function elaguerHorsBloc(lignes: LigneTicket[], ecartees: string[]): LigneTicket
  * de la quantité par le prix unitaire est **une addition, pas une invention** —
  * les deux facteurs viennent du ticket, et la règle du projet est qu'une valeur
  * affichée doit pouvoir s'expliquer par un calcul lisible.
+ *
+ * `apres` est le texte qui **suit** le détail de calcul, et pas la ligne
+ * entière : c'est ce qui distingue le total du prix unitaire. Sur « 4 X 0,75 »
+ * sans total imprimé, chercher un prix en fin de ligne retrouvait le 0,75 du
+ * détail et l'enregistrait comme prix payé — le yaourt entrait dans l'historique
+ * au quart de son prix, et devenait aussitôt le meilleur prix jamais vu. Le
+ * repli par multiplication, lui, n'était jamais atteint.
  */
-function appliquerTotalLigne(ligne: LigneTicket, texte: string): void {
-  const prix = lirePrixFin(texte)
+function appliquerTotalLigne(ligne: LigneTicket, apres: string): void {
+  const prix = lirePrixFin(apres)
   if (prix && prix.valeur > 0) {
     poserPrix(ligne, prix.valeur, prix.repare)
     return

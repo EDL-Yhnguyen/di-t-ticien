@@ -892,12 +892,58 @@ nouveau.
 
 ## Vérifier avant de livrer
 
-Il n'y a **ni linter ni suite de tests** dans le projet. Le seul contrôle
-automatisé est le typecheck du build :
+**Une commande, et c'est celle-là :**
 
 ```bash
-npm run build      # tsc -b (src) && tsc -p tsconfig.api.json (api) && vite build
+npm run verifier   # tests, contrastes des 8 thèmes, typecheck src + api, build
 ```
+
+Elle enchaîne, dans cet ordre de coût croissant :
+
+```bash
+npm test                          # vitest run — 145 tests sur la logique pure
+node outils/palettes.mjs --verifie # sort en 1 si un contraste échoue
+npm run build                     # tsc -b (src) && tsc -p tsconfig.api.json && vite build
+```
+
+`npm run test:suivi` laisse Vitest en veille pendant qu'on écrit.
+
+### Ce que les tests couvrent, et pourquoi ceux-là
+
+Il n'y a **pas de linter**, et pas de test de composant : ce serait `jsdom`, une
+dépendance de plus, et des tests qui cassent au moindre changement de JSX pour
+une garantie faible. Ce qui est couvert, ce sont les modules **purs** dont une
+erreur produit un écran plausible plutôt qu'une panne — c'est-à-dire ceux où
+chaque séance de travail a trouvé des défauts « invisibles au typecheck » :
+
+| Fichier | Ce qui est protégé |
+|---|---|
+| `aliments/recherche.test.ts` | jetons, préfixes, accents, ligatures ; la base sans doublon |
+| `ingredients.test.ts` | cumul des quantités, pluriels en `-x`, fractions, rapprochement des noms |
+| `nutriscore.test.ts` | les quatre barèmes, le plafond des protéines, l'indice Mamakilo |
+| `nutrition.test.ts` | Mifflin-St Jeor, déficit 20 %, **plancher calorique par sexe** |
+| `journal.test.ts` | mise à l'échelle, qualité pondérée par les calories, série de jours |
+| `cuisson.test.ts` | durées déduites du texte des étapes, bornes, compte à rebours |
+| `ticket/parseur.test.ts` | lots, poids, remises, réparations, **la somme de contrôle** |
+| `recettes/catalogue.test.ts` | **le déterminisme des identifiants** |
+
+**Le test du catalogue est le plus important du lot.** Les favoris, les plans de
+menus et les listes de courses ne gardent pas des recettes mais leurs
+identifiants. Une graine qui bouge dans le générateur ne casse aucun typecheck,
+ne lève aucune erreur, et change la recette derrière chaque identifiant déjà
+enregistré. C'est la seule régression du projet qui abîmerait les données de
+tout le monde en silence.
+
+**Écrire un test, c'est écrire le cas rencontré**, pas une assertion de
+couverture. Chaque test du projet cite le défaut qui l'a fait naître ; celui qui
+n'en cite aucun aura toujours l'air juste, y compris le jour où il ne prouve
+plus rien.
+
+La CI (`.github/workflows/verifier.yml`) rejoue tout sur `push` et sur
+*pull request*, avec deux contrôles de plus que le local : **`npm ci`** (Vercel
+installe ainsi, et refuse un lockfile désaccordé — c'est le trou qui a laissé
+passer la panne du 29/07/2026) et la vérification que `@anthropic-ai/sdk` n'est
+pas parti dans le bundle client.
 
 **`npm run build` ne remplace pas un `npm ci`.** Il réutilise `node_modules`
 et ne relit jamais le lockfile ; Vercel installe avec `npm ci`, qui refuse un
@@ -919,6 +965,54 @@ Vérification manuelle attendue :
 ---
 
 ## Historique du projet
+
+### 31 juillet 2026 — Le filet automatisé
+
+Le projet avait 128 fichiers TypeScript, 7 608 recettes, un OCR, un moteur
+nutritionnel — et **aucun test**. C'était le point P2 3.7 de l'`AUDIT.md`, ouvert
+depuis le 28/07 et jamais traité pendant que le code triplait de volume. Chaque
+entrée de cet historique dit pourtant la même chose : « trois défauts corrigés en
+vérifiant, invisibles au typecheck ». Ces défauts-là étaient trouvés à la main,
+une fois, par quelqu'un qui savait où regarder.
+
+- **Vitest en dépendance de développement**, `npm audit` toujours à zéro. Pas de
+  linter et pas de `jsdom` : le premier discuterait du style, le second ferait
+  payer une dépendance pour des tests de JSX qui cassent à chaque retouche.
+- **145 tests sur la logique pure**, chacun écrit à partir d'un défaut réellement
+  rencontré — le tableau est dans « Vérifier avant de livrer ».
+- **`npm run verifier`** aligne Mamakilo sur Cérémonia et GénieLab : une seule
+  commande à retenir d'un projet à l'autre.
+- **Une CI** qui rejoue tout, plus `npm ci` et le contrôle de non-fuite du SDK
+  Anthropic dans le bundle.
+
+**Deux défauts trouvés en écrivant les tests**, tous deux dans le parseur de
+tickets, tous deux silencieux :
+
+- **`JAMBON DE PARIS` était lu comme une remise.** `REMISES` contient `'BON DE'`
+  pour attraper « BON DE RÉDUCTION », cherché n'importe où dans la ligne — et
+  « JAM**BON DE** PARIS » le contient. Le jambon cessait d'être un produit et son
+  prix était *retranché* de la ligne du dessus. C'est le piège que le module
+  décrit lui-même à propos de « N° DE », sur un motif qui était resté. Les
+  mentions de remise se cherchent désormais par mots entiers.
+- **Sur `4 X 0,75` sans total imprimé, le prix unitaire était pris pour le prix
+  payé.** Le yaourt entrait dans l'historique au quart de son prix — et devenait
+  aussitôt son « meilleur prix jamais vu ». Le repli qui devait calculer
+  4 × 0,75 était inatteignable : la recherche du total lisait la fin de la ligne
+  entière, donc retrouvait toujours le prix unitaire. Elle ne lit plus que ce qui
+  **suit** le détail de calcul.
+
+Dans les deux cas le contrôle du total rattrapait le coup — c'est la démonstration
+que cette somme de contrôle vaut ce qu'elle promet. Mais elle le rattrapait en
+envoyant corriger un ticket parfaitement photographié, sur l'un des libellés les
+plus courants d'un supermarché français.
+
+**Une inexactitude légale corrigée** : `REGION_BASE` annonçait Francfort dans la
+politique de confidentialité alors que le projet Supabase est en `eu-west-1`,
+c'est-à-dire l'Irlande. Les deux sont dans l'Union et rien ne change sur le fond,
+mais une mention légale qui nomme la mauvaise ville pour l'hébergement de données
+de santé est fausse. **À reconfirmer dans le tableau de bord Supabase**
+(Settings → General → Region) : aucun code ne peut la deviner, et le connecteur
+MCP servait l'autre projet ce jour-là.
 
 ### 31 juillet 2026 — La base d'aliments, le terroir et les photos
 

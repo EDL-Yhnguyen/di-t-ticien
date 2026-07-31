@@ -8,6 +8,9 @@
     "dev": "vite",
     "prebuild": "node outils/ocr.mjs",
     "build": "tsc -b && tsc -p tsconfig.api.json && vite build",
+    "test": "vitest run",
+    "test:suivi": "vitest",
+    "verifier": "npm run test && node outils/palettes.mjs --verifie && npm run build",
     "preview": "vite preview",
     "marque": "node outils/marque.mjs",
     "partage": "node outils/partage.mjs"
@@ -30,6 +33,7 @@
     "@vitejs/plugin-react": "^6.0.4",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.9.3",
-    "vite": "^8.1.5"
+    "vite": "^8.1.5",
+    "vitest": "^4.1.10"
   }
 }
