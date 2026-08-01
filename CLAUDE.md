@@ -943,7 +943,7 @@ npm run verifier   # tests, contrastes des 8 thèmes, typecheck src + api, build
 Elle enchaîne, dans cet ordre de coût croissant :
 
 ```bash
-npm test                          # vitest run — 307 tests sur la logique pure
+npm test                          # vitest run — 368 tests sur la logique pure
 node outils/palettes.mjs --verifie # sort en 1 si un contraste échoue
 npm run build                     # tsc -b (src) && tsc -p tsconfig.api.json && vite build
 ```
@@ -986,6 +986,9 @@ chaque séance de travail a trouvé des défauts « invisibles au typecheck » :
 | `store.test.ts` | **la règle des trois endroits**, la migration `menus`→`plans` |
 | `rgpd.test.ts` | **l'intégralité de l'export**, la version du consentement |
 | `badges.test.ts` | aucun prédicat ne lève — ils tournent à **chaque écriture** |
+| `catalogue.test.ts` | **aucun régime déduit des ingrédients**, sur les 7 608 recettes |
+| `sport.test.ts` | **la dépense nette**, le repère de l'OMS, la règle de ton |
+| `journalRecette.test.ts` | **aucune note sur une estimation**, unicité des entrées |
 
 Trois d'entre eux méritent un mot, parce qu'ils protègent autre chose qu'un
 calcul :
@@ -1077,6 +1080,41 @@ pas — `src/lib/peremption.test.ts`, dernier bloc.
 ---
 
 ## Historique du projet
+
+### 1er août 2026 — La frontière des déductions, et un identifiant qui collisionnait
+
+307 tests deviennent 368. Trois modules, dont un qui garde une frontière
+sanitaire et un qui cachait un vrai défaut.
+
+- **`catalogue.test.ts` garde la règle « aucun régime ne se déduit des
+  ingrédients », sur les 7 608 recettes et pas sur un échantillon.** Les axes de
+  classement — forme, goût, occasion — se déduisent, et c'est nécessaire : sans
+  déduction, les filtres ne montreraient que les 129 recettes manuelles. Les
+  régimes, non : se tromper de forme propose un gratin à qui cherchait une
+  poêlée, se tromper de régime envoie du gluten à une personne cœliaque. C'est
+  exactement le genre de règle qu'une refactorisation bien intentionnée défait en
+  « améliorant » une déduction.
+- **`sport.test.ts` protège la dépense nette.** MET moins un, sur tout le
+  catalogue d'activités : rester assis coûte déjà 1 MET, déjà compté dans
+  l'objectif. C'est le seul endroit de l'application où un chiffre *ajoute* de
+  quoi manger, donc le seul où une erreur se lit comme une permission.
+- **`journalRecette.test.ts` fixe qu'aucun Nutri-Score n'est posé sur une
+  estimation.** Une note de qualité assise sur des macros elles-mêmes estimées se
+  donnerait une autorité qu'elle n'a pas.
+
+**Un défaut trouvé en écrivant : deux versements au journal recevaient le même
+identifiant.** `entreeDeLaRecette` construisait `entree:${Date.now()}:${id}`, et
+l'horloge a une résolution d'une milliseconde. Mesuré : **cent appels d'affilée
+produisaient deux identifiants distincts**, soit 98 collisions. Un double-appui
+sur « Ajouter au journal » suffisait. Le reste du code suppose cette clé unique —
+c'est elle qui sert à supprimer une ligne et de clé de rendu : deux entrées
+jumelles s'effacent ensemble, et une portion disparaît du décompte de la journée
+sans que rien ne le signale. `identifiant()` d'`utils.ts` était déjà là.
+
+**Une tolérance de test corrigée aussi** : `toBeCloseTo(kcal, 0)` échouait sur
+331,2 contre 330, un écart d'arrondi sans intérêt. La tolérance est devenue
+relative — 1 % — pour attraper ce qui compte, une confusion d'unité ou un facteur
+deux, sans broncher sur une décimale.
 
 ### 1er août 2026 — Les données protégées par construction
 

@@ -1,5 +1,6 @@
 import type { Recette } from './recettes'
 import type { Aliment, Categorie, EntreeJournal, Moment, ValeursPour100 } from './types'
+import { identifiant } from './utils'
 
 /**
  * Verser une recette au journal alimentaire.
@@ -153,7 +154,14 @@ export function entreeDeLaRecette(
   p: { date: string; moment?: Moment; quantiteG?: number },
 ): EntreeJournal {
   return {
-    id: `entree:${Date.now()}:${recette.id}`,
+    // `identifiant()` et non `Date.now()` : l'horloge a une résolution d'une
+    // milliseconde, et deux versements du même plat dans la même milliseconde
+    // recevaient le même identifiant. Un double-appui sur « Ajouter au journal »
+    // suffit à le produire. Le reste du code suppose cette clé unique — c'est
+    // elle qui sert à supprimer une ligne et de clé de rendu : deux entrées
+    // jumelles s'effacent alors ensemble, et l'une des deux portions disparaît
+    // du décompte de la journée sans que rien ne le signale.
+    id: identifiant('entree'),
     date: p.date,
     moment: p.moment ?? recette.moment,
     horodatage: new Date().toISOString(),
