@@ -943,7 +943,7 @@ npm run verifier   # tests, contrastes des 8 thèmes, typecheck src + api, build
 Elle enchaîne, dans cet ordre de coût croissant :
 
 ```bash
-npm test                          # vitest run — 368 tests sur la logique pure
+npm test                          # vitest run — 422 tests sur la logique pure
 node outils/palettes.mjs --verifie # sort en 1 si un contraste échoue
 npm run build                     # tsc -b (src) && tsc -p tsconfig.api.json && vite build
 ```
@@ -989,6 +989,14 @@ chaque séance de travail a trouvé des défauts « invisibles au typecheck » :
 | `catalogue.test.ts` | **aucun régime déduit des ingrédients**, sur les 7 608 recettes |
 | `sport.test.ts` | **la dépense nette**, le repère de l'OMS, la règle de ton |
 | `journalRecette.test.ts` | **aucune note sur une estimation**, unicité des entrées |
+| `prix/agregats.test.ts` | **la moyenne se recalcule**, les unités ne se mélangent pas |
+| `courses.test.ts` | cumul au pluriel près, ordre du magasin, **aucune date inventée** |
+
+**Restent non couverts** : `stocks.ts`, `stats.ts`, `appleSante.ts`,
+`cuisineEnDirect.ts` (effets navigateur), `ticket/image.ts` et `ticket/ocr.ts`
+(canvas et worker), `photo.ts`, `openfoodfacts.ts` et `decodeur.ts` (réseau et
+API navigateur). Les cinq derniers demanderaient des bouchons, ce qui testerait
+les bouchons ; les trois premiers sont du travail qui reste.
 
 Trois d'entre eux méritent un mot, parce qu'ils protègent autre chose qu'un
 calcul :
@@ -1080,6 +1088,25 @@ pas — `src/lib/peremption.test.ts`, dernier bloc.
 ---
 
 ## Historique du projet
+
+### 1er août 2026 — Les prix et les courses
+
+368 tests deviennent 422. **Aucun défaut trouvé cette fois** : les deux modules
+sont justes, et c'est un résultat aussi utile que les précédents — il dit où ne
+pas chercher.
+
+- **`prix/agregats.test.ts`** tient la phrase du module : « une moyenne fausse ne
+  se voit pas, elle a l'air d'une moyenne ». Deux propriétés y sont fixées — la
+  moyenne se **recalcule** depuis les relevés bruts et ne s'entretient jamais à
+  l'incrément, et les unités ne se mélangent pas : « jambon » à la barquette et
+  « jambon » au poids ne donnent pas des prix comparables, et les fondre
+  produirait une moyenne entre un prix au kilo et un prix à la pièce.
+- **`courses.test.ts`** couvre l'écran qu'on tient en marchant, dans un magasin,
+  souvent sans réseau. Le rapprochement au pluriel près et pas au-delà, la ligne
+  cochée qui redevient à prendre quand elle grossit, les lignes cochées qui ne
+  descendent pas — et surtout : **le retour de courses n'invente aucune date
+  limite**, ce qui est la même règle que celle du garde-manger, vue de l'autre
+  côté.
 
 ### 1er août 2026 — La frontière des déductions, et un identifiant qui collisionnait
 
