@@ -1,15 +1,15 @@
 # Reprise — Mamakilo
 
-Dernière séance : 2026-08-01 · dernier commit : *deux versements au journal
-recevaient le même identifiant*
+Dernière séance : 2026-08-01 · dernier commit : *les prix et les courses, sans
+défaut trouvé*
 
-> **Rien n'est poussé.** La branche est en avance de douze commits sur
+> **Rien n'est poussé.** La branche est en avance de quatorze commits sur
 > `origin/main`, dont deux d'un autre chantier. Un push redéploie la production ;
 > il attend une validation de Yann.
 >
-> Le dernier commit corrige un **défaut de production** : un double-appui sur
-> « Ajouter au journal » créait deux entrées au même identifiant, qui s'effacent
-> ensemble. Ça plaide pour pousser.
+> `2ea20f0` corrige un **défaut de production** : un double-appui sur « Ajouter
+> au journal » créait deux entrées au même identifiant, qui s'effacent ensemble.
+> Ça plaide pour pousser.
 >
 > **Un arbitrage attend aussi**, décrit dans `CLAUDE.md`, section « Ce qui attend
 > un arbitrage » : `ouvertLe` déclenche une alerte *sanitaire* sur toute
@@ -94,9 +94,18 @@ Le reste garde des frontières : **aucun régime ne se déduit des ingrédients*
 (vérifié sur les 7 608 recettes), la dépense sportive reste **nette**, et aucun
 Nutri-Score n'est posé sur une estimation.
 
-**Il reste des modules non couverts** : `stocks.ts`, `courses.ts`, `stats.ts`,
-`prix/agregats.ts`, `appleSante.ts`. Le plus intéressant du lot est
-`prix/agregats.ts` — « une moyenne fausse a l'air d'une moyenne ».
+### Septième chantier — les prix et les courses
+
+**422 tests, et aucun défaut trouvé.** Les deux modules sont justes ; c'est un
+résultat aussi utile que les autres, il dit où ne pas chercher. La moyenne des
+prix se recalcule et ne s'entretient pas, les unités ne se mélangent pas, et le
+retour de courses n'invente aucune date limite.
+
+**Ce qui reste non couvert**, et la distinction compte : `stocks.ts`, `stats.ts`
+et `appleSante.ts` sont du travail restant ; `cuisineEnDirect.ts`, `photo.ts`,
+`openfoodfacts.ts`, `decodeur.ts` et les deux modules OCR demanderaient des
+bouchons, donc testeraient les bouchons. Ne pas les couvrir est une décision, pas
+un oubli.
 
 ## La prochaine action
 
