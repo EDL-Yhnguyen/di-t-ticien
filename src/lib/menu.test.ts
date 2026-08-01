@@ -381,12 +381,26 @@ describe('les modèles — sans dates, par construction', () => {
     })),
   }
 
-  it('ne garde aucune date dans le modèle', () => {
+  it('ne garde aucune date dans les jours du modèle', () => {
     // Y garder les dates d'origine obligerait à les recalculer à chaque pose, et
     // la première erreur de décalage passerait inaperçue.
+    //
+    // L'assertion porte sur `jours` et non sur le modèle entier : `creeLe` est
+    // une date, et c'est normal — c'est l'horodatage de création du modèle, pas
+    // une date de repas. La première version de ce test interdisait la chaîne
+    // « 2026-08 » n'importe où dans le JSON ; elle passait le 31 juillet et
+    // tombait le 1er août, quand `creeLe` s'est mis à contenir ce mois-là. Un
+    // test dont le résultat dépend du jour où on l'exécute ne prouve rien.
     const modele = modeleDepuisPlan(source, 'Ma semaine type')
-    expect(JSON.stringify(modele)).not.toContain('2026-08')
     expect(modele.jours).toHaveLength(7)
+
+    const jours = JSON.stringify(modele.jours)
+    for (const date of source.jours.map((j) => j.date)) {
+      expect(jours).not.toContain(date)
+    }
+    for (const jour of modele.jours) {
+      expect(Object.keys(jour).sort()).toEqual([...MOMENTS].sort())
+    }
   })
 
   it('se pose sur n’importe quel lundi, dans le bon ordre', () => {

@@ -943,10 +943,21 @@ npm run verifier   # tests, contrastes des 8 thèmes, typecheck src + api, build
 Elle enchaîne, dans cet ordre de coût croissant :
 
 ```bash
-npm test                          # vitest run — 250 tests sur la logique pure
+npm test                          # vitest run — 307 tests sur la logique pure
 node outils/palettes.mjs --verifie # sort en 1 si un contraste échoue
 npm run build                     # tsc -b (src) && tsc -p tsconfig.api.json && vite build
 ```
+
+**Les trois étapes ne se remplacent pas.** Vitest exécute, il ne type-vérifie
+pas : un objet de test au mauvais champ passe les tests et tombe au `tsc -b`.
+C'est arrivé le 01/08/2026, et c'est la raison pour laquelle `npm test` seul ne
+suffit jamais à conclure.
+
+**Ne jamais appeler `charger()`, `enregistrer()`, `effacerDonnees()` ni
+`toutSupprimer()` depuis un test.** `supabase` n'est `null` qu'en l'absence de
+clés, or un `.env` traîne sur toute machine de développement : ces fonctions
+écriraient dans la vraie base, sous le vrai identifiant. `fusionner()` est
+exportée précisément pour qu'on puisse éprouver la migration sans y toucher.
 
 `npm run test:suivi` laisse Vitest en veille pendant qu'on écrit.
 
@@ -972,6 +983,9 @@ chaque séance de travail a trouvé des défauts « invisibles au typecheck » :
 | `coach.test.ts` | seuils des verdicts, rôle d'une alternative, **la règle de ton** |
 | `menu.test.ts` | arithmétique des dates, mémoire partagée, échange de repas, modèles |
 | `ics.test.ts` | pliage à 75 **octets**, échappement, heures flottantes, UID stables |
+| `store.test.ts` | **la règle des trois endroits**, la migration `menus`→`plans` |
+| `rgpd.test.ts` | **l'intégralité de l'export**, la version du consentement |
+| `badges.test.ts` | aucun prédicat ne lève — ils tournent à **chaque écriture** |
 
 Trois d'entre eux méritent un mot, parce qu'ils protègent autre chose qu'un
 calcul :
@@ -989,6 +1003,17 @@ calcul :
   **mesuré le 01/08/2026, quatre semaines générées d'affilée donnent 112 recettes
   distinctes sur 112 repas**, douze fois de suite. Le seuil du test est posé à
   100, pour tomber sur une régression et pas sur un tirage.
+- **`store.test.ts` rend exécutable la règle des trois endroits.** Il ne liste
+  pas les champs du document : il les **lit** dans `etatInitial`, donne à chacun
+  une valeur témoin, passe le tout dans `fusionner` et vérifie qu'aucune ne se
+  perd. Un champ ajouté demain y entre donc tout seul — c'est ce qui le distingue
+  d'un test qu'il faudrait penser à mettre à jour, et qu'on oublierait exactement
+  comme on oublie la ligne de `fusionner`. **Vérifié en cassant volontairement le
+  code** : la ligne `favoris` retirée, le test échoue en nommant le champ perdu.
+- **`badges.test.ts` protège toutes les écritures, pas l'écran des badges.**
+  `modifier()` évalue chaque prédicat à chaque sauvegarde : un badge qui lève sur
+  un document incomplet casse l'enregistrement de l'application entière, et la
+  personne voit sa saisie à l'écran sans qu'elle atteigne jamais la base.
 
 **Le test du catalogue est le plus important du lot.** Les favoris, les plans de
 menus et les listes de courses ne gardent pas des recettes mais leurs
@@ -1052,6 +1077,40 @@ pas — `src/lib/peremption.test.ts`, dernier bloc.
 ---
 
 ## Historique du projet
+
+### 1er août 2026 — Les données protégées par construction
+
+Trois modules où une erreur ne se voit jamais : elle perd des données, ampute un
+droit, ou bloque toutes les sauvegardes. 250 tests deviennent 307.
+
+- **`fusionner` est exportée**, et ce n'est pas une commodité de test. C'est la
+  migration ascendante du projet, l'endroit précis où un oubli coûte des données
+  de santé sans rien signaler. `store.test.ts` **lit** les champs dans
+  `etatInitial` au lieu de les énumérer : un champ ajouté demain entre tout seul
+  dans le contrôle. La règle des trois endroits, écrite depuis longtemps dans ce
+  fichier, est enfin exécutable.
+- **`rgpd.test.ts` fixe l'intégralité de l'export.** « Ne pas le filtrer pour
+  faire propre » était une consigne ; c'est maintenant une contrainte, y compris
+  sur les relevés de prix et les photos, qui ne vivent pas dans le document mais
+  que l'article 20 couvre quand même.
+- **`badges.test.ts` protège les écritures.** Les prédicats tournent à chaque
+  appel de `modifier()` : un badge qui lève sur un document incomplet ne casse
+  pas l'écran des badges, il casse l'enregistrement de l'application.
+
+**Le garde-fou a été éprouvé en cassant le code exprès** : la ligne `favoris`
+retirée de `fusionner`, le test échoue et nomme le champ perdu. Un garde-fou
+qu'on n'a pas vu échouer ne garde rien.
+
+**Deux défauts corrigés, tous deux dans mes propres tests de la veille :**
+
+- Un test du planificateur interdisait la chaîne « 2026-08 » dans tout le JSON
+  d'un modèle, pour vérifier qu'il ne porte pas de dates. Or `creeLe` en est une,
+  légitimement. **Il passait le 31 juillet et tombait le 1er août.** Un test dont
+  le résultat dépend du jour où on l'exécute ne prouve rien ; l'assertion porte
+  désormais sur `jours`, qui est l'invariant réel.
+- Un objet de test utilisait `composants` là où le champ s'appelle
+  `composantsCoches`. **Vitest l'a laissé passer, `tsc -b` l'a arrêté** — la
+  démonstration que les trois étapes de `npm run verifier` ne se remplacent pas.
 
 ### 1er août 2026 — Le filet s'étend aux modules à conséquences
 

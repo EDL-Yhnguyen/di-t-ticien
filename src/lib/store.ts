@@ -256,8 +256,22 @@ interface ChampsHistoriques {
   menus?: PlanSemaine | null
 }
 
-/** Complète un document ancien avec les champs ajoutés depuis sa création. */
-function fusionner(
+/**
+ * Complète un document ancien avec les champs ajoutés depuis sa création.
+ *
+ * **Exportée pour être éprouvable, et pas seulement par commodité de test.**
+ * C'est la migration ascendante de tout le projet : oublier une ligne ici fait
+ * perdre un champ au rechargement, sans erreur, sans trace, et sur des données
+ * de santé. La règle des trois endroits (`CLAUDE.md`, « Ajouter un champ
+ * persistant ») est écrite depuis longtemps ; `store.test.ts` la rend
+ * exécutable en parcourant les clés d'`etatInitial` et en vérifiant qu'aucune
+ * ne se perd. Une fonction qu'on ne peut pas appeler ne peut pas être vérifiée.
+ *
+ * Elle reste pure : ni réseau, ni `localStorage`. C'est ce qui permet de la
+ * tester sans toucher à la base — `charger()` et `enregistrer()`, eux, écrivent
+ * pour de bon dès qu'un `.env` est présent.
+ */
+export function fusionner(
   u: Utilisateur,
   partiel: Partial<EtatUtilisateur> & ChampsHistoriques,
 ): EtatUtilisateur {
