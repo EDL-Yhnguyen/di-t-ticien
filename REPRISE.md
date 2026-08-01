@@ -1,9 +1,9 @@
 # Reprise — Mamakilo
 
-Dernière séance : 2026-08-01 · dernier commit : *le filet s'étend aux quatre
-modules à conséquences*
+Dernière séance : 2026-08-01 · dernier commit : *les données protégées par
+construction, et `fusionner` rendue éprouvable*
 
-> **Rien n'est poussé.** La branche est en avance de six commits sur
+> **Rien n'est poussé.** La branche est en avance de neuf commits sur
 > `origin/main`, dont deux d'un autre chantier. Un push redéploie la production ;
 > il attend une validation de Yann.
 >
@@ -64,9 +64,21 @@ fichier qui part chez Google Agenda sans qu'on voie ce qu'il devient).
 
 **Le découpage de `@supabase/supabase-js` n'a pas été fait, et c'est délibéré** :
 il demande de réécrire `supabase.ts` et `auth.ts`, que l'autre chantier venait de
-toucher. À reprendre une fois son chantier email atterri — le premier affichage
-pèse 218 Ko compressés, dont la bibliothèque Supabase entière alors que
-l'application n'en utilise que l'authentification et un `upsert`.
+toucher. Le premier affichage pèse 218 Ko compressés, dont la bibliothèque
+Supabase entière alors que l'application n'en utilise que l'authentification et
+un `upsert` — le realtime, le stockage et les fonctions sont du poids mort.
+
+**Deuxième raison, plus forte que la première : ça ne se vérifie pas ici.** Le
+chemin synchronisé demande un vrai projet Supabase ; en local on ne peut
+éprouver que le mode démo. Toucher au câblage de l'authentification sans pouvoir
+tester le chemin réel, sur une application qui porte des données de santé, n'est
+pas un arbitrage à prendre seul.
+
+### Cinquième chantier — les données protégées par construction (1er août)
+
+**307 tests.** `fusionner` est exportée et sa perte de champ est désormais
+impossible sans échec de test ; l'intégralité de l'export RGPD est fixée ; aucun
+prédicat de badge ne peut lever, donc bloquer les écritures.
 
 ## La prochaine action
 
@@ -148,4 +160,15 @@ code ne peut deviner cette valeur. Le connecteur MCP servait l'autre projet
   sur 112 repas » avait l'air prudent ; la mesure donne 112 sur 112. Le seuil
   aurait laissé passer une régression divisant la diversité par deux. Mesurer
   d'abord, écrire le seuil ensuite, et noter la mesure à côté.
-- **Ne pas toucher `supabase.ts` ni `auth.ts` tant que le chantier email tourne.**
+- **Ne pas toucher `supabase.ts` ni `auth.ts` tant que le chantier email tourne**,
+  ni tant qu'on ne peut pas éprouver le chemin synchronisé.
+- **Ne pas écrire un test qui contient une date en dur du mois courant.** Un test
+  du planificateur interdisait « 2026-08 » dans le JSON d'un modèle pour prouver
+  qu'il ne porte pas de dates ; `creeLe` en est une, et il est tombé au passage
+  du 31 juillet au 1er août. Viser l'invariant, jamais la sous-chaîne.
+- **Ne pas conclure sur `npm test` seul.** Vitest exécute, il ne type-vérifie
+  pas : un objet de test au mauvais nom de champ passe les tests et tombe au
+  `tsc -b`. C'est arrivé le même jour.
+- **Ne jamais appeler `charger()`, `enregistrer()` ou `toutSupprimer()` depuis un
+  test.** Un `.env` traîne sur la machine, donc `supabase` n'est pas `null` : ces
+  fonctions écriraient dans la vraie base, sous le vrai identifiant.
