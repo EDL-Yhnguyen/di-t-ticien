@@ -1,11 +1,15 @@
 # Reprise — Mamakilo
 
-Dernière séance : 2026-08-01 · dernier commit : *les données protégées par
-construction, et `fusionner` rendue éprouvable*
+Dernière séance : 2026-08-01 · dernier commit : *deux versements au journal
+recevaient le même identifiant*
 
-> **Rien n'est poussé.** La branche est en avance de neuf commits sur
+> **Rien n'est poussé.** La branche est en avance de douze commits sur
 > `origin/main`, dont deux d'un autre chantier. Un push redéploie la production ;
 > il attend une validation de Yann.
+>
+> Le dernier commit corrige un **défaut de production** : un double-appui sur
+> « Ajouter au journal » créait deux entrées au même identifiant, qui s'effacent
+> ensemble. Ça plaide pour pousser.
 >
 > **Un arbitrage attend aussi**, décrit dans `CLAUDE.md`, section « Ce qui attend
 > un arbitrage » : `ouvertLe` déclenche une alerte *sanitaire* sur toute
@@ -79,6 +83,20 @@ pas un arbitrage à prendre seul.
 **307 tests.** `fusionner` est exportée et sa perte de champ est désormais
 impossible sans échec de test ; l'intégralité de l'export RGPD est fixée ; aucun
 prédicat de badge ne peut lever, donc bloquer les écritures.
+
+### Sixième chantier — les déductions et un identifiant qui collisionnait
+
+**368 tests**, et un défaut de production corrigé : `entreeDeLaRecette` bâtissait
+son identifiant sur `Date.now()`, donc cent appels d'affilée n'en produisaient
+que deux distincts. Deux entrées jumelles s'effacent ensemble.
+
+Le reste garde des frontières : **aucun régime ne se déduit des ingrédients**
+(vérifié sur les 7 608 recettes), la dépense sportive reste **nette**, et aucun
+Nutri-Score n'est posé sur une estimation.
+
+**Il reste des modules non couverts** : `stocks.ts`, `courses.ts`, `stats.ts`,
+`prix/agregats.ts`, `appleSante.ts`. Le plus intéressant du lot est
+`prix/agregats.ts` — « une moyenne fausse a l'air d'une moyenne ».
 
 ## La prochaine action
 
