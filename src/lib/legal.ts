@@ -88,19 +88,22 @@ export const HEBERGEUR_BASE = {
  * résident physiquement les données de santé — donc si le RGPD s'applique sans
  * transfert hors UE.
  *
- * Le projet `vdnfqijjmuxdrimbyyrv` est en **`eu-west-1`**, que Supabase nomme
- * *West EU (Ireland)*. Ce fichier annonçait Francfort, qui est `eu-central-1` :
- * une autre région, un autre pays. Les deux sont dans l'Union, donc rien de ce
- * que dit la politique de confidentialité sur le fond ne change — mais une
- * mention légale qui nomme la mauvaise ville pour des données de santé est
- * fausse, et c'est le genre d'inexactitude qu'on ne peut corriger qu'avant
- * qu'elle serve d'argument.
+ * Depuis la migration du 02/08/2026, la base est le projet
+ * `exovzmoygupllcdjbwtf`, en **`eu-west-3`** — *West EU (Paris)*. Elle était
+ * auparavant sur `vdnfqijjmuxdrimbyyrv`, en `eu-west-1` (Irlande) ; les deux
+ * sont dans l'Union, donc rien de ce que dit la politique de confidentialité
+ * sur le fond ne change. Mais une mention légale qui nomme le mauvais pays
+ * pour des données de santé est fausse, et c'est le genre d'inexactitude qu'on
+ * ne peut corriger qu'avant qu'elle serve d'argument. Le fichier avait déjà
+ * annoncé Francfort à tort, qui est `eu-central-1`.
  *
- * **Elle se relit dans le tableau de bord Supabase** (Settings → General →
- * Region) à chaque changement de projet : c'est la seule source qui fasse foi,
- * et aucun code ne peut la deviner.
+ * **Cette ligne se change en même temps que `VITE_SUPABASE_URL`, jamais
+ * après** : entre les deux, la politique affichée ment sur le pays
+ * d'hébergement. Elle se relit dans le tableau de bord Supabase
+ * (Settings → General → Region), seule source qui fasse foi — aucun code ne
+ * peut la deviner.
  */
-export const REGION_BASE = 'Union européenne (Irlande)'
+export const REGION_BASE = 'Union européenne (France)'
 
 /** Les tiers qui reçoivent quelque chose, et ce qu'ils en reçoivent. */
 export const DESTINATAIRES = [

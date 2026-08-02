@@ -72,7 +72,23 @@ create trigger donnees_maj
 -- Cette fonction fait l'inverse — elle s'exécute avec les droits de son
 -- propriétaire, mais n'efface que l'appelant, et personne d'autre. La ligne de
 -- `public.donnees` part avec, par la cascade déclarée plus haut.
-create or replace function public.supprimer_mon_compte()
+--
+-- ⚠️ **Le suffixe `_mamakilo` doit rester, et rien ne doit toucher au nom
+-- court.** Le projet Supabase est partagé avec GénieLab et Cérémonia depuis la
+-- migration du 02/08/2026. GénieLab y possède déjà
+-- `public.supprimer_mon_compte()`, sans paramètre comme celle-ci : un
+-- `create or replace` sur ce nom-là écraserait la sienne **sans la moindre
+-- erreur**, et casserait la suppression de compte de l'autre application. Ne
+-- jamais ajouter de `drop function if exists public.supprimer_mon_compte()`
+-- ici « pour faire propre » — ce serait détruire la fonction du voisin.
+-- Cérémonia a résolu le même problème de la même façon
+-- (`supprimer_mon_compte_ceremonia`).
+--
+-- Corollaire de `auth.users` partagé : effacer le compte l'efface **pour les
+-- trois applications**. C'est le comportement voulu — un compte est une
+-- personne, pas un abonnement à une application — mais l'écran qui appelle
+-- ceci ne doit pas promettre l'inverse.
+create or replace function public.supprimer_mon_compte_mamakilo()
 returns void
 language plpgsql
 security definer
@@ -88,5 +104,5 @@ $$;
 
 -- Contrairement à `marquer_maj`, celle-ci doit bien être appelable depuis
 -- l'application — mais seulement par quelqu'un de connecté.
-revoke execute on function public.supprimer_mon_compte() from public, anon;
-grant execute on function public.supprimer_mon_compte() to authenticated;
+revoke execute on function public.supprimer_mon_compte_mamakilo() from public, anon;
+grant execute on function public.supprimer_mon_compte_mamakilo() to authenticated;

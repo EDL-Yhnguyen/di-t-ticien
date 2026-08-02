@@ -1,11 +1,18 @@
 # Reprise — Mamakilo
 
-Dernière séance : 2026-08-01 · dernier commit : *les prix et les courses, sans
-défaut trouvé*
+Dernière séance : 2026-08-02 · dernier commit : *Mamakilo rejoint le projet
+Supabase unique*
 
-> **Rien n'est poussé.** La branche est en avance de quatorze commits sur
-> `origin/main`, dont deux d'un autre chantier. Un push redéploie la production ;
-> il attend une validation de Yann.
+> **Rien n'est poussé, et le dernier commit ne DOIT pas l'être seul.** La
+> branche est en avance de quinze commits sur `origin/main`, dont deux d'un
+> autre chantier. Un push redéploie la production ; il attend une validation de
+> Yann.
+>
+> ⚠️ **Le commit de migration Supabase casse la suppression de compte s'il part
+> avant que la base ait bougé** : il appelle `supprimer_mon_compte_mamakilo`,
+> qui n'existe pas sur le projet `vdnfqijjmuxdrimbyyrv`. Il se pousse **après**
+> avoir changé `VITE_SUPABASE_URL` dans Vercel, jamais avant. La procédure
+> complète est dans `MIGRATION-SUPABASE.md`.
 >
 > `2ea20f0` corrige un **défaut de production** : un double-appui sur « Ajouter
 > au journal » créait deux entrées au même identifiant, qui s'effacent ensemble.
@@ -107,21 +114,38 @@ et `appleSante.ts` sont du travail restant ; `cuisineEnDirect.ts`, `photo.ts`,
 bouchons, donc testeraient les bouchons. Ne pas les couvrir est une décision, pas
 un oubli.
 
+### Huitième chantier — Mamakilo rejoint le projet Supabase unique (2 août)
+
+**Décidé par Yann le 02/08/2026** : les trois applications personnelles se
+regroupent sur `exovzmoygupllcdjbwtf`, ce qui libère la seconde place du plan
+gratuit pour une base RH — `EDL-Skill-Studio` n'en a jamais eu.
+
+Le code est prêt, **la base n'a pas bougé** : le connecteur Supabase répond
+`Unauthorized`, l'environnement n'a pas le jeton d'accès. Trois modifications,
+toutes inertes tant que l'application vise encore l'ancien projet :
+
+- `supprimer_mon_compte()` devient `supprimer_mon_compte_mamakilo()` dans
+  `supabase/schema.sql` et dans `auth.ts`. **GénieLab possède déjà une fonction
+  de ce nom exact sur le projet cible** : un `create or replace` l'aurait
+  écrasée sans erreur, cassant sa suppression de compte en silence.
+- `REGION_BASE` passe d'Irlande à France — la mention légale suit la base, et se
+  change dans le même geste que `VITE_SUPABASE_URL`.
+- `MIGRATION-SUPABASE.md` porte la procédure en six étapes, dont le point de
+  non-retour.
+
 ## La prochaine action
 
-**Brancher le SMTP sur le projet `vdnfqijjmuxdrimbyyrv`** — `docs/email.md`,
-section « Aucun SMTP n'est branché ». La procédure est celle, déjà éprouvée, des
-sections 2 à 4 de `Ceremonia/docs/email.md` ; seules changent la référence du
-projet et le nom d'expéditeur, qui peut ici dire la vérité.
+**Exécuter `MIGRATION-SUPABASE.md`, étape 1** : coller `supabase/schema.sql`
+dans le SQL Editor du projet `exovzmoygupllcdjbwtf`. Rien ne peut commencer
+avant, et le reste de la procédure en découle.
 
-Puis autoriser les URL de retour, **les deux domaines**, et rejouer les cinq
-contrôles de la fin de `docs/email.md`.
+Il faut d'abord **un terminal neuf** pour que le connecteur Supabase soit
+authentifié — le relancer depuis la session en cours ne suffit pas, l'ancien
+environnement est hérité.
 
-Tant qu'on est dans ce tableau de bord, **relire Settings → General → Region**
-et confirmer que le projet est bien en Irlande : `REGION_BASE` l'annonce
-désormais dans `src/lib/legal.ts` après avoir annoncé Francfort à tort, et aucun
-code ne peut deviner cette valeur. Le connecteur MCP servait l'autre projet
-(`exovzmoygupllcdjbwtf`) ce jour-là et n'a pas pu la lire.
+Le chantier SMTP qui occupait cette place **n'a plus lieu d'être** : le projet
+cible a déjà un SMTP branché. Le compromis qu'il crée (l'expéditeur dira
+« Cérémonia ») est décrit dans `MIGRATION-SUPABASE.md`.
 
 ## Décidé cette séance
 

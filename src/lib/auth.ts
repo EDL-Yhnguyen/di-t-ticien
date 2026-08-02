@@ -269,15 +269,22 @@ export async function utilisateurCourant(): Promise<Utilisateur | null> {
  * à un effacement complet.
  *
  * `auth.admin.deleteUser` exige la clé `service_role`, qui n'a rien à faire
- * dans un navigateur. La suppression passe donc par `supprimer_mon_compte`,
- * une fonction `security definer` déclarée dans `supabase/schema.sql` qui
- * n'efface que la ligne de son appelant. Tant qu'elle n'a pas été exécutée
- * dans le projet Supabase, l'appel échoue : les données sont quand même
- * détruites en amont, mais l'identifiant survit côté Supabase.
+ * dans un navigateur. La suppression passe donc par
+ * `supprimer_mon_compte_mamakilo`, une fonction `security definer` déclarée
+ * dans `supabase/schema.sql` qui n'efface que la ligne de son appelant. Tant
+ * qu'elle n'a pas été exécutée dans le projet Supabase, l'appel échoue : les
+ * données sont quand même détruites en amont, mais l'identifiant survit côté
+ * Supabase.
+ *
+ * **Le suffixe n'est pas décoratif.** Depuis le 02/08/2026 le projet Supabase
+ * est partagé avec GénieLab et Cérémonia, et GénieLab y déclare déjà un
+ * `supprimer_mon_compte()` de même signature. Repasser au nom court ferait
+ * appeler la fonction du voisin — qui fait la même chose aujourd'hui, donc la
+ * panne serait invisible jusqu'au jour où l'une des deux divergera.
  */
 export async function supprimerCompte(userId: string): Promise<boolean> {
   if (supabase) {
-    const { error } = await supabase.rpc('supprimer_mon_compte')
+    const { error } = await supabase.rpc('supprimer_mon_compte_mamakilo')
     await supabase.auth.signOut()
     if (error) {
       console.error('[auth] suppression du compte :', error)
