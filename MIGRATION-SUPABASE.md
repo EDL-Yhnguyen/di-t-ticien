@@ -71,26 +71,41 @@ order by u.created_at;
 Un compte sans ligne dans `donnees` n'a jamais rien enregistré : il ne se
 migre pas, il se recrée seulement s'il sert encore.
 
-### 3. Recréer chaque compte sur le projet A
+### 3. Recréer les comptes manquants sur le projet A
 
-**Les mots de passe ne se transfèrent pas** sans copier les hachés du schéma
-`auth`, ce qui demande un accès Postgres direct et ne vaut pas le risque pour
-quelques comptes familiaux. Chaque personne repart donc d'un mot de passe neuf,
-à lui communiquer.
+**Relevé du 02/08/2026 : sept comptes sur B, tous sous une adresse réelle.**
+Aucun pseudo historique en `@equilibre.local` n'a survécu — la contrainte du
+domaine qui ne reçoit rien ne s'applique donc à personne.
 
-- **Adresse réelle** → inscription normale depuis l'application, ou
-  Authentication → Users → Add user dans le tableau de bord.
-- **Pseudo historique en `@equilibre.local`** → obligatoirement le tableau de
-  bord, avec **Auto Confirm User** coché : ce domaine ne reçoit rien, donc
-  aucun lien de confirmation n'arriverait. Garder **exactement la même
-  adresse** — c'est l'identifiant que la personne tape.
+⚠️ **Deux de ces adresses ont déjà un compte sur le projet A**, créé pour
+Cérémonia ou GénieLab. Elles ne se recréent pas : l'insertion échouerait sur
+l'unicité de l'adresse, et surtout ce serait deux comptes pour une seule
+personne. Leur document Mamakilo s'attache au compte **déjà existant** sur A.
+La requête de l'étape 2, croisée avec `auth.users` du projet A, dit lesquelles.
 
-`Confirm email` est déjà désactivé sur le projet A (Cérémonia en dépend), donc
-les pseudos y fonctionnent. **Si quelqu'un l'active un jour pour Cérémonia, les
-comptes Mamakilo par pseudo cessent de pouvoir être créés** — c'est le seul
-réglage partagé qui puisse casser l'autre application.
+Pour les autres, deux façons de faire, et elles ne se valent pas :
 
-Noter la correspondance ancien `id` → nouveau `id` : elle sert à l'étape 4.
+- **Copier le compte tel quel** (recommandé) — lire `encrypted_password` et les
+  colonnes d'identité sur B, les réécrire sur A. **Les mots de passe sont
+  conservés**, personne ne voit la différence. C'est ce que fait une migration
+  Supabase → Supabase, et c'est à portée dès qu'on a un accès SQL aux deux
+  projets. Il faut alors copier **aussi** `auth.identities`, sans quoi GoTrue
+  refuse la connexion par adresse.
+- **Recréer à la main** — Authentication → Users → Add user, avec **Auto
+  Confirm User**. Plus simple, mais chaque personne repart d'un mot de passe
+  neuf qu'il faut lui communiquer.
+
+`Confirm email` est déjà désactivé sur le projet A, Cérémonia en dépend.
+**L'activer un jour casserait les inscriptions de l'autre application** — c'est
+le seul réglage partagé qui puisse le faire.
+
+Noter la correspondance ancien `id` → nouveau `id` : elle sert à l'étape 4. Si
+les comptes sont copiés tels quels avec leur `id`, il n'y a pas de
+correspondance à tenir — c'est l'autre avantage de cette voie.
+
+> **Rien de tout ça ne se recopie dans ce fichier.** Le dépôt est public : les
+> adresses et les identifiants des personnes n'y ont pas leur place, pas plus
+> que le contenu des documents, qui sont des données de santé.
 
 ### 4. Copier les documents
 
