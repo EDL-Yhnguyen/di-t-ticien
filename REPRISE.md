@@ -26,24 +26,32 @@ comptait. `npm run verifier`, les advisors de sécurité et la fonction
 `supprimer_mon_compte()` de GénieLab (non écrasée, vérifiée par lecture directe
 de sa définition) sont tous conformes à ce qu'attendait le document.
 
-**L'étape 5 est donc entièrement validée.** Reste l'étape 6, seul point de
-non-retour du document : sauvegarder puis supprimer le projet B
-(`vdnfqijjmuxdrimbyyrv`), créer le projet Supabase du RH. Elle attend une
-confirmation explicite et séparée de Yann — accordée pour tout le reste de la
-migration, mais pas pour celle-ci.
+**L'étape 6, seul point de non-retour, est faite aussi** : le projet B
+(`vdnfqijjmuxdrimbyyrv`) est supprimé sans sauvegarde `pg_dump` — tentée par
+deux voies (connexion directe, puis pooler), les deux ont échoué (DNS, puis
+mot de passe refusé) ; Yann a tranché que la migration déjà vérifiée des 7
+comptes suffisait. Le projet Supabase du RH (`xvapiclrpaerjjyhakhf`,
+`eu-west-3`) est créé avec le schéma de Skill Studio (12 tables) installé.
+Son `.env` reste à compléter côté `EDL-Skill-Studio` (valeurs communiquées à
+Yann en conversation, pas recopiées ici).
+
+`MIGRATION-SUPABASE.md` a rempli son rôle et a été supprimé ; ce qui devait en
+rester durablement est dans `CLAUDE.md`, section « Historique du projet »,
+entrée du 04/08/2026.
 
 Outillage installé cette séance sur cette machine et déjà authentifié : Vercel
-CLI et Supabase CLI (`npm install -g vercel supabase`), utiles pour la suite
-(création du projet RH à l'étape 6, ou toute bascule future).
+CLI et Supabase CLI (`npm install -g vercel supabase`), utiles pour toute
+bascule future.
 
 ## La prochaine action
 
-Demander à Yann le feu vert explicite pour l'étape 6 de
-`MIGRATION-SUPABASE.md`. Une fois obtenu : sauvegarder le projet B (Settings →
-Database → Backups ou `pg_dump`), le supprimer, créer le projet RH en
-`eu-west-3`, y installer `EDL-Skill-Studio/supabase/schema.sql`. Après quoi ce
-fichier `MIGRATION-SUPABASE.md` s'efface, et ce qui doit en rester durablement
-migre dans `CLAUDE.md`.
+Rien de bloquant côté Mamakilo. Deux choses en suspens, à reprendre quand
+Yann le décide :
+
+- Compléter le `.env` d'`EDL-Skill-Studio` avec les valeurs du projet RH pour
+  pouvoir y travailler.
+- La vidéo vitrine de Mamakilo (30-60 s, motion design stylisé, voix off
+  française), chantier séparé jamais commencé — skill `hyperframes`.
 
 ## Décidé cette séance
 

@@ -21,3 +21,7 @@ public/ocr
 # d'exécution SDD (briefs, rapports, revues) : les deux non versionnés.
 .superpowers/
 .env*
+
+# Métadonnées locales du CLI Supabase (quel projet `supabase link` a lié) :
+# propre à la machine, pas au dépôt.
+supabase/.temp/

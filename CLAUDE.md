@@ -31,7 +31,9 @@ parallèle sur `/app/plan`, pour les personnes suivies par une diététicienne.
 Dépôt : `EDL-Yhnguyen/mamakilo` (public)
 Production : **https://mamakilo.vercel.app**
 Dossier local : `C:\Users\YHN\Documents\Git\mamakilo`
-Supabase : projet `Mamakilo`, ref `vdnfqijjmuxdrimbyyrv`, région `eu-west-1`
+Supabase : projet **partagé** `Cérémonia` (le nom du tableau de bord n'a pas
+suivi), ref `exovzmoygupllcdjbwtf`, région `eu-west-3` — Mamakilo l'a rejoint
+le 04/08/2026, voir « Supabase » plus bas et l'historique
 
 ### Le renommage du 30 juillet 2026
 
@@ -860,9 +862,26 @@ santé, c'est la *row level security* : quatre politiques (`select`, `insert`,
 Un trigger `donnees_maj` tient `maj_le` côté base (le client peut se tromper
 de fuseau, pas elle).
 
-**`schema.sql` a évolué** : il déclare aussi `supprimer_mon_compte()`. Un
-projet créé avant le 29/07/2026 doit le rejouer, sinon la suppression de
+**`schema.sql` a évolué** : il déclare aussi `supprimer_mon_compte_mamakilo()`.
+Un projet créé avant le 29/07/2026 doit le rejouer, sinon la suppression de
 compte reste partielle (voir « Données personnelles » plus haut).
+
+**Le suffixe `_mamakilo` n'est pas cosmétique.** Depuis le 04/08/2026, ce
+projet Supabase héberge aussi Cérémonia et GénieLab (un compte, un seul
+`auth.users`, RLS filtrée par `user_id` partout) — sur un projet partagé,
+`public.supprimer_mon_compte()` sans suffixe appartient à GénieLab, arrivée la
+première sur ce nom. Un `create or replace` par-dessus l'aurait écrasée sans la
+moindre erreur et cassé sa suppression de compte en silence. **Ne jamais
+ajouter de `drop function if exists public.supprimer_mon_compte()` dans
+`schema.sql`** : ce serait détruire la fonction du voisin. Cérémonia suit la
+même règle avec `supprimer_mon_compte_ceremonia()`.
+
+**Effet de la cohabitation** : supprimer son compte l'efface pour les trois
+applications à la fois — c'est voulu (un compte est une personne), mais aucun
+écran ne doit laisser croire à l'inverse. Le trigger `on_auth_user_created` de
+Cérémonia s'exécute aussi aux inscriptions de Mamakilo (crée un profil et une
+organisation Cérémonia vides) ; sans conséquence fonctionnelle, RLS cloisonne,
+mais ce trigger ne se « corrige » pas sans mesurer l'effet sur Cérémonia.
 
 **Deux fichiers SQL supplémentaires depuis le 30/07/2026, ni appliqués ni
 requis** : `catalogue.sql` (catalogue de recettes à l'échelle) et `foyer.sql`
@@ -1099,6 +1118,49 @@ pas — `src/lib/peremption.test.ts`, dernier bloc.
 
 ## Historique du projet
 
+### 4 août 2026 — Migration vers le projet Supabase partagé
+
+Mamakilo quitte son projet Supabase dédié (`vdnfqijjmuxdrimbyyrv`, `eu-west-1`,
+**supprimé**) pour rejoindre celui de Cérémonia et GénieLab
+(`exovzmoygupllcdjbwtf`, `eu-west-3`) — le plan gratuit plafonne à deux projets
+par organisation, et les regrouper libérait la seconde place pour le RH. Décidé
+le 02/08/2026, exécuté le 04/08/2026 en six étapes, chacune vérifiée avant la
+suivante : schéma installé (fonction suffixée
+`supprimer_mon_compte_mamakilo()`, voir « Supabase » plus haut), les 7 comptes
+existants recréés à l'identique (mots de passe conservés, deux adresses
+rattachées à un compte déjà existant côté Cérémonia/GénieLab plutôt que
+dupliquées), leurs 7 documents copiés et vérifiés par taille (`pg_column_size`,
+744 à 16 900 octets, conformes à l'original), variables Vercel et redirect URLs
+Auth basculées, déploiement production vérifié, **les 7 comptes confirmés par
+Yann après connexion**. Le projet B a ensuite été supprimé et le projet
+Supabase du RH (`xvapiclrpaerjjyhakhf`, `eu-west-3`) créé avec le schéma de
+Skill Studio.
+
+**Une troncature accidentelle corrigée en cours de route** : la copie manuelle
+d'un des 7 documents avait réduit ses deux listes de courses à des tableaux
+vides, repérée seulement parce que la taille finale ne correspondait pas à
+l'originale — d'où la vérification systématique par taille sur les 7 comptes,
+pas seulement sur celui qui posait problème.
+
+**Aucun outil ne permettait de faire le tour complet sans en installer** : les
+CLI Vercel et Supabase (`npm install -g vercel supabase`) ont été installés en
+cours de séance pour lire/écrire les variables d'environnement Vercel
+(`vercel env`), vérifier les déploiements (`vercel inspect`), et exécuter les
+opérations d'administration Supabase (`supabase projects delete`,
+`supabase projects create`, `supabase db query --linked`) qu'aucun MCP
+n'exposait. `supabase db query --linked` (API Management) a réussi là où
+`supabase db dump`/`--db-url` a échoué : le premier n'a pas besoin de Docker
+(absent sur cette machine) ni d'une connexion Postgres directe, le second si —
+et la connexion directe au projet B a buté sur la résolution DNS de son hôte
+IPv6 puis sur une authentification par mot de passe refusée via le pooler,
+sans qu'aucune des deux pistes n'aboutisse. Résultat : pas de sauvegarde
+`pg_dump` du projet B avant sa suppression — décision explicite de Yann, la
+migration des 7 comptes étant déjà vérifiée indépendamment (tailles, puis
+connexion réelle).
+
+`MIGRATION-SUPABASE.md`, qui portait la procédure, s'efface avec cette entrée —
+c'était son rôle annoncé dès sa création.
+
 ### 4 août 2026 — Refonte de l'identité visuelle
 
 Nouveau jeu de couleurs de marque (orange sanguine, citron vert, menthe, rose
@@ -1162,10 +1224,11 @@ dans `docs/superpowers/plans/2026-08-04-refonte-identite-mamakilo.md`.
 
 **Non livré à ce stade :** la vidéo vitrine évoquée au cadrage (30-60 s, motion
 design stylisé, voix off française) est un chantier séparé, pas commencé — à
-traiter via le skill `hyperframes` le jour où il démarre. **Non fusionné à ce
-stade :** le travail vit sur la branche `refonte-design`, dans la worktree
-`C:\Users\YHN\Documents\Git\.worktrees\mamakilo-refonte-design` — `main` n'a
-pas encore reçu ces commits.
+traiter via le skill `hyperframes` le jour où il démarre.
+
+**Fusionné dans `main` et poussé sur `origin` le 04/08/2026**, avec les
+commits de la migration Supabase décrite dans l'entrée suivante — les deux
+chantiers avaient avancé sur des branches séparées sans se gêner.
 
 ### 1er août 2026 — Les prix et les courses
 
