@@ -53,17 +53,17 @@ function dessiner(carte: Carte): Promise<Blob> {
   marmite(ctx, LARGEUR / 2 - 110, 150, 220)
 
   ctx.fillStyle = '#232D3A'
-  ctx.font = '600 84px Faustina, Georgia, serif'
+  ctx.font = '600 84px Fredoka, Georgia, serif'
   ctx.textAlign = 'center'
   const lignes = enveloppe(ctx, carte.titre, LARGEUR - 160)
   lignes.forEach((l, i) => ctx.fillText(l, LARGEUR / 2, 520 + i * 100))
 
   ctx.fillStyle = '#5C6F7A'
-  ctx.font = '400 44px Figtree, system-ui, sans-serif'
+  ctx.font = '400 44px Inter, system-ui, sans-serif'
   ctx.fillText(carte.sousTitre, LARGEUR / 2, 520 + lignes.length * 100 + 60)
 
   ctx.fillStyle = '#FFFFFF'
-  ctx.font = '600 52px Faustina, Georgia, serif'
+  ctx.font = '600 52px Fredoka, Georgia, serif'
   ctx.fillText('Mamakilo', LARGEUR / 2, HAUTEUR - 62)
 
   return new Promise((resoudre, rejeter) =>
