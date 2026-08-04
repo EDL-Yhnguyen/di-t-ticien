@@ -12,7 +12,12 @@ import { readFileSync } from 'node:fs'
 const traces = (source) =>
   [...source.matchAll(/\sd="([^"]+)"/g)].map((m) => m[1].replace(/\s+/g, ' ').trim())
 
-const composant = traces(readFileSync('src/components/ui.tsx', 'utf8'))
+// Extract only the Marque function content
+const uiContent = readFileSync('src/components/ui.tsx', 'utf8')
+const marqueMatch = uiContent.match(/export function Marque\([^)]*\)\s*\{[\s\S]*?\n  \)[\s\S]*?\n\}/)
+const marqueContent = marqueMatch ? marqueMatch[0] : ''
+
+const composant = traces(marqueContent)
 const icone = traces(readFileSync('public/icone.svg', 'utf8'))
 
 const manquants = composant.filter((d) => !icone.includes(d))
