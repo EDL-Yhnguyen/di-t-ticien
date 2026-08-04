@@ -17,5 +17,6 @@ public/ocr
 .DS_Store
 *.log
 
-# Compagnon visuel de brainstorming (maquettes de travail, non versionnées)
+# Compagnon visuel de brainstorming (maquettes de travail) et registre
+# d'exécution SDD (briefs, rapports, revues) : les deux non versionnés.
 .superpowers/

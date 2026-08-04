@@ -272,7 +272,7 @@ Expected: pas d'erreur, `src/palettes.css écrit.` suivi de `Contrastes vérifi�
 
 ```
 Contrastes vérifiés, clair et sombre.
-Primaire : clair #ca3709 (7.6x:1)   sombre #fe6944 (…)
+Primaire : clair #ca3709 (4.52:1)   sombre #fe6944 (…)
 Fond (ground) : clair #fdf4ed   sombre #1c1611
 ```
 

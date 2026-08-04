@@ -68,7 +68,7 @@ export function Marque({ taille = 36, className }: { taille?: number; className?
  */
 export function SignatureMarque({ className }: { className?: string }) {
   return (
-    <span className={classes('font-display font-semibold text-ink', className)} aria-label="mamakilo">
+    <span className={classes('font-display font-semibold text-ink', className)} role="img" aria-label="mamakilo">
       <span aria-hidden="true">
         mamak
         <svg
@@ -98,7 +98,7 @@ type Ton = 'primaire' | 'accent' | 'doux' | 'fantome' | 'alerte'
  * Les trois tons pleins portent un dégradé et un halo de leur propre couleur
  * plutôt qu'un aplat et une ombre grise : c'est ce qui fait qu'un bouton a l'air
  * d'éclairer la page. Le halo est recalculé par thème (`--shadow-halo` dans
- * index.css), il n'y a donc rien à redéfinir huit fois.
+ * index.css), il n'y a donc rien à redéfinir à la main pour chaque bouton.
  *
  * `active:scale-[0.97]` remplace le changement de luminosité : sur un dégradé,
  * un `brightness` écrase les deux extrémités et le volume disparaît au moment

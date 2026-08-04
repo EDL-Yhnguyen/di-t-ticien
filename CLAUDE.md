@@ -215,7 +215,7 @@ api/
 | `/app/plan` | `PagePlan.tsx` | le plan alimentaire détaillé |
 | `/app/badges` | `Badges.tsx` | badges débloqués |
 | `/app/jeux` | `Jeux.tsx` | mémo, quiz, respiration |
-| `/app/profil` | `Profil.tsx` | mesures, réglages, thème |
+| `/app/profil` | `Profil.tsx` | mesures, réglages, luminosité |
 
 Trois écrans **bloquants** passent avant tout le reste dans `App()`, dans cet
 ordre : `motDePasseAChanger` → `NouveauMotDePasse.tsx`, consentement absent ou
@@ -414,7 +414,7 @@ palettes. Trois règles à ne pas défaire :
   cache figé rendrait toute correction impossible sans les renommer. Trente jours,
   et le service worker fait le reste.
 
-**La bascule du service worker à `mamakilo-v2` fait partie du changement.** Le
+**La bascule du service worker à `mamakilo-v3` fait partie du changement.** Le
 cache `mamakilo-v1-polices` contenait des réponses de `gstatic.com` qui n'étaient
 plus demandées, donc plus jamais remplacées : sans changement de version, chaque
 PWA déjà installée aurait gardé indéfiniment les fichiers du tiers dont on venait
@@ -950,14 +950,18 @@ Elle enchaîne, dans cet ordre de coût croissant :
 
 ```bash
 npm test                          # vitest run — 422 tests sur la logique pure
+node outils/marque.mjs            # sort en 1 si Marque et public/icone.svg divergent
 node outils/palettes.mjs --verifie # sort en 1 si un contraste échoue
 npm run build                     # tsc -b (src) && tsc -p tsconfig.api.json && vite build
 ```
 
-**Les trois étapes ne se remplacent pas.** Vitest exécute, il ne type-vérifie
+**Les quatre étapes ne se remplacent pas.** Vitest exécute, il ne type-vérifie
 pas : un objet de test au mauvais champ passe les tests et tombe au `tsc -b`.
 C'est arrivé le 01/08/2026, et c'est la raison pour laquelle `npm test` seul ne
-suffit jamais à conclure.
+suffit jamais à conclure. `node outils/marque.mjs` couvre une règle que rien
+d'autre ne vérifie : que le composant `Marque` et `public/icone.svg` portent
+toujours les mêmes tracés — jusqu'au 04/08/2026, elle ne se contrôlait qu'à la
+main.
 
 **Ne jamais appeler `charger()`, `enregistrer()`, `effacerDonnees()` ni
 `toutSupprimer()` depuis un test.** `supabase` n'est `null` qu'en l'absence de

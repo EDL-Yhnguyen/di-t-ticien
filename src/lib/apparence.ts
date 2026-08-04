@@ -63,7 +63,7 @@ export function enregistrerMode(mode: ModeApparence): void {
   try {
     localStorage.setItem(CLE_MODE, mode)
   } catch {
-    /* Navigation privée : le modo s'applique quand même, il ne survit pas. */
+    /* Navigation privée : le mode s'applique quand même, il ne survit pas. */
   }
 }
 

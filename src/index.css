@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 
-/* Faustina et Figtree, servies depuis notre domaine. Fichier généré : voir
+/* Fredoka et Inter, servies depuis notre domaine. Fichier généré : voir
    outils/polices.mjs, qui explique pourquoi elles ne viennent plus de Google —
    une police chargée depuis fonts.gstatic.com transmet l'adresse IP du visiteur
    à un destinataire que la politique de confidentialité ne déclare pas. */
@@ -16,10 +16,10 @@
 /* ─────────────────────────────────────────────────────────────
    Jetons qui ne changent pas avec le thème
 
-   Ceux-ci portent du sens, pas du goût : les redéfinir par thème
-   ferait dire autre chose à la même couleur d'un thème à l'autre.
-   Ils sont validés une fois, sur les fonds de tous les thèmes, par
-   outils/palettes.mjs.
+   Ceux-ci portent du sens, pas du goût : les redéfinir selon le mode
+   clair ou sombre ferait dire autre chose à la même couleur d'un
+   réglage d'affichage à l'autre. Ils sont validés une fois, sur les
+   fonds des deux modes, par outils/palettes.mjs.
    ───────────────────────────────────────────────────────────── */
 :root {
   /* Les trois parts de l'assiette forment une palette catégorielle : elles se
@@ -27,7 +27,7 @@
      Ces valeurs sont validées, pas choisies à l'œil — vert et orange voisins,
      le réflexe naturel, tombaient à ΔE 5,1 en protanopie (seuil : 8).
      Elles ne suivent pas le thème : la part des légumes doit rester la même
-     couleur que l'utilisateur choisisse « Agrumes » ou « Océan », sinon la
+     couleur que l'utilisateur soit en clair ou en sombre, sinon la
      légende apprise hier ne vaut plus rien aujourd'hui. */
   --assiette-legume: #1a6e3e;
   --assiette-feculent: #c97b14;
@@ -104,8 +104,8 @@
    Les ombres sont teintées du primaire du thème plutôt que grises :
    c'est ce qui fait qu'une carte a l'air posée sur la couleur du
    thème et non collée sur un fond blanc. `color-mix` les recalcule
-   toute seule quand le thème change — sans elle, il faudrait
-   écrire seize jeux d'ombres à la main.
+   toute seule quand le mode change — sans elle, il faudrait
+   écrire un jeu d'ombres à la main pour chaque mode.
    ───────────────────────────────────────────────────────────── */
 :root {
   --ombre-teinte: color-mix(in oklab, var(--primaire) 22%, transparent);

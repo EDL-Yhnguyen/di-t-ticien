@@ -206,8 +206,9 @@ function variante(sombre) {
   // ── L'accent vif ──────────────────────────────────────────────────────────
   // Le citron vert doit porter du texte à 4,5:1 sur fond clair, ce qu'aucun
   // jaune-vert vif n'atteint : `accent` ressort donc olive/sombre par
-  // construction (physique, pas un réglage à trouver — le même phénomène que
-  // le thème « Encre » documentait déjà). Le citron fluo attendu vit dans
+  // construction (physique, pas un réglage à trouver — le même phénomène
+  // qu'un accent vif forcé au sombre pour tenir le contraste du texte
+  // qu'il porte). Le citron fluo attendu vit dans
   // `accent-vif`, réservé aux aplats (Tuile ton="vif", le bandeau) où c'est le
   // texte qui doit être lisible sur la couleur, pas l'inverse.
   const { hue: ha, chroma: ca } = MARQUE.roles.accent
@@ -289,8 +290,8 @@ function verifier(sombre, j) {
   }
 
   // Les jetons réservés ne changent pas avec le thème, mais ils atterrissent sur
-  // ses fonds : c'est la seule chose que l'ajout de huit palettes pouvait casser
-  // dans une échelle déjà validée.
+  // ses fonds : c'est la seule chose qu'un jeu de couleurs de marque pouvait
+  // casser dans une échelle déjà validée.
   //
   // Ils se mesurent sur `surface` et `ground`, les fonds où un graphique est
   // réellement posé, et non sur `sunken`. Deux d'entre eux — le féculent de

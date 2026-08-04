@@ -45,9 +45,9 @@ jobs:
         run: npm test
 
       # Sort en 1 à la moindre paire de couleurs sous le seuil de contraste.
-      # Huit thèmes × deux modes : c'est la seule façon de tenir la règle « toute
-      # teinte modifiée se revérifie » à plus de six cents paires.
-      - name: Contrastes des huit thèmes
+      # Deux variantes, clair et sombre : c'est la seule façon de tenir la règle
+      # « toute teinte modifiée se revérifie » sans relire chaque paire à l'œil.
+      - name: Contrastes clair et sombre
         run: node outils/palettes.mjs --verifie
 
       # `tsc -b` sur src, `tsc -p tsconfig.api.json` sur les fonctions

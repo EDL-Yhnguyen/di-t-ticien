@@ -10,7 +10,7 @@
     "build": "tsc -b && tsc -p tsconfig.api.json && vite build",
     "test": "vitest run",
     "test:suivi": "vitest",
-    "verifier": "npm run test && node outils/palettes.mjs --verifie && npm run build",
+    "verifier": "npm run test && node outils/marque.mjs && node outils/palettes.mjs --verifie && npm run build",
     "preview": "vite preview",
     "marque": "node outils/marque.mjs",
     "partage": "node outils/partage.mjs"

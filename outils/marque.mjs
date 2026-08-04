@@ -12,7 +12,9 @@ import { readFileSync } from 'node:fs'
 const traces = (source) =>
   [...source.matchAll(/\sd="([^"]+)"/g)].map((m) => m[1].replace(/\s+/g, ' ').trim())
 
-// Extract only the Marque function content
+// `ui.tsx` porte aussi `SignatureMarque`, un second composant avec ses propres
+// tracés de SVG : sans borner la lecture à `Marque`, le contrôle croirait que
+// les tracés de la signature manquent dans public/icone.svg.
 const uiContent = readFileSync('src/components/ui.tsx', 'utf8')
 const marqueMatch = uiContent.match(/export function Marque\([^)]*\)\s*\{[\s\S]*?\n  \)[\s\S]*?\n\}/)
 const marqueContent = marqueMatch ? marqueMatch[0] : ''
