@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Rapatrie Faustina et Figtree depuis Google Fonts, une fois pour toutes.
+ * Rapatrie Fredoka et Inter depuis Google Fonts, une fois pour toutes.
  *
  * ## Pourquoi elles ne restent pas chez Google
  *
@@ -34,10 +34,10 @@
  *
  * ## Le droit de les héberger
  *
- * Faustina (Omnibus-Type) et Figtree (Erik Kennedy) sont toutes deux sous
- * **SIL Open Font License 1.1**, qui autorise explicitement la redistribution.
- * La licence est recopiée dans `public/polices/OFL-Faustina.txt` et
- * `public/polices/OFL-Figtree.txt` — c'est la contrepartie, et elle n'est pas
+ * Fredoka et Inter sont toutes deux sous **SIL Open Font License 1.1**, qui
+ * autorise explicitement la redistribution.
+ * La licence est recopiée dans `public/polices/OFL-Fredoka.txt` et
+ * `public/polices/OFL-Inter.txt` — c'est la contrepartie, et elle n'est pas
  * plus négociable que l'attribution des photos de Commons. Le script refuse de
  * réussir si elles manquent ou si leur contenu ne ressemble pas à l'OFL.
  *
@@ -70,7 +70,7 @@ const RACINE = join(dirname(fileURLToPath(import.meta.url)), '..')
 const DOSSIER = join(RACINE, 'public', 'polices')
 const FEUILLE = join(RACINE, 'src', 'polices.css')
 
-const REQUETE = 'https://fonts.googleapis.com/css2?family=Faustina:wght@400..700&family=Figtree:wght@400..900&display=swap'
+const REQUETE = 'https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Inter:wght@100..900&display=swap'
 
 /**
  * Google ne sert les `woff2` qu'aux navigateurs qui les acceptent : sans cet
@@ -159,7 +159,7 @@ async function principal() {
     '/*',
     ' * Fichier généré par outils/polices.mjs — ne pas éditer à la main.',
     ' *',
-    ' * Faustina et Figtree, servies depuis notre domaine plutôt que depuis Google :',
+    ' * Fredoka et Inter, servies depuis notre domaine plutôt que depuis Google :',
     ' * une police chargée depuis fonts.gstatic.com transmet l’adresse IP du visiteur',
     ' * à un tiers que la politique de confidentialité ne déclare pas, et fait dépendre',
     ' * le premier affichage d’une origine que rien n’a préchargée.',
@@ -186,7 +186,7 @@ async function principal() {
  * la bonne taille **et** qu'il porte les mentions de l'OFL.
  */
 async function controlerLicences() {
-  const attendues = ['OFL-Faustina.txt', 'OFL-Figtree.txt']
+  const attendues = ['OFL-Fredoka.txt', 'OFL-Inter.txt']
   const manquantes = []
 
   for (const nom of attendues) {
