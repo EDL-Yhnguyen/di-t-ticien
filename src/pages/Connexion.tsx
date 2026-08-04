@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { AlertCircle, X } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import { Bouton, Champ, Marque } from '../components/ui'
+import { Bouton, Champ, Marque, SignatureMarque } from '../components/ui'
 import { Lien } from '../lib/router'
 import { exigeEmailReel } from '../lib/auth'
 import { modeDemo } from '../lib/supabase'
@@ -54,7 +54,7 @@ export function Connexion({ mode }: { mode: 'connexion' | 'inscription' }) {
 
         <Lien vers="/" className="mb-8 flex items-center justify-center gap-2.5">
           <Marque taille={40} />
-          <span className="font-display text-2xl font-semibold text-ink">Mamakilo</span>
+          <SignatureMarque className="text-2xl" />
         </Lien>
 
         <div className="rounded-card border border-line bg-surface p-6 shadow-soft sm:p-7">

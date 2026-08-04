@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { Gamepad2, LineChart, NotebookText, ShieldHalf } from 'lucide-react'
 import { Assiette, type PartAssiette } from '../components/Assiette'
 import { Parrainage } from '../components/Parrainage'
-import { Bouton, Marque } from '../components/ui'
+import { Bouton, Marque, SignatureMarque } from '../components/ui'
 import { Lien } from '../lib/router'
 
 /**
@@ -71,7 +71,7 @@ export function Accueil() {
       <header className="mx-auto flex max-w-5xl items-center justify-between px-5 py-5">
         <span className="flex items-center gap-2.5">
           <Marque taille={36} />
-          <span className="font-display text-xl font-semibold text-ink">Mamakilo</span>
+          <SignatureMarque className="text-xl" />
         </span>
         <Lien vers="/connexion" className="font-semibold text-primaire">
           Se connecter
@@ -89,8 +89,8 @@ export function Accueil() {
                 présence sans repousser le bouton sous le pli en 390 px. */}
             <div className="flex items-center gap-4 sm:gap-5">
               <Marque taille={96} className="size-16 sm:size-24" />
-              <h1 className="font-display text-[2.6rem] leading-[1.05] font-semibold text-ink sm:text-6xl">
-                Mamakilo
+              <h1>
+                <SignatureMarque className="text-[2.6rem] leading-[1.05] sm:text-6xl" />
               </h1>
             </div>
             <p className="mt-5 max-w-md text-lg leading-relaxed text-ink-soft">
