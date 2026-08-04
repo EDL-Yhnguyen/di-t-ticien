@@ -432,12 +432,12 @@ export function Profil() {
       </section>
 
       <section>
-        <TitreSection eyebrow="Apparence">Vos couleurs</TitreSection>
+        <TitreSection eyebrow="Apparence">Luminosité</TitreSection>
         <Carte className="p-5">
           <ReglageApparence />
           <p className="mt-5 border-t border-line pt-4 text-xs text-ink-faint">
             Le choix est mémorisé sur cet appareil, pas dans votre compte : l’écran d’un téléphone
-            le soir n’appelle pas le même thème que celui d’un ordinateur en plein jour.
+            le soir n’appelle pas le même réglage que celui d’un ordinateur en plein jour.
           </p>
         </Carte>
       </section>
