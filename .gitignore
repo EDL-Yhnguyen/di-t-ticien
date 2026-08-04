@@ -16,3 +16,6 @@ public/ocr
 .vercel
 .DS_Store
 *.log
+
+# Compagnon visuel de brainstorming (maquettes de travail, non versionnées)
+.superpowers/
