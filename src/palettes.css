@@ -2,395 +2,56 @@
    FICHIER GÉNÉRÉ — ne pas modifier à la main.
    Source : outils/palettes.mjs · régénérer avec « node outils/palettes.mjs ».
 
-   Huit thèmes, chacun en variante claire et sombre. Chaque valeur a été
-   calculée pour atteindre son rapport de contraste sur le pire fond du thème,
-   lavis compris, puis mesurée. Retoucher une couleur ici la ferait sortir de
-   cette garantie sans que rien ne le signale.
-
-   Le thème « marmite » est le défaut : il vit dans :root, sans attribut, pour
-   qu'un premier chargement n'attende pas le JavaScript.
+   Le jeu de couleurs de marque de Mamakilo, calculé pour atteindre son
+   rapport de contraste sur le pire fond, lavis compris, puis mesuré.
+   Retoucher une couleur ici la ferait sortir de cette garantie sans que rien
+   ne le signale.
    ───────────────────────────────────────────────────────────────────────── */
 
-/* Marmite — clair. Le corail du logo, sur crème. */
+/* Mamakilo — clair */
 :root {
-  --ground: #fdf6ee;
+  --ground: #fdf4ed;
   --surface: #ffffff;
-  --sunken: #f8f0e6;
-  --ink: #232d3a;
-  --ink-soft: #5b6675;
+  --sunken: #fcede1;
+  --ink: #44525a;
+  --ink-soft: #5f6e76;
   --ink-faint: #616f78;
-  --line: #e8dccd;
+  --line: #eedaca;
   --line-fort: #938375;
-  --primaire: #c33f22;
-  --primaire-wash: #fff1ec;
-  --accent: #a85908;
-  --accent-wash: #fdefe3;
-  --accent-vif: #feba7e;
-  --accent-vif-encre: #694f38;
-  --reussite: #3e7a3f;
-  --reussite-wash: #eaf6e6;
-  --alerte: #bd2b62;
-  --alerte-wash: #fde3ec;
-  --bandeau-haut: #c33f22;
-  --bandeau-bas: #a33018;
+  --primaire: #ca3709;
+  --primaire-wash: #ffebe6;
+  --accent: #7c6d01;
+  --accent-wash: #f7f2cd;
+  --accent-vif: #e5cc0c;
+  --accent-vif-encre: #5d5736;
+  --reussite: #107c5e;
+  --reussite-wash: #d8f9eb;
+  --alerte: #bb368d;
+  --alerte-wash: #ffe9f4;
+  --bandeau-haut: #ba2e00;
+  --bandeau-bas: #7f1f05;
 }
 
-/* Marmite — sombre */
+/* Mamakilo — sombre */
 .dark {
-  --ground: #171d26;
-  --surface: #1f2733;
-  --sunken: #28323f;
-  --ink: #f2f0ec;
-  --ink-soft: #b3bcc7;
+  --ground: #1c1611;
+  --surface: #28211c;
+  --sunken: #37302a;
+  --ink: #b1c1ca;
+  --ink-soft: #8d9da5;
   --ink-faint: #8b9ba3;
-  --line: #33404f;
-  --line-fort: #7c6d5f;
-  --primaire: #ff8f74;
-  --primaire-wash: #3a2019;
-  --accent: #f5a03f;
-  --accent-wash: #3d2a13;
-  --accent-vif: #fe9d39;
-  --accent-vif-encre: #5b412b;
-  --reussite: #6fc46f;
-  --reussite-wash: #1b2f1c;
-  --alerte: #f57fa8;
-  --alerte-wash: #3b1725;
-  --bandeau-haut: #8f3a22;
-  --bandeau-bas: #5e2312;
-}
-
-/* Potager — clair. Vert feuille et jeunes pousses. */
-[data-theme='potager'] {
-  --ground: #f1f9ef;
-  --surface: #ffffff;
-  --sunken: #e7f5e5;
-  --ink: #485445;
-  --ink-soft: #647061;
-  --ink-faint: #657162;
-  --line: #d2e4ce;
-  --line-fort: #7c8b79;
-  --primaire: #0f7e41;
-  --primaire-wash: #dbf9e2;
-  --accent: #747100;
-  --accent-wash: #f3f3ce;
-  --accent-vif: #d7d206;
-  --accent-vif-encre: #595938;
-  --reussite: #027d5f;
-  --reussite-wash: #d8f9eb;
-  --alerte: #cb313d;
-  --alerte-wash: #ffebe9;
-  --bandeau-haut: #017238;
-  --bandeau-bas: #054d25;
-}
-
-/* Potager — sombre */
-[data-theme='potager'].dark {
-  --ground: #131912;
-  --surface: #1f251d;
-  --sunken: #2d342c;
-  --ink: #b5c4b2;
-  --ink-soft: #919f8e;
-  --ink-faint: #909d8c;
-  --line: #374035;
-  --line-fort: #62715f;
-  --primaire: #39ae64;
-  --primaire-wash: #032811;
-  --accent: #a19e15;
-  --accent-wash: #232200;
-  --accent-vif: #c2be0d;
-  --accent-vif-encre: #4c4b2b;
-  --reussite: #1bae85;
-  --reussite-wash: #00281c;
-  --alerte: #fe686b;
-  --alerte-wash: #381313;
-  --bandeau-haut: #015629;
-  --bandeau-bas: #003617;
-}
-
-/* Agrumes — clair. Orange sanguine et citron. */
-[data-theme='agrumes'] {
-  --ground: #fef5e4;
-  --surface: #ffffff;
-  --sunken: #fdeed4;
-  --ink: #5d4e35;
-  --ink-soft: #796a50;
-  --ink-faint: #7a6b51;
-  --line: #f0dbb7;
-  --line-fort: #958465;
-  --primaire: #b35008;
-  --primaire-wash: #ffece3;
-  --accent: #916506;
-  --accent-wash: #feeed5;
-  --accent-vif: #ffbd4b;
-  --accent-vif-encre: #645235;
-  --reussite: #1e7d3e;
-  --reussite-wash: #dff8e3;
-  --alerte: #ca2f55;
-  --alerte-wash: #ffeaec;
-  --bandeau-haut: #a2490a;
-  --bandeau-bas: #703003;
-}
-
-/* Agrumes — sombre */
-[data-theme='agrumes'].dark {
-  --ground: #1d160a;
-  --surface: #292215;
-  --sunken: #383124;
-  --ink: #cebea1;
-  --ink-soft: #a8997d;
-  --ink-faint: #a7977b;
-  --line: #463c29;
-  --line-fort: #7b6a4c;
-  --primaire: #f4741d;
-  --primaire-wash: #371603;
-  --accent: #ca8e09;
-  --accent-wash: #2e1d00;
-  --accent-vif: #eea812;
-  --accent-vif-encre: #574428;
-  --reussite: #52ab68;
-  --reussite-wash: #092712;
-  --alerte: #ff6380;
-  --alerte-wash: #381219;
-  --bandeau-haut: #7d3500;
-  --bandeau-bas: #501f00;
-}
-
-/* Myrtille — clair. Violet profond et fruits noirs. */
-[data-theme='myrtille'] {
-  --ground: #f7f4fe;
-  --surface: #ffffff;
-  --sunken: #f2edfd;
-  --ink: #524e5d;
-  --ink-soft: #6f6979;
-  --ink-faint: #706a7a;
-  --line: #e1daf0;
-  --line-fort: #888395;
-  --primaire: #8650cf;
-  --primaire-wash: #f2edff;
-  --accent: #ad3ea7;
-  --accent-wash: #ffe8fc;
-  --accent-vif: #ffa7f7;
-  --accent-vif-encre: #644961;
-  --reussite: #0a7d52;
-  --reussite-wash: #dbf9e7;
-  --alerte: #cb3143;
-  --alerte-wash: #ffebea;
-  --bandeau-haut: #7c44c4;
-  --bandeau-bas: #581f96;
-}
-
-/* Myrtille — sombre */
-[data-theme='myrtille'].dark {
-  --ground: #18161d;
-  --surface: #242129;
-  --sunken: #323038;
-  --ink: #c1bccd;
-  --ink-soft: #9d98a8;
-  --ink-faint: #9b96a6;
-  --line: #3f3b46;
-  --line-fort: #6f697a;
-  --primaire: #b07ffd;
-  --primaire-wash: #251938;
-  --accent: #de6dd7;
-  --accent-wash: #30142e;
-  --accent-vif: #fe7ff5;
-  --accent-vif-encre: #543b52;
-  --reussite: #37ac78;
-  --reussite-wash: #012817;
-  --alerte: #fc676e;
-  --alerte-wash: #381314;
-  --bandeau-haut: #6224a5;
-  --bandeau-bas: #410275;
-}
-
-/* Océan — clair. Bleu marine et eau claire. */
-[data-theme='ocean'] {
-  --ground: #edf8ff;
-  --surface: #ffffff;
-  --sunken: #e1f3ff;
-  --ink: #41535e;
-  --ink-soft: #5c6f7a;
-  --ink-faint: #5e707c;
-  --line: #c9e2f2;
-  --line-fort: #748a97;
-  --primaire: #0171bd;
-  --primaire-wash: #e5f2ff;
-  --accent: #0e7987;
-  --accent-wash: #d4f8fe;
-  --accent-vif: #13e3fe;
-  --accent-vif-encre: #345f67;
-  --reussite: #027d5f;
-  --reussite-wash: #d8f9eb;
-  --alerte: #ca2f55;
-  --alerte-wash: #ffeaec;
-  --bandeau-haut: #0466aa;
-  --bandeau-bas: #004575;
-}
-
-/* Océan — sombre */
-[data-theme='ocean'].dark {
-  --ground: #10181d;
-  --surface: #1b242a;
-  --sunken: #2a3339;
-  --ink: #aec2cf;
-  --ink-soft: #8a9eaa;
-  --ink-faint: #889ca8;
-  --line: #323f47;
-  --line-fort: #5a6f7c;
-  --primaire: #259efb;
-  --primaire-wash: #04223b;
-  --accent: #15a8bb;
-  --accent-wash: #01262b;
-  --accent-vif: #17cee6;
-  --accent-vif-encre: #26525a;
+  --line: #453b33;
+  --line-fort: #78695c;
+  --primaire: #fe6944;
+  --primaire-wash: #38140b;
+  --accent: #ab9916;
+  --accent-wash: #262100;
+  --accent-vif: #d0b811;
+  --accent-vif-encre: #4f4929;
   --reussite: #19ad84;
   --reussite-wash: #00281c;
-  --alerte: #ff6380;
-  --alerte-wash: #381219;
-  --bandeau-haut: #034d82;
-  --bandeau-bas: #013053;
-}
-
-/* Cacao — clair. Chocolat, caramel et noisette. */
-[data-theme='cacao'] {
-  --ground: #fff4ec;
-  --surface: #ffffff;
-  --sunken: #ffecdf;
-  --ink: #614c3e;
-  --ink-soft: #7d6758;
-  --ink-faint: #7e695a;
-  --line: #f5d8c2;
-  --line-fort: #99816f;
-  --primaire: #ae522c;
-  --primaire-wash: #ffece4;
-  --accent: #be433e;
-  --accent-wash: #ffebe8;
-  --accent-vif: #feb5ad;
-  --accent-vif-encre: #6f4a47;
-  --reussite: #447930;
-  --reussite-wash: #e5f6df;
-  --alerte: #c73068;
-  --alerte-wash: #ffeaee;
-  --bandeau-haut: #a24822;
-  --bandeau-bas: #762901;
-}
-
-/* Cacao — sombre */
-[data-theme='cacao'].dark {
-  --ground: #1e150e;
-  --surface: #2a2119;
-  --sunken: #3a2f28;
-  --ink: #d2baa9;
-  --ink-soft: #ac9685;
-  --ink-faint: #ab9483;
-  --line: #493a2f;
-  --line-fort: #7f6856;
-  --primaire: #de7f58;
-  --primaire-wash: #35160a;
-  --accent: #f17168;
-  --accent-wash: #381311;
-  --accent-vif: #fd978d;
-  --accent-vif-encre: #5f3d39;
-  --reussite: #6fa65b;
-  --reussite-wash: #14260d;
-  --alerte: #fb6392;
-  --alerte-wash: #37121d;
-  --bandeau-haut: #822f03;
-  --bandeau-bas: #541b01;
-}
-
-/* Framboise — clair. Rose vif et fruits rouges. */
-[data-theme='framboise'] {
-  --ground: #fff2f7;
-  --surface: #ffffff;
-  --sunken: #ffeaf2;
-  --ink: #5e4b53;
-  --ink-soft: #7b666f;
-  --ink-faint: #7c6770;
-  --line: #f2d5e0;
-  --line-fort: #967f88;
-  --primaire: #c43274;
-  --primaire-wash: #ffeaf0;
-  --accent: #c33e35;
-  --accent-wash: #ffebe8;
-  --accent-vif: #fdb6ac;
-  --accent-vif-encre: #6e4b46;
-  --reussite: #087d4e;
-  --reussite-wash: #dbf9e6;
-  --alerte: #b33b9d;
-  --alerte-wash: #ffe8f8;
-  --bandeau-haut: #b8246a;
-  --bandeau-bas: #830747;
-}
-
-/* Framboise — sombre */
-[data-theme='framboise'].dark {
-  --ground: #1d1418;
-  --surface: #292024;
-  --sunken: #382e32;
-  --ink: #ceb8c1;
-  --ink-soft: #a9949c;
-  --ink-faint: #a8929a;
-  --line: #47383e;
-  --line-fort: #7c666f;
-  --primaire: #f7639f;
-  --primaire-wash: #361220;
-  --accent: #f56d5f;
-  --accent-wash: #38130f;
-  --accent-vif: #fe9689;
-  --accent-vif-encre: #5f3c38;
-  --reussite: #3cab74;
-  --reussite-wash: #022816;
-  --alerte: #e56acb;
-  --alerte-wash: #32142b;
-  --bandeau-haut: #930150;
-  --bandeau-bas: #5f0031;
-}
-
-/* Encre — clair. Presque noir et blanc, un accent citron. */
-[data-theme='encre'] {
-  --ground: #fcfdff;
-  --surface: #ffffff;
-  --sunken: #ebf1f6;
-  --ink: #454a50;
-  --ink-soft: #60656b;
-  --ink-faint: #61666c;
-  --line: #d8dfe7;
-  --line-fort: #81878d;
-  --primaire: #304255;
-  --primaire-wash: #eaf1f8;
-  --accent: #816c06;
-  --accent-wash: #faf1cb;
-  --accent-vif: #ecc916;
-  --accent-vif-encre: #5f5636;
-  --reussite: #157e42;
-  --reussite-wash: #def8e4;
-  --alerte: #cb3048;
-  --alerte-wash: #ffebea;
-  --bandeau-haut: #526579;
-  --bandeau-bas: #334456;
-}
-
-/* Encre — sombre */
-[data-theme='encre'].dark {
-  --ground: #0a0c0f;
-  --surface: #171a1c;
-  --sunken: #27292c;
-  --ink: #b9bfc5;
-  --ink-soft: #959ba0;
-  --ink-faint: #93999e;
-  --line: #3a3e41;
-  --line-fort: #60666c;
-  --primaire: #b8cee5;
-  --primaire-wash: #1a2128;
-  --accent: #a78e02;
-  --accent-wash: #282000;
-  --accent-vif: #d5b618;
-  --accent-vif-encre: #514929;
-  --reussite: #42a162;
-  --reussite-wash: #072813;
-  --alerte: #f45969;
-  --alerte-wash: #381215;
-  --bandeau-haut: #3a4c5f;
-  --bandeau-bas: #1f2f40;
+  --alerte: #ee67ba;
+  --alerte-wash: #341327;
+  --bandeau-haut: #8e2201;
+  --bandeau-bas: #5c1200;
 }
