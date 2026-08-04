@@ -40,8 +40,10 @@ mot « mamakilo » en dessous, utilisée sur les surfaces qui présentent la
 marque en entier (accueil public, écran de connexion, à-propos) plutôt que
 partout où l'icône seule suffit (barre de navigation, favicon) :
 
-- Mot « mamakilo » en encre marine (`#24303C`, la teinte déjà utilisée dans
-  le tracé du visage de la marmite — aucune couleur nouvelle introduite ici).
+- Mot « mamakilo » en encre marine — le jeton `--ink` calculé par
+  `outils/palettes.mjs` (même famille de teinte que le `#24303C` du visage de
+  la marmite, hue 232), et non ce hex figé : un texte fixe casserait le
+  contraste en mode sombre, où `--ink` doit être clair pour rester lisible.
 - Un petit cœur remplace le point du « i », dessiné en trait plein (pas le
   caractère `♥` utilisé dans les maquettes de travail).
 - Typographie de la signature : **Fredoka**, la même police que les titres
