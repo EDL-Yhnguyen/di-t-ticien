@@ -12,10 +12,10 @@ const racine = document.getElementById('root')
 if (!racine) throw new Error('Élément #root introuvable')
 
 /*
-  Le script d'index.html a déjà posé la classe et l'attribut avant le premier
-  rendu — c'est lui qui évite le flash. Cet appel-ci complète ce qu'il ne peut
-  pas faire : mettre la barre du navigateur à la couleur du thème, ce qui demande
-  de lire les variables CSS une fois la feuille de style chargée.
+  Le script d'index.html a déjà posé la classe avant le premier rendu — c'est
+  lui qui évite le flash. Cet appel-ci complète ce qu'il ne peut pas faire :
+  mettre la barre du navigateur à la couleur du thème, ce qui demande de lire
+  les variables CSS une fois la feuille de style chargée.
 
   L'écoute du réglage système vit ici et non dans l'écran des réglages : quelqu'un
   qui laisse « Système » et n'ouvre jamais son profil doit voir l'application
