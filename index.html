@@ -8,10 +8,9 @@
       name="description"
       content="Notez ce que vous mangez, suivez votre poids et vos envies de grignotage. Une mosaïque qui se remplit, pas un compteur qui culpabilise."
     />
-    <!-- Une seule balise, mise à jour par appliquerApparence() : avec huit thèmes,
-         deux valeurs figées par préférence système afficheraient la barre du
-         navigateur en crème pendant que l'application est en violet. -->
-    <meta name="theme-color" content="#FDF6EE" />
+    <!-- Valeur de repli avant que appliquerApparence() ne la corrige selon le
+         mode clair/sombre réel — voir le script anti-flash plus bas. -->
+    <meta name="theme-color" content="#fdf4ed" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/icone.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/icone-180.png" />
@@ -35,16 +34,10 @@
          se téléchargent que si un caractère les appelle, ce que gèrent les
          unicode-range de src/polices.css ; les précharger ferait payer 34 Ko à
          tout le monde pour des lettres que le français n'emploie pas. -->
+    <link rel="preload" href="/polices/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
     <link
       rel="preload"
-      href="/polices/figtree-latin.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <link
-      rel="preload"
-      href="/polices/faustina-latin.woff2"
+      href="/polices/fredoka-latin.woff2"
       as="font"
       type="font/woff2"
       crossorigin
@@ -52,12 +45,12 @@
   </head>
   <body>
     <div id="root"></div>
-    <!-- Appliqué avant le premier rendu : sans ça, un thème sombre ou coloré
-         choisi dans les réglages provoque un flash de l'autre thème au
-         chargement. Ces quelques lignes sont volontairement dupliquées avec
+    <!-- Appliqué avant le premier rendu : sans ça, un mode sombre choisi dans
+         les réglages provoque un flash du mode clair au chargement. Ces
+         quelques lignes sont volontairement dupliquées avec
          src/lib/apparence.ts : elles doivent tourner avant le premier octet de
-         JavaScript applicatif, donc elles ne peuvent pas l'importer. Les noms des
-         deux clés et la liste des thèmes sont la seule chose à garder d'accord. -->
+         JavaScript applicatif, donc elles ne peuvent pas l'importer. Le nom de
+         la clé est la seule chose à garder d'accord. -->
     <script>
       ;(function () {
         try {
@@ -66,20 +59,6 @@
             mode === 'sombre' ||
             (mode !== 'clair' && matchMedia('(prefers-color-scheme: dark)').matches)
           if (sombre) document.documentElement.classList.add('dark')
-
-          var theme = localStorage.getItem('equilibre:palette')
-          var connus = [
-            'potager',
-            'agrumes',
-            'myrtille',
-            'ocean',
-            'cacao',
-            'framboise',
-            'encre',
-          ]
-          // « marmite » est le défaut et vit dans :root, sans attribut.
-          if (theme && connus.indexOf(theme) !== -1)
-            document.documentElement.setAttribute('data-theme', theme)
         } catch (e) {}
       })()
     </script>

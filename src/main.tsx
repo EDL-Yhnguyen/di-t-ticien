@@ -5,12 +5,7 @@ import { App } from './App'
 import { BarriereErreur } from './components/BarriereErreur'
 import { FournisseurApp } from './context/AppContext'
 import { FournisseurRoutage } from './lib/router'
-import {
-  appliquerApparence,
-  modeEnregistre,
-  surChangementSysteme,
-  themeEnregistre,
-} from './lib/apparence'
+import { appliquerApparence, modeEnregistre, surChangementSysteme } from './lib/apparence'
 import './index.css'
 
 const racine = document.getElementById('root')
@@ -26,8 +21,8 @@ if (!racine) throw new Error('Élément #root introuvable')
   qui laisse « Système » et n'ouvre jamais son profil doit voir l'application
   basculer le soir comme le reste de son téléphone.
 */
-appliquerApparence(themeEnregistre(), modeEnregistre())
-surChangementSysteme(() => appliquerApparence(themeEnregistre(), modeEnregistre()))
+appliquerApparence(modeEnregistre())
+surChangementSysteme(() => appliquerApparence(modeEnregistre()))
 
 createRoot(racine).render(
   <StrictMode>
