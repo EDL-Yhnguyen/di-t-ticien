@@ -308,13 +308,20 @@ Utilitaire de classes : `classes(...)` dans `src/lib/utils.ts`.
 
 ### Jetons de couleur — `src/index.css` et `src/palettes.css`
 
-Deux réglages indépendants qui se combinent : le **mode** (clair / sombre /
-système) est une classe `.dark` sur `<html>`, le **thème de couleur** est un
-attribut `data-theme`. Huit thèmes × deux modes.
+**Un seul réglage depuis le 4 août 2026 : le mode (clair / sombre / système),**
+une classe `.dark` sur `<html>`. Le second réglage qui existait à côté — le
+*thème de couleur*, huit thèmes choisis par attribut `data-theme` — a disparu :
+l'application porte désormais un unique jeu de couleurs de marque, le même pour
+tout le monde. C'est un changement de doctrine autant que de code : le thème de
+couleur répondait à « quelle couleur j'aime », alors que le mode répond à
+« combien de lumière je veux ce soir » — deux questions dont une seule a encore
+sa place dans les réglages de Mamakilo. La clé `localStorage`
+`equilibre:palette` que les comptes existants portent encore n'est plus lue ;
+elle ne casse rien, elle ne fait plus rien.
 
 **`src/palettes.css` est un fichier généré — ne jamais l'éditer à la main.**
-Il sort d'`outils/palettes.mjs`, qui tient les seize variantes et vérifie leurs
-contrastes :
+Il sort d'`outils/palettes.mjs`, qui tenait seize variantes (huit thèmes × deux
+modes) et n'en tient plus que **deux** — `:root` et `.dark` :
 
 ```bash
 node outils/palettes.mjs            # régénère palettes.css et affiche le rapport
@@ -322,47 +329,46 @@ node outils/palettes.mjs --verifie  # n'écrit rien, sort en 1 si un contraste �
 ```
 
 Le générateur existe parce que la règle « toute teinte modifiée se revérifie au
-calcul de contraste » représentait une relecture à un thème, et plus de six cents
-paires à huit thèmes en clair et en sombre. Une règle de cette taille ne tient
-que si elle est exécutable. **Le lancer avant de commiter une modification de
-couleur.**
+calcul de contraste » représentait déjà, à deux variantes, une relecture sur
+chacun des quatre fonds où une teinte peut atterrir. Elle en représentait plus
+de six cents à huit thèmes. Une règle de cette taille ne tient que si elle est
+exécutable, et elle reste exécutable même réduite à deux variantes. **Le lancer
+avant de commiter une modification de couleur.**
 
-Le thème par défaut, **Marmite**, occupe `:root` et `.dark` : l'application a ses
-couleurs sans qu'aucun attribut soit posé. Il est tiré du logo Mamakilo
-(`Modèles/logo Mamakilo.jpg`) : marmite corail, fond crème, encre marine du
-lettrage, vert des feuilles. **Aucune couleur du logo n'est reprise telle
-quelle** — le corail `#f67a5e` ne tient que 2,4:1 sur blanc, donc ni texte ni
-bouton. Il reste à l'illustration ; `--corail` en est la version portante,
-assombrie jusqu'à 4,5:1 dans chacun de ses usages. Les deux se ressemblent assez
-pour que la marque reste une seule couleur à l'œil.
-
-Les sept autres — Potager, Agrumes, Myrtille, Océan, Cacao, Framboise, Encre —
-vivent sous `[data-theme=…]`. Ajouter un thème demande de le déclarer **dans le
-générateur et dans `THEMES` de `src/lib/apparence.ts`** : les trois couleurs de
-la vignette de choix y sont recopiées en dur, parce qu'une vignette doit montrer
-son thème pendant qu'un autre est appliqué, donc elle ne peut pas lire les
-variables CSS courantes.
+Le jeu de couleurs occupe `:root` et `.dark` : l'application a ses couleurs sans
+qu'aucun attribut soit posé. Quatre rôles, chacun tiré d'une teinte OKLCH
+choisie pour ce qu'elle évoque plutôt que pour coller au logo au pixel près —
+**orange sanguine** (`primaire`), **citron vert** (`accent`, la teinte des
+calories), **menthe** (`reussite`) et **rose radis** (`alerte`). Le fond varie
+de la crème (`ground` clair `#fdf4ed`) à un brun presque noir (`ground` sombre
+`#1c1611`) ; `primaire` passe de `#ca3709` en clair à `#fe6944` en sombre, les
+deux à 4,52:1 sur leur fond — la même discipline qu'avant : **aucune couleur du
+logo n'est reprise telle quelle**, chacune est la teinte la plus vive que le
+contraste autorise sur son pire fond, pas un compromis choisi à l'œil.
 
 - Neutres : `ground`, `surface`, `sunken`, `ink`, `ink-soft`, `ink-faint`, `line`,
   `line-fort`
 - **Teintes nommées par leur rôle, plus par leur couleur** : `primaire`,
   `accent` (calories), `reussite`, `alerte`, chacune avec son lavis `-wash`.
-  C'est le renommage qui a rendu les huit thèmes possibles : `corail`, `apricot`,
-  `basil` et `berry` décrivaient une teinte, et un jeton nommé « corail » qui
-  vaut du bleu en thème Océan ment à celui qui le lit. Les anciens noms ne
-  subsistent nulle part dans `src/` — ne pas les réintroduire.
+  C'est le renommage, fait à l'époque des huit thèmes, qui rend le jeu de
+  couleurs de marque lisible aujourd'hui : un jeton nommé d'après une couleur
+  plutôt que son rôle mentirait le jour où la teinte change. Les anciens noms
+  (`corail`, `apricot`, `basil`, `berry`) ne subsistent nulle part dans `src/` —
+  ne pas les réintroduire.
 - Aplats : `.plein-primaire`, `.plein-accent`, `.plein-reussite`,
   `.plein-alerte` (fond porteur + texte blanc), et `.shadow-halo`
 - **Toute teinte modifiée se revérifie au calcul de contraste**, sur les quatre
   fonds où elle peut atterrir : `surface`, `ground`, `sunken` et son propre lavis.
   Le fond crème est moins clair que le blanc — une valeur qui passe sur `surface`
   peut échouer sur `ground`, ce qui est arrivé au premier jet.
-- **Les jetons de données ne suivent pas le thème**, et c'est la règle centrale
-  du système : `assiette-*`, `nutri-*`, `macro-*`, `bande-*` portent du sens, pas
-  du goût. La part des légumes doit rester la même couleur que l'utilisateur
-  choisisse « Agrumes » ou « Océan », sinon la légende apprise hier ne vaut plus
-  rien aujourd'hui. Ils sont déclarés une fois dans `index.css` et validés sur
-  les fonds de **tous** les thèmes.
+- **Les jetons de données ne suivent pas la marque**, et c'est la règle qui a
+  survécu à la disparition des huit thèmes : `assiette-*`, `nutri-*`, `macro-*`,
+  `bande-*` portent du sens, pas du goût. La part des légumes reste la même
+  couleur quel que soit le reste de l'écran, sinon la légende apprise hier ne
+  vaut plus rien aujourd'hui — c'était déjà vrai à huit thèmes, ça reste vrai à
+  un seul. Ils sont déclarés dans `index.css`, une fois par mode (`:root` pour
+  le clair, `.dark` pour le sombre — pas par thème, il n'y en a plus qu'un), et
+  chaque paire s'y revalide au calcul de contraste.
 - **Réservés, ne pas emprunter** : `assiette-legume`, `assiette-feculent`,
   `assiette-proteine`. Palette catégorielle validée en vision daltonienne
   (ΔE ≥ 8 en protanopie) — les trois parts se touchent, donc chaque paire doit
@@ -370,11 +376,11 @@ variables CSS courantes.
   ΔE 5,1 en protanopie. **Les modifier demande de revérifier au script.**
 - Réservés au bandeau (texte blanc dessus) : `bandeau-haut`, `bandeau-bas`
 - Rayons : `rounded-card` (1.5rem), `rounded-tile` (1rem)
-- Polices : `--font-display` (Faustina, d'office sur h1/h2/h3), `--font-sans` (Figtree)
+- Polices : `--font-display` (Fredoka, d'office sur h1/h2/h3), `--font-sans` (Inter)
 
 ### Les polices — `outils/polices.mjs` et `public/polices/`
 
-**Faustina et Figtree sont servies depuis notre domaine, et elles doivent le
+**Fredoka et Inter sont servies depuis notre domaine, et elles doivent le
 rester.** Elles venaient de `fonts.googleapis.com` jusqu'au 31/07/2026 ; les
 rapatrier a réglé trois choses d'un coup, dont une qui n'était pas négociable :
 
@@ -937,7 +943,7 @@ nouveau.
 **Une commande, et c'est celle-là :**
 
 ```bash
-npm run verifier   # tests, contrastes des 8 thèmes, typecheck src + api, build
+npm run verifier   # tests, contrastes clair/sombre, typecheck src + api, build
 ```
 
 Elle enchaîne, dans cet ordre de coût croissant :
@@ -1088,6 +1094,74 @@ pas — `src/lib/peremption.test.ts`, dernier bloc.
 ---
 
 ## Historique du projet
+
+### 4 août 2026 — Refonte de l'identité visuelle
+
+Nouveau jeu de couleurs de marque (orange sanguine, citron vert, menthe, rose
+radis), remplaçant les huit thèmes sélectionnables — un seul réglage reste :
+clair / sombre / système. `outils/palettes.mjs` ne génère plus que deux
+variantes au lieu de seize. Mesuré au générateur : fond `#fdf4ed` en clair et
+`#1c1611` en sombre, `--primaire` à `#ca3709` en clair et `#fe6944` en sombre,
+les deux à 4,52:1 — le seuil, pas une marge de confort. Typographie Fredoka
+(titres) et Inter (texte courant), remplaçant Faustina/Figtree, toujours
+servies depuis notre domaine pour les mêmes raisons RGPD et hors-ligne que le
+31/07/2026. Service worker passé à `mamakilo-v3` pour renouveler le cache des
+polices chez les PWA déjà installées.
+
+**La marmite (`public/icone.svg`) et le composant `Marque` restent strictement
+inchangés** — Yann a tranché après avoir vu 24 pistes de logo alternatives :
+aucune ne valait l'original. Une signature de marque s'ajoute à côté (le mot
+« mamakilo » avec un cœur sur le i, composant `SignatureMarque`), sur
+l'accueil, la connexion et le mot de passe oublié.
+
+**D'où vient le nom, pour la première fois noté ici : c'est ainsi que le fils
+de Yann appelle sa mère.** Ce n'est pas un jeu de mots marketing — la première
+direction de logo (géométrique, abstraite) a été refusée pour cette raison
+précise. Toute décision de ton ou de marque sur ce projet s'y réfère
+désormais.
+
+**Un défaut d'accessibilité trouvé après la livraison initiale de
+`SignatureMarque` : le nom accessible calculé valait « mamaklo », sans le i.**
+Le cœur qui remplace visuellement le point du i vit dans un SVG marqué
+`aria-hidden` — un lecteur d'écran assemblait donc « mamak » + (rien) + « lo ».
+Corrigé en encapsulant tout le contenu visuel (texte et SVG) dans un `<span
+aria-hidden="true">` interne, et en portant `aria-label="mamakilo"` sur le
+`<span>` englobant : la présentation visuelle et le nom accessible sont
+désormais deux chemins séparés plutôt qu'un seul texte partiellement masqué.
+
+**Un défaut de contraste latent, découvert en écrivant le plan et non en
+codant** : la maquette de la signature de marque prévoyait le mot en
+`#24303C` fixe (la teinte du visage de la marmite) — illisible en mode sombre,
+où `--ink` calculé vaut `#b1c1ca`. `SignatureMarque` utilise `text-ink`, pas
+une couleur figée.
+
+**Vérifié** : `npm run verifier` passe intégralement (422/422 tests, 0 échec de
+contraste — les deux seuls avertissements portent sur des fonds réservés
+jamais utilisés en pratique) ; `npm ci && npm run build` sur une copie propre
+ne signale aucune dérive de lockfile, avec des noms de fichiers `dist/assets/`
+strictement identiques à ceux du build précédent. Les 23 écrans de
+l'application ont été balayés un par un (console ouverte) : aucune erreur,
+aucune régression visuelle attribuable à ce chantier. Deux observations
+relevées à cette occasion, **ni l'une ni l'autre corrigée, parce qu'aucune des
+deux n'est un défaut introduit par cette refonte** : l'émoji 🫧 de la tuile
+« Le souffle » sur `/app/jeux` s'affiche en glyphe manquant dans le navigateur
+de test — le rendu d'un emoji passe par la police système, pas par
+Fredoka/Inter, donc c'est une question de couverture de police de
+l'environnement, sans rapport avec le changement de police ; et
+`/app/mode-cuisine` s'affiche entièrement vide en l'absence de séance de
+cuisine active — comportement de routage préexistant, `ModeCuisine.tsx` et son
+branchement dans `App.tsx` n'ont été touchés par aucune tâche de ce chantier.
+
+Cadrage complet dans
+`docs/superpowers/specs/2026-08-04-refonte-identite-mamakilo-design.md`, plan
+dans `docs/superpowers/plans/2026-08-04-refonte-identite-mamakilo.md`.
+
+**Non livré à ce stade :** la vidéo vitrine évoquée au cadrage (30-60 s, motion
+design stylisé, voix off française) est un chantier séparé, pas commencé — à
+traiter via le skill `hyperframes` le jour où il démarre. **Non fusionné à ce
+stade :** le travail vit sur la branche `refonte-design`, dans la worktree
+`C:\Users\YHN\Documents\Git\.worktrees\mamakilo-refonte-design` — `main` n'a
+pas encore reçu ces commits.
 
 ### 1er août 2026 — Les prix et les courses
 
