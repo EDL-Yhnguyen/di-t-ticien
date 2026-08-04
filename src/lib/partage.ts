@@ -42,23 +42,26 @@ function dessiner(carte: Carte): Promise<Blob> {
   const ctx = toile.getContext('2d')!
 
   // Les couleurs sont écrites en dur : c'est une image de marque, elle ne suit
-  // pas le thème de celui qui la fabrique. Une carte partagée en thème Océan et
-  // une autre en thème Framboise ne se ressembleraient plus.
-  ctx.fillStyle = '#FDF6EE'
+  // pas les réglages de celui qui la fabrique. Une carte partagée depuis un
+  // téléphone en mode sombre doit ressembler à celle partagée depuis un
+  // ordinateur en mode clair — c'est la même image, pas un rendu personnel.
+  // Valeurs reprises de `:root` dans src/palettes.css (ground, primaire, ink,
+  // ink-soft) : à resynchroniser ici si la palette de marque change.
+  ctx.fillStyle = '#fdf4ed'
   ctx.fillRect(0, 0, LARGEUR, HAUTEUR)
 
-  ctx.fillStyle = '#F67A5E'
+  ctx.fillStyle = '#ca3709'
   ctx.fillRect(0, HAUTEUR - 160, LARGEUR, 160)
 
   marmite(ctx, LARGEUR / 2 - 110, 150, 220)
 
-  ctx.fillStyle = '#232D3A'
+  ctx.fillStyle = '#44525a'
   ctx.font = '600 84px Fredoka, Georgia, serif'
   ctx.textAlign = 'center'
   const lignes = enveloppe(ctx, carte.titre, LARGEUR - 160)
   lignes.forEach((l, i) => ctx.fillText(l, LARGEUR / 2, 520 + i * 100))
 
-  ctx.fillStyle = '#5C6F7A'
+  ctx.fillStyle = '#5f6e76'
   ctx.font = '400 44px Inter, system-ui, sans-serif'
   ctx.fillText(carte.sousTitre, LARGEUR / 2, 520 + lignes.length * 100 + 60)
 
