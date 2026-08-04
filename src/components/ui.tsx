@@ -61,26 +61,31 @@ export function Marque({ taille = 36, className }: { taille?: number; className?
  * main, en unités `em`, pour ne pas dépendre de la position du point réel
  * dans Fredoka d'une taille à l'autre. `mamak` et `lo` restent du texte, pour
  * que la casse et l'espacement suivent la police environnante normalement.
+ *
+ * Accessible aux lecteurs d'écran via `aria-label` : le contenu visuel (SVG +
+ * texte séparé) est caché par `aria-hidden="true"`, et le mot entier est
+ * annoncé par l'étiquette.
  */
 export function SignatureMarque({ className }: { className?: string }) {
   return (
-    <span className={classes('font-display font-semibold text-ink', className)}>
-      mamak
-      <svg
-        aria-hidden="true"
-        viewBox="0 0 32 100"
-        style={{ width: '0.32em', height: '1em' }}
-        className="mx-[0.02em] inline-block align-baseline"
-      >
-        {/* La haste du i */}
-        <rect x="9" y="34" width="14" height="58" rx="7" fill="currentColor" />
-        {/* Le cœur, à la place du point */}
-        <path
-          d="M16,30 C6,22 2,15 2,9 C2,3 7,0 12,3 C14,4.5 15.3,6.5 16,9 C16.7,6.5 18,4.5 20,3 C25,0 30,3 30,9 C30,15 26,22 16,30 Z"
-          fill="var(--alerte)"
-        />
-      </svg>
-      lo
+    <span className={classes('font-display font-semibold text-ink', className)} aria-label="mamakilo">
+      <span aria-hidden="true">
+        mamak
+        <svg
+          viewBox="0 0 32 100"
+          style={{ width: '0.32em', height: '1em' }}
+          className="mx-[0.02em] inline-block align-baseline"
+        >
+          {/* La haste du i */}
+          <rect x="9" y="34" width="14" height="58" rx="7" fill="currentColor" />
+          {/* Le cœur, à la place du point */}
+          <path
+            d="M16,30 C6,22 2,15 2,9 C2,3 7,0 12,3 C14,4.5 15.3,6.5 16,9 C16.7,6.5 18,4.5 20,3 C25,0 30,3 30,9 C30,15 26,22 16,30 Z"
+            fill="var(--alerte)"
+          />
+        </svg>
+        lo
+      </span>
     </span>
   )
 }
