@@ -7,17 +7,14 @@
  * navigateur, jamais dans le cache HTTP.
  */
 
-// Changer ce nom purge les caches précédents à l'activation : c'est ce qui
-// débarrasse les installations existantes de l'ancienne icône et de l'ancienne
-// coquille au moment du passage à Mamakilo.
+// Changer ce nom purge les caches précédents à l'activation.
 //
-// **v2 le 31/07/2026, et cette bascule-là compte plus que les autres.** Le cache
-// `mamakilo-v1-polices` contient des réponses de fonts.gstatic.com, obtenues du
-// temps où les polices venaient de Google. Elles ne sont plus demandées, donc
-// elles ne seraient jamais remplacées : sans changement de version, chaque PWA
-// déjà installée garderait indéfiniment des fichiers d'un tiers dont on vient de
-// se séparer.
-const VERSION = 'mamakilo-v2'
+// **v3 le 04/08/2026.** Le cache `mamakilo-v2-ressources` contient les
+// `.woff2` de Faustina et Figtree, remplacées par Fredoka et Inter (voir
+// outils/polices.mjs) : sans changement de version, chaque PWA déjà
+// installée garderait indéfiniment les anciens fichiers de police, jamais
+// redemandés donc jamais renouvelés.
+const VERSION = 'mamakilo-v3'
 const COQUILLE = `${VERSION}-coquille`
 const RESSOURCES = `${VERSION}-ressources`
 
