@@ -24,8 +24,13 @@ export const config = { runtime: 'nodejs' }
 const DELAI_MS = 5000
 
 export async function GET(): Promise<Response> {
-  const url = process.env.VITE_SUPABASE_URL
-  const cle = process.env.VITE_SUPABASE_ANON_KEY
+  // `.trim()` n'est pas décoratif : une variable d'environnement peut porter un
+  // BOM ou une espace de fin selon la façon dont elle a été collée, et `fetch`
+  // lève alors un `TypeError` d'analyse d'URL — indistinguable d'une base
+  // injoignable. Cérémonia porte le même garde-fou, pour l'avoir payé en
+  // production le 30/07/2026.
+  const url = process.env.VITE_SUPABASE_URL?.trim().replace(/\/+$/, '')
+  const cle = process.env.VITE_SUPABASE_ANON_KEY?.trim()
 
   // Sans clés, l'application tourne en mode démo et n'a aucune base à joindre.
   // Répondre 503 ferait sonner une alerte pour une configuration délibérée.
@@ -50,8 +55,13 @@ export async function GET(): Promise<Response> {
     }
     return reponse(200, { etat: 'ok', base: 'joignable', ms })
   } catch (erreur) {
-    const cause = erreur instanceof Error ? erreur.name : 'inconnue'
-    return reponse(503, { etat: 'panne', base: `injoignable (${cause})` })
+    // Le nom seul ne suffisait pas à diagnostiquer : un `TypeError` couvre
+    // aussi bien une URL mal formée qu'un réseau coupé, et il a fallu
+    // redéployer pour savoir lequel. Le message de `fetch` est technique et ne
+    // porte aucune donnée — il est plafonné par prudence, la route étant
+    // publique.
+    const cause = erreur instanceof Error ? `${erreur.name}: ${erreur.message}` : 'inconnue'
+    return reponse(503, { etat: 'panne', base: `injoignable`, cause: cause.slice(0, 120) })
   }
 }
 
