@@ -15,17 +15,22 @@ import { surveillanceActive } from './surveillance'
  * redemande son consentement à tout le monde — ne la toucher que si le texte
  * change sur le fond (nouvelle donnée collectée, nouveau destinataire).
  *
- * **Elle dépend de la surveillance depuis le 07/08/2026, et c'est la seule
- * façon d'être exact.** Sentry est un destinataire de plus, donc le texte
- * change sur le fond et le consentement doit être redemandé — mais seulement
- * là où Sentry reçoit vraiment quelque chose. Figer la date au 07/08 aurait
- * fait rouvrir l'écran de consentement à tout le monde sur un déploiement sans
- * DSN, c'est-à-dire pour un destinataire qui ne reçoit rien ; garder le 30/07
- * aurait laissé consentir à un texte qui ne mentionne pas Sentry. Le DSN étant
- * lu à la compilation, chaque déploiement porte une valeur figée : c'est celui
- * qui active la surveillance qui redemande l'accord, et lui seul.
+ * **Elle passe au 07/08/2026, et ce n'est pas Sentry qui la fait bouger.**
+ * C'est **Google**, ajouté aux destinataires : il achemine les courriels de
+ * réinitialisation depuis que Mamakilo a rejoint le projet Supabase partagé le
+ * 04/08/2026, sans avoir jamais été déclaré. Le traitement ne change donc pas,
+ * c'est l'information qui devient exacte — et un consentement doit être éclairé
+ * pour valoir, a fortiori sur des données de santé.
+ *
+ * **La date est inconditionnelle, contrairement à ce qui avait été écrit
+ * d'abord.** Sentry, lui, n'est déclaré que s'il est branché — mais Google
+ * l'est toujours, donc conditionner la version à `surveillanceActive` ferait
+ * dépendre une re-sollicitation méritée d'un réglage sans rapport. Tout le
+ * monde est donc resollicité au prochain déploiement ; et si la surveillance
+ * est activée ensuite, personne ne l'est deux fois, la date étant déjà celle du
+ * jour.
  */
-export const VERSION_CONFIDENTIALITE = surveillanceActive ? '2026-08-07' : '2026-07-30'
+export const VERSION_CONFIDENTIALITE = '2026-08-07'
 
 export interface Editeur {
   /** Nom et prénom, ou raison sociale. Facultatif pour un éditeur non professionnel. */
@@ -141,6 +146,27 @@ export const DESTINATAIRES = [
     role: 'Recherche de produits et codes-barres',
     donnees:
       'Le terme recherché ou le code-barres scanné. Aucun identifiant de compte n’accompagne la requête.',
+  },
+  /**
+   * **Il manquait, et la migration du 04/08/2026 l'a rendu vrai sans que
+   * personne le remarque.** Mamakilo a rejoint ce jour-là le projet Supabase de
+   * Cérémonia, où un SMTP Gmail est branché depuis le 31/07/2026. Le réglage
+   * vit dans la console, hors dépôt : rien dans le code ne le rappelait, et la
+   * liste des destinataires est restée celle d'avant la migration.
+   *
+   * C'est le même raisonnement que celui qui a fait chasser Google Fonts le
+   * 31/07/2026 — « transmettre l'adresse IP d'un visiteur à un tiers en fait un
+   * destinataire » —, appliqué à une donnée bien plus identifiante qu'une
+   * adresse IP, et sur une application qui traite des données de santé.
+   *
+   * ⚠️ **Le réglage est partagé avec Cérémonia et GénieLab.** En changer ici
+   * change leur acheminement aussi.
+   */
+  {
+    nom: 'Google (Gmail)',
+    role: 'Acheminement du courriel de réinitialisation du mot de passe',
+    donnees:
+      'Votre adresse de courriel, au moment précis où vous demandez un nouveau mot de passe, et le texte du message — qui ne contient qu’un lien. Rien de votre journal, de vos pesées ni de votre profil ne l’accompagne. Les comptes créés sous un pseudo n’ont pas d’adresse : rien ne part pour eux, et ils ne peuvent pas non plus être récupérés ainsi.',
   },
   ...(surveillanceActive
     ? [

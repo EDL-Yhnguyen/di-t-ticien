@@ -39,8 +39,36 @@ export const erreurDuLienRecu: string | null = (() => {
  * Sans clés, l'application bascule en mode démo : les comptes et les données
  * restent dans le navigateur. Tout le reste de l'app fonctionne à l'identique,
  * ce qui permet de développer et de tester sans dépendre du réseau.
+ *
+ * **Une clé *présente mais malformée* ne doit pas faire mieux qu'une clé
+ * absente.** `createClient` lève sur une URL invalide, et il est appelé ici au
+ * niveau du module : l'exception part donc pendant le chargement du fichier,
+ * **avant que React ait monté quoi que ce soit**. Ni `BarriereErreur` ni l'écran
+ * de dernier recours de `main.tsx` ne peuvent l'attraper — c'est une page
+ * blanche, sans message, et la seule trace est dans une console que personne
+ * n'ouvre.
+ *
+ * Ce n'est pas théorique : une variable mal collée (BOM, espace, guillemets
+ * conservés) suffit, et c'est exactement ce qui traîne dans le `.env` de la
+ * machine de développement au 07/08/2026 — il y met trois suites de tests par
+ * terre, `auth.ts` important ce fichier. Le même contenu déployé sur Vercel
+ * rendrait l'application entièrement muette.
+ *
+ * Le repli est donc le mode démo, qui est déjà le comportement prévu quand la
+ * configuration manque. Il est bruyant en console, parce qu'une application qui
+ * bascule en démo sans le dire ferait croire à une perte de données.
  */
-export const supabase: SupabaseClient | null =
-  url && cle ? createClient(url, cle, { auth: { persistSession: true } }) : null
+export const supabase: SupabaseClient | null = (() => {
+  if (!url || !cle) return null
+  try {
+    return createClient(url, cle, { auth: { persistSession: true } })
+  } catch (erreur) {
+    console.error(
+      '[supabase] configuration invalide, l’application démarre en mode démo :',
+      erreur instanceof Error ? erreur.message : erreur,
+    )
+    return null
+  }
+})()
 
 export const modeDemo = supabase === null
