@@ -70,7 +70,11 @@ export async function demarrerSurveillance(): Promise<void> {
     // Aucune mesure de performance : elle échantillonne des parcours entiers,
     // donc des URL et des durées d'écran, pour une question qu'on ne se pose
     // pas. Et surtout aucun `replayIntegration` — il filme l'écran.
-    tracesSampleRate: 0,
+    //
+    // **L'option est absente, et non posée à zéro.** Le SDK teste
+    // `tracesSampleRate != null` pour savoir s'il doit instrumenter : zéro
+    // n'étant pas `null`, l'écrire monte toute la pile de mesure pour ensuite
+    // n'en rien envoyer. L'omettre est le seul moyen de ne pas l'installer.
 
     // `sendDefaultPii` est déjà faux par défaut ; l'écrire évite qu'une mise à
     // jour du SDK change la valeur sans qu'on s'en aperçoive.
@@ -85,10 +89,24 @@ export async function demarrerSurveillance(): Promise<void> {
      * Les intégrations retirées plus haut couvrent ce qu'on connaît ; celle-ci
      * couvre ce qu'une version future du SDK ajouterait d'office. Un champ
      * qu'on n'a pas prévu vaut mieux supprimé que transmis.
+     *
+     * **`extra` et `transaction` ont été ajoutés après une revue**, et aucun
+     * des deux ne se devine :
+     *
+     * - Quand ce qu'on capture n'est pas une `Error` mais un objet — le cas
+     *   d'une erreur Supabase, ou de toute promesse rejetée avec autre chose —
+     *   le SDK range **l'objet entier** dans `extra.__serialized__`. Un
+     *   `PostgrestError` y emporterait son champ `details`, où Postgres écrit
+     *   les valeurs de la ligne fautive (« Key (email)=(…) already exists »).
+     * - `transaction` porte le **chemin de la page**, posé par le suivi de
+     *   navigation. Ici c'est peu de chose, mais la règle est la même partout
+     *   dans le workspace et une exception locale finit par voyager.
      */
     beforeSend(evenement) {
       delete evenement.user
       delete evenement.request
+      delete evenement.extra
+      delete evenement.transaction
       evenement.breadcrumbs = undefined
       return evenement
     },
