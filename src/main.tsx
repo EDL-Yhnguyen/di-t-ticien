@@ -6,6 +6,7 @@ import { BarriereErreur } from './components/BarriereErreur'
 import { FournisseurApp } from './context/AppContext'
 import { FournisseurRoutage } from './lib/router'
 import { appliquerApparence, modeEnregistre, surChangementSysteme } from './lib/apparence'
+import { demarrerSurveillance } from './lib/surveillance'
 import './index.css'
 
 const racine = document.getElementById('root')
@@ -93,5 +94,13 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
     navigator.serviceWorker.register('/sw.js').catch(() => {
       // Hors ligne ou navigation privée : l'application marche sans.
     })
+  })
+}
+
+// Après le premier affichage, comme le service worker : la surveillance ne doit
+// rien coûter à l'ouverture. Sans DSN configuré, l'appel ne charge rien.
+if (import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    void demarrerSurveillance()
   })
 }

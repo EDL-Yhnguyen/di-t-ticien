@@ -1,6 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { RotateCcw } from 'lucide-react'
 import { Bouton, Carte } from './ui'
+import { signalerErreur } from '../lib/surveillance'
 
 /**
  * Le filet de sécurité de l'application.
@@ -32,10 +33,13 @@ export class BarriereErreur extends Component<Props, State> {
   }
 
   componentDidCatch(erreur: Error, infos: ErrorInfo) {
-    // Aucun service de télémétrie n'est branché — et n'en branchez pas un sans
-    // le déclarer dans DESTINATAIRES : une trace d'erreur peut contenir des
-    // données de santé. La console suffit tant que l'usage reste familial.
     console.error('[écran en erreur]', erreur, infos.componentStack)
+    // La télémétrie est branchée depuis le 07/08/2026, et la mise en garde qui
+    // était ici tenait : une trace d'erreur peut contenir des données de santé.
+    // C'est `lib/surveillance.ts` qui la fait tenir — il retire les fils
+    // d'Ariane, où le nom des aliments notés se serait retrouvé. Sentry est
+    // déclaré dans DESTINATAIRES, et seulement quand un DSN est configuré.
+    signalerErreur(erreur, 'ecran')
   }
 
   reessayer = () => this.setState({ erreur: null })

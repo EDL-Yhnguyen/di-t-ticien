@@ -8,12 +8,24 @@
  * affichent un avertissement plutôt qu'une fausse mention.
  */
 
+import { surveillanceActive } from './surveillance'
+
 /**
  * Date de la version en vigueur du texte de confidentialité. La changer
  * redemande son consentement à tout le monde — ne la toucher que si le texte
  * change sur le fond (nouvelle donnée collectée, nouveau destinataire).
+ *
+ * **Elle dépend de la surveillance depuis le 07/08/2026, et c'est la seule
+ * façon d'être exact.** Sentry est un destinataire de plus, donc le texte
+ * change sur le fond et le consentement doit être redemandé — mais seulement
+ * là où Sentry reçoit vraiment quelque chose. Figer la date au 07/08 aurait
+ * fait rouvrir l'écran de consentement à tout le monde sur un déploiement sans
+ * DSN, c'est-à-dire pour un destinataire qui ne reçoit rien ; garder le 30/07
+ * aurait laissé consentir à un texte qui ne mentionne pas Sentry. Le DSN étant
+ * lu à la compilation, chaque déploiement porte une valeur figée : c'est celui
+ * qui active la surveillance qui redemande l'accord, et lui seul.
  */
-export const VERSION_CONFIDENTIALITE = '2026-07-30'
+export const VERSION_CONFIDENTIALITE = surveillanceActive ? '2026-08-07' : '2026-07-30'
 
 export interface Editeur {
   /** Nom et prénom, ou raison sociale. Facultatif pour un éditeur non professionnel. */
@@ -130,4 +142,14 @@ export const DESTINATAIRES = [
     donnees:
       'Le terme recherché ou le code-barres scanné. Aucun identifiant de compte n’accompagne la requête.',
   },
+  ...(surveillanceActive
+    ? [
+        {
+          nom: 'Sentry',
+          role: 'Signalement des pannes de l’application',
+          donnees:
+            'Uniquement lorsqu’un écran cesse de fonctionner : le message d’erreur technique, l’endroit du code où il s’est produit, et votre navigateur. Ni votre compte, ni ce que vous avez noté, ni ce que vous veniez de faire — le fil des actions précédentes, que ce service enregistre d’ordinaire, est explicitement désactivé parce qu’il contiendrait le nom de vos aliments et vos pesées.',
+        },
+      ]
+    : []),
 ]

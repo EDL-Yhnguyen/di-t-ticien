@@ -633,6 +633,63 @@ Corollaire : **tout nouveau destinataire de données se déclare dans
 
 ---
 
+## La surveillance des pannes — `src/lib/surveillance.ts`
+
+Branchée le 07/08/2026. Avant elle, une exception en production n'était vue par
+personne : la barrière affichait un écran de secours et écrivait dans une
+console que personne n'ouvre. Sur une PWA installée, un défaut pouvait durer des
+semaines.
+
+**Quatre règles, et aucune n'est un réglage de confort.**
+
+- **Sans `VITE_SENTRY_DSN`, rien n'est chargé et rien ne part.** Ce n'est pas une
+  précaution théorique : mesuré au build, l'absence de DSN **élimine
+  entièrement Sentry du bundle** par élagage. En développement, en mode démo et
+  sur toute copie du dépôt, Sentry n'est donc pas un destinataire parce qu'il ne
+  reçoit rien — et `DESTINATAIRES` ne le déclare pas.
+- **Les fils d'Ariane sont désactivés, et c'est la décision qui porte tout le
+  reste.** Sentry enregistre d'office le texte de chaque élément cliqué, chaque
+  appel réseau et chaque `console.log` des minutes précédentes. Ici, ça voudrait
+  dire le nom des aliments notés, les pesées, et les URL Supabase qui portent
+  l'identifiant du compte — des données de l'article 9, transmises à l'occasion
+  d'un bogue. `Breadcrumbs`, `HttpContext` et `BrowserSession` sont retirés, et
+  `beforeSend` efface `user`, `request` et les fils d'Ariane une seconde fois,
+  pour couvrir ce qu'une version future du SDK ajouterait d'office.
+- **Ni mesure de performance, ni `replayIntegration`.** Le second filme l'écran.
+- **`VERSION_CONFIDENTIALITE` suit la surveillance** :
+  `surveillanceActive ? '2026-08-07' : '2026-07-30'`. Un destinataire de plus
+  change le texte sur le fond, donc le consentement doit être redemandé — mais
+  seulement là où Sentry reçoit vraiment quelque chose. Figer la date au 07/08
+  aurait rouvert l'écran de consentement de tout le monde sur un déploiement
+  sans DSN. C'est le déploiement qui active la surveillance qui redemande
+  l'accord, et lui seul.
+
+Le chargement est dynamique et déclenché après l'événement `load`, comme le
+service worker : le module pèse 475 Ko non compressés, et l'ouverture de
+l'application n'a pas à les payer.
+
+`BarriereErreur` appelle `signalerErreur()` — sans quoi rien ne remonterait des
+défauts qui cassent un écran sans casser l'application, précisément ceux dont
+personne ne se plaint puisqu'un écran de secours s'affiche.
+
+## Le point de santé — `api/sante.ts`
+
+`GET /api/sante` répond 200 tant que Supabase répond, 503 sinon. C'est ce que
+lit la surveillance extérieure (UptimeRobot).
+
+**Surveiller la page d'accueil ne prouverait presque rien** : elle est servie
+depuis le cache de Vercel et répondra 200 avec entrain alors que la base est
+injoignable et que plus personne ne peut se connecter. Le mode de panne visé
+n'est pas théorique — l'offre gratuite de Supabase **met un projet en veille
+après une période sans activité**, sans prévenir.
+
+La route interroge `/auth/v1/health`, pas la table `donnees` : la santé du
+service d'authentification se lit sans traverser la RLS, donc sans qu'aucune
+donnée de santé n'entre dans un point de contrôle que n'importe qui peut
+appeler.
+
+---
+
 ## Verser une recette au journal
 
 `src/lib/journalRecette.ts` transforme une recette en `EntreeJournal`. Le
